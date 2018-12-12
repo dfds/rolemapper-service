@@ -1,0 +1,16 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: rolemapper-service
+  name: rolemapper-service
+  namespace: $(kubernetes-namespace)
+spec:
+  ports:
+    - name: external
+      port: 80
+      targetPort: web
+  selector:
+    app: rolemapper-service
+  type: ClusterIP

@@ -1,0 +1,19 @@
+# ---
+# apiVersion: extensions/v1beta1
+# kind: Ingress
+# metadata:
+#   name: rolemapper-service
+#   namespace: $(kubernetes-namespace)
+#   annotations:
+#     kubernetes.io/ingress.class: traefik
+#     traefik.frontend.rule.type: PathPrefixStrip
+# spec:
+#   rules:
+#     - host: app.dfds.cloud
+#       http:
+#         paths:
+#           - path: /rolemapperservice
+#             backend:
+#               serviceName: rolemapper-service
+#               servicePort: external
+# 

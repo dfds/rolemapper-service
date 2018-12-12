@@ -1,0 +1,29 @@
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: rolemapper-service
+  namespace: $(kubernetes-namespace)
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rolemapper-service
+  template:
+    metadata:
+      labels:
+        app: rolemapper-service
+    spec:
+      containers:
+        - name: rolemapper-service
+          image: 579478677147.dkr.ecr.eu-central-1.amazonaws.com/ded/rolemapper-service:$(Build.BuildId)
+          ports:
+            - containerPort: 80
+              name: web
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "100m"
+            limits:
+              memory: "128Mi"
+              cpu: "200m"
