@@ -6,12 +6,12 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace RolemapperService.WebApi.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/roles")]
     [ApiController]
-    public class RoleMappingController : ControllerBase
+    public class RoleController : ControllerBase
     {
         [HttpGet("")]
-        public ActionResult<string> Map()
+        public ActionResult<string> Ping()
         {
             return Ok("OK");
         }
