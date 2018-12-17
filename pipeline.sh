@@ -18,9 +18,15 @@ restore_dependencies() {
     dotnet restore ${SERVICE_NAME}.sln
 }
 
+run_tests() {
+    echo "Running tests..."
+    dotnet build -c Release ${SERVICE_NAME}.sln
+    dotnet test --logger:"trx;LogFileName=testresults.trx" --results-directory ${BUILD_SOURCES_DIRECTORY}/output ${SERVICE_NAME}.WebApi.Tests/${SERVICE_NAME}.WebApi.Tests.csproj
+}
+
 publish_binaries() {
     echo "Publishing binaries..."
-    dotnet publish -c Release -o ${BUILD_SOURCES_DIRECTORY}/output ${SERVICE_NAME}.WebApi/${SERVICE_NAME}.WebApi.csproj
+    dotnet publish -c Release -o ${BUILD_SOURCES_DIRECTORY}/output/app ${SERVICE_NAME}.WebApi/${SERVICE_NAME}.WebApi.csproj
 }
 
 build_container_image() {
@@ -45,6 +51,7 @@ push_container_image() {
 cd ./src
 
 restore_dependencies
+run_tests
 publish_binaries
 
 cd ..
