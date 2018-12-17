@@ -1,5 +1,6 @@
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -9,6 +10,16 @@ namespace RolemapperService.WebApi.Services
 {
     public class ConfigMapService : IConfigMapService
     {
+        public string AddRoleMapping(string yaml, string roleArn)
+        {
+            var username = GetUserNameFromArn(roleArn);
+            var groups = GetReadonlyGroup();
+
+            var updatedMapRolesYaml = AddRoleMapping(yaml, roleArn, username, groups);
+
+            return updatedMapRolesYaml;
+        }
+
         public string AddRoleMapping(string yaml, string roleArn, string userName, IList<string> groups)
         {
             var modifiedYaml = yaml;
@@ -40,6 +51,21 @@ namespace RolemapperService.WebApi.Services
             }
 
             return modifiedYaml;
+        }
+
+        public string GetUserNameFromArn(string arn)
+        {
+            Debug.WriteLine(arn.LastIndexOf("/"));
+            var username = arn.Substring(arn.LastIndexOf("/") + 1);
+            return username;
+        }
+
+        public IList<string> GetReadonlyGroup()
+        {
+            return new List<string>
+            {
+                "kub-view"
+            };
         }
     }
 }
