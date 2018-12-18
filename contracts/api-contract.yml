@@ -1,0 +1,34 @@
+---
+swagger: '2.0'
+info:
+  version: 0.0.1
+  title: Rolemapper Service
+  description: Small service for creating role mapping in Kubernetes config map on AWS.
+consumes:
+  - application/json
+produces:
+  - application/json
+basePath: /api
+paths:
+  /roles:
+    post:
+      summary: Creates a new role mapping
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: "#/definitions/AddRoleRequest"
+      responses:
+        200:
+          description: The role mapping was created.
+        400:
+          description: The role name is invalid.
+        500:
+          description: An error occured trying to create the role mapping.
+definitions:
+  AddRoleRequest:
+    type: object
+    properties:
+      roleArn:
+        type: string
