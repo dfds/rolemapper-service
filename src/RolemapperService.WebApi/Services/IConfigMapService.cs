@@ -4,9 +4,8 @@ namespace RolemapperService.WebApi.Services
 {
     public interface IConfigMapService
     {
-        string AddRoleMapping(string yaml, string roleArn);
-        string AddRoleMapping(string yaml, string roleArn, string userName, IList<string> groups);
-        string GetUserNameFromArn(string arn);
+        string AddRoleMapping(string configMapYaml, string roleName, string roleArn);
+        string AddRoleMapping(string configMapYaml, string roleArn, string userName, IList<string> groups);
         IList<string> GetReadonlyGroup();
     }
 }

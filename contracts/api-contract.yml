@@ -30,5 +30,7 @@ definitions:
   AddRoleRequest:
     type: object
     properties:
+      roleName:
+        type: string
       roleArn:
         type: string

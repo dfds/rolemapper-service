@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using RolemapperService.WebApi.Models;
 using RolemapperService.WebApi.Services;
@@ -13,10 +14,12 @@ namespace RolemapperService.WebApi.Controllers
     public class RoleController : ControllerBase
     {
         private readonly IConfigMapService _configMapService;
+        private readonly IKubernetesService _kubernetesService;
 
-        public RoleController(IConfigMapService configMapService)
+        public RoleController(IConfigMapService configMapService, IKubernetesService kubernetesService)
         {
             _configMapService = configMapService;
+            _kubernetesService = kubernetesService;
         }
 
         [HttpGet("")]
@@ -28,26 +31,16 @@ namespace RolemapperService.WebApi.Controllers
         [HttpPost("")]
         public ActionResult<string> AddRole([FromBody]AddRoleRequest addRoleRequest)
         {
-            // TODO: Get from Kubernetes API.
-            var mapRolesYaml = _mapRolesInput;
+            var configMapYaml = _kubernetesService.GetAwsAuthConfigMap();
             
-            var updatedMapRolesYaml = _configMapService.AddRoleMapping(mapRolesYaml, addRoleRequest.RoleArn);
+            var updatedMapRolesYaml = _configMapService.AddRoleMapping(configMapYaml, addRoleRequest.RoleName, addRoleRequest.RoleArn);
 
-            // TODO: Call Kubernetes API to update config map.
+            if (_kubernetesService.PatchAwsAuthConfigMap(updatedMapRolesYaml))
+            {
+                return Ok(updatedMapRolesYaml);
+            }
 
-            return Ok(updatedMapRolesYaml);
+            return StatusCode(StatusCodes.Status500InternalServerError, "An error occured trying to add the role to the config map.");
         }
-
-        private readonly string _mapRolesInput = 
-@"mapRoles:
-- roleARN: arn:aws:iam::228426479489:role/KubernetesAdmin
-  username: kubernetes-admin:{{SessionName}}
-  groups:
-  - system:masters
-- roleARN: arn:aws:iam::228426479489:role/KubernetesView
-  username: kubernetes-view:{{SessionName}}
-  groups:
-  - kub-view
-";
     }
 }

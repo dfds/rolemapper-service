@@ -10,21 +10,19 @@ namespace RolemapperService.WebApi.Services
 {
     public class ConfigMapService : IConfigMapService
     {
-        public string AddRoleMapping(string yaml, string roleArn)
+        public string AddRoleMapping(string configMapYaml, string roleName, string roleArn)
         {
-            var username = GetUserNameFromArn(roleArn);
             var groups = GetReadonlyGroup();
-
-            var updatedMapRolesYaml = AddRoleMapping(yaml, roleArn, username, groups);
+            var updatedMapRolesYaml = AddRoleMapping(configMapYaml, roleArn, roleName, groups);
 
             return updatedMapRolesYaml;
         }
 
-        public string AddRoleMapping(string yaml, string roleArn, string userName, IList<string> groups)
+        public string AddRoleMapping(string configMapYaml, string roleArn, string userName, IList<string> groups)
         {
-            var modifiedYaml = yaml;
+            var modifiedYaml = configMapYaml;
 
-            using (StringReader reader = new StringReader(yaml))
+            using (StringReader reader = new StringReader(configMapYaml))
             {
                 var stream = new YamlStream();
                 stream.Load(reader);
@@ -53,15 +51,9 @@ namespace RolemapperService.WebApi.Services
             return modifiedYaml;
         }
 
-        public string GetUserNameFromArn(string arn)
-        {
-            Debug.WriteLine(arn.LastIndexOf("/"));
-            var username = arn.Substring(arn.LastIndexOf("/") + 1);
-            return username;
-        }
-
         public IList<string> GetReadonlyGroup()
         {
+            // TODO: Get from configuration?
             return new List<string>
             {
                 "kub-view"
