@@ -14,6 +14,7 @@ spec:
       labels:
         app: rolemapper-service
     spec:
+      serviceAccountName: rolemapper-sa
       containers:
         - name: rolemapper-service
           image: 579478677147.dkr.ecr.eu-central-1.amazonaws.com/ded/rolemapper-service:$(Build.BuildId)
