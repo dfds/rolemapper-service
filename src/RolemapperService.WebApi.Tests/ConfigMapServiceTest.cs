@@ -26,7 +26,7 @@ namespace RolemapperService.WebApi.Tests
             // Arrange
             var sut = new ConfigMapService();
             var roleARN = "arn:aws:iam::228426479489:role/KubernetesTest";
-            var username = "kubernetes-test:{{SessionName}}";
+            var username = "kubernetes-test";
             var groups = new List<string> 
             {
                 "kub-test"
@@ -38,6 +38,26 @@ namespace RolemapperService.WebApi.Tests
             // Assert
             Assert.NotNull(result);
             Assert.Contains(groups.First(), result);
+        }
+
+        [Fact]
+        public void AddRoleMapping_GivenValidInput_ReturnsUsernameWithAddedSessionName()
+        {
+            // Arrange
+            var sut = new ConfigMapService();
+            var roleARN = "arn:aws:iam::228426479489:role/KubernetesTest";
+            var username = "kubernetes-test";
+            var groups = new List<string> 
+            {
+                "kub-test"
+            };
+
+            // Act
+            var result = sut.AddRoleMapping(mapRolesInput, roleARN, username, groups);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Contains($"{username}:{{{{SessionName}}}}", result);
         }
     }
 }

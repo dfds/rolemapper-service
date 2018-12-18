@@ -34,7 +34,7 @@ namespace RolemapperService.WebApi.Services
                 // Construct the new role-mapping and add it to mapRoles sequence.
                 YamlMappingNode mapping = new YamlMappingNode();
                 mapping.Add("roleARN", roleArn);
-                mapping.Add("username", userName);
+                mapping.Add("username", $"{userName}:{{{{SessionName}}}}");
 
                 var groupsNodes = groups.Select(group => new YamlScalarNode(group));
                 mapping.Add("groups", new YamlSequenceNode(groupsNodes));
