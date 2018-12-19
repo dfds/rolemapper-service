@@ -50,7 +50,7 @@ push_container_image() {
 
 push_container_image_dockercloud() {
     echo "Login to docker..."
-    docker login -u ${docker_username} -p ${docker_password}
+    docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}
 
     image_name="dfdsdk/rolemapper-service:${BUILD_NUMBER}"
 
