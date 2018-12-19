@@ -52,7 +52,7 @@ push_container_image_dockercloud() {
     echo "Login to docker..."
     docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}
 
-    image_name="hub.docker.com/dfdsdk/rolemapper-service:${BUILD_NUMBER}"
+    image_name="dfdsdk/rolemapper-service:${BUILD_NUMBER}"
 
     echo "Tagging container image..."
     docker tag ${IMAGE_NAME}:latest ${image_name}
