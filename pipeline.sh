@@ -48,6 +48,20 @@ push_container_image() {
     docker push ${image_name}
 }
 
+push_container_image_dockercloud() {
+    echo "Login to docker..."
+    docker login -u ${docker_username} -p ${docker_password}
+
+    image_name="dfdsdk/rolemapper-service:${BUILD_NUMBER}"
+
+    echo "Tagging container image..."
+    docker tag ${IMAGE_NAME}:latest ${image_name}
+
+    echo "Pushing container image to ECR..."
+    docker push ${image_name}
+}
+
+
 cd ./src
 
 restore_dependencies
@@ -60,4 +74,5 @@ build_container_image
 
 if [[ "${BUILD_NUMBER}" != "N/A" ]]; then
     push_container_image
+    push_container_image_dockercloud
 fi
