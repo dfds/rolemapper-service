@@ -6,7 +6,7 @@ Service for mapping IAM roles to k8s cluster roles.
 ## Development
 
 ### Prerequisites
-- .NET Core 2.2 SDK ([download](https://dotnet.microsoft.com/download/dotnet-core/2.2))
+- .NET Core 2.1 SDK ([download](https://dotnet.microsoft.com/download/dotnet-core/2.1))
 - Docker (any relatively new version will do)
 
 Other than the above prerequisites this application requires no additional 
