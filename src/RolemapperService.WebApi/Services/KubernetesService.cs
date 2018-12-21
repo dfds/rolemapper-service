@@ -1,55 +1,43 @@
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using RolemapperService.WebApi.Repositories;
 
 namespace RolemapperService.WebApi.Services
 {
     public class KubernetesService : IKubernetesService
     {
-        private static readonly string KubeSystemNamespace = "kube-system";
-        private static readonly string AwsAuthConfigMapName = "aws-auth";
+        private readonly IKubernetesRepository _kubernetesRepository;
+        private readonly IConfigMapService _configMapService;
 
-        public string GetAwsAuthConfigMap()
+        public KubernetesService(IKubernetesRepository kubernetesRepository, IConfigMapService configMapService)
         {
-            return GetConfigMap(KubeSystemNamespace, AwsAuthConfigMapName);
+            _kubernetesRepository = kubernetesRepository;
+            _configMapService = configMapService;
         }
 
-        public string GetConfigMap(string namespaceName, string configMapName)
+        public async Task<string> GetAwsAuthConfigMapRoleMap()
         {
-            // TODO: Implement integration.
-            return _mapRolesInput;
+            return await _kubernetesRepository.GetAwsAuthConfigMapRoleMap();
         }
 
-        public bool PatchAwsAuthConfigMap(string configMapYaml)
+        public async Task<string> PatchAwsAuthConfigMapRoleMap(string roleName, string roleArn)
         {
-            return PatchConfigMap(KubeSystemNamespace, AwsAuthConfigMapName, configMapYaml);
+            // TODO: Determine what is needed for the patch object in KubernetesRepository.
+            var configMapRoleMap = string.Empty;
+            var patchedConfigMapRoleMap = await _kubernetesRepository.PatchAwsAuthConfigMapRoleMap(configMapRoleMap);
+
+            return patchedConfigMapRoleMap;
         }
 
-        public bool PatchConfigMap(string namespaceName, string configMapName, string configMapYaml)
+        public async Task<string> ReplaceAwsAuthConfigMapRoleMap(string roleName, string roleArn)
         {
-            // TODO: Implement integration.
-            return true;
-        }
+            var configMapRoleMap = await _kubernetesRepository.GetAwsAuthConfigMapRoleMap();
 
-        public bool ReplaceAwsAuthConfigMap(string configMapYaml)
-        {
-            return ReplaceConfigMap(KubeSystemNamespace, AwsAuthConfigMapName, configMapYaml);
-        }
+            configMapRoleMap = _configMapService.AddReadOnlyRoleMapping(configMapRoleMap, roleName, roleArn);
+            var newConfigMapRoleMap = await _kubernetesRepository.ReplaceAwsAuthConfigMapRoleMap(configMapRoleMap);
 
-        public bool ReplaceConfigMap(string namespaceName, string configMapName, string configMapYaml)
-        {
-            // TODO: Implement integration.
-            return true;
+            return newConfigMapRoleMap;
         }
-
-        private readonly string _mapRolesInput = 
-@"mapRoles:
-- roleARN: arn:aws:iam::228426479489:role/KubernetesAdmin
-  username: kubernetes-admin:{{SessionName}}
-  groups:
-  - system:masters
-- roleARN: arn:aws:iam::228426479489:role/KubernetesView
-  username: kubernetes-view:{{SessionName}}
-  groups:
-  - kub-view
-";
     }
 }

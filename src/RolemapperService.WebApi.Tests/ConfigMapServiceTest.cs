@@ -9,16 +9,15 @@ namespace RolemapperService.WebApi.Tests
     public class ConfigMapServiceTest
     {
         private readonly string mapRolesInput = 
-@"mapRoles:
-- roleARN: arn:aws:iam::228426479489:role/KubernetesAdmin
-  username: kubernetes-admin:{{SessionName}}
-  groups:
-  - system:masters
-- roleARN: arn:aws:iam::228426479489:role/KubernetesView
-  username: kubernetes-view:{{SessionName}}
-  groups:
-  - kub-view
-";
+        @"- roleARN: arn:aws:iam::228426479489:role/KubernetesAdmin
+        username: kubernetes-admin:{{SessionName}}
+        groups:
+        - system:masters
+        - roleARN: arn:aws:iam::228426479489:role/KubernetesView
+        username: kubernetes-view:{{SessionName}}
+        groups:
+        - kub-view
+        ";
 
         [Fact]
         public void AddRoleMapping_GivenValidInput_ReturnsValidOutputWithGroupAdded()

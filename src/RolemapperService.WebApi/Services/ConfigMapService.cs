@@ -10,7 +10,7 @@ namespace RolemapperService.WebApi.Services
 {
     public class ConfigMapService : IConfigMapService
     {
-        public string AddRoleMapping(string configMapYaml, string roleName, string roleArn)
+        public string AddReadOnlyRoleMapping(string configMapYaml, string roleName, string roleArn)
         {
             var groups = GetReadonlyGroup();
             var updatedMapRolesYaml = AddRoleMapping(configMapYaml, roleArn, roleName, groups);
@@ -20,38 +20,39 @@ namespace RolemapperService.WebApi.Services
 
         public string AddRoleMapping(string configMapYaml, string roleArn, string userName, IList<string> groups)
         {
-            var modifiedYaml = configMapYaml;
-
-            using (StringReader reader = new StringReader(configMapYaml))
+            // If the role map already exist return existing map.
+            if (configMapYaml.Contains(roleArn))
             {
-                var stream = new YamlStream();
-                stream.Load(reader);
+                return configMapYaml;
+            }
 
-                // Get the root node "mapRoles".
-                var rootNode = (YamlMappingNode)stream.Documents[0].RootNode;
-                var mapRolesNode = (YamlSequenceNode)rootNode["mapRoles"];
+            // Construct the new role-mapping.
+            YamlMappingNode mapping = new YamlMappingNode();
+            mapping.Add("rolearn", roleArn);
+            mapping.Add("username", $"{userName}:{{{{SessionName}}}}");
 
-                // Construct the new role-mapping and add it to mapRoles sequence.
-                YamlMappingNode mapping = new YamlMappingNode();
-                mapping.Add("roleARN", roleArn);
-                mapping.Add("username", $"{userName}:{{{{SessionName}}}}");
+            var groupsNodes = groups.Select(group => new YamlScalarNode(group));
+            mapping.Add("groups", new YamlSequenceNode(groupsNodes));
 
-                var groupsNodes = groups.Select(group => new YamlScalarNode(group));
-                mapping.Add("groups", new YamlSequenceNode(groupsNodes));
+            // The mapping is part of a sequence of role maps.
+            var yamlSequenceNode = new YamlSequenceNode(mapping);
+            // Create yaml-stream from the mapping, in order to save to string.
+            var stream = new YamlStream(new YamlDocument(yamlSequenceNode));
 
-                mapRolesNode.Add(mapping);
+            // Append the new role-mapping to the original configMapYaml. 
+            var modifiedYaml = string.Empty;
+            StringBuilder yamlStringBuilder = new StringBuilder();
 
-                // Save the stream to string and return this.
-                StringBuilder yamlStringBuilder = new StringBuilder();
-                stream.Save(new StringWriter(yamlStringBuilder));
-
-                modifiedYaml = yamlStringBuilder.ToString();
+            using (var writer = new StringWriter(yamlStringBuilder))
+            {
+                stream.Save(writer);
+                modifiedYaml = configMapYaml + yamlStringBuilder.ToString();
             }
 
             return modifiedYaml;
         }
 
-        public IList<string> GetReadonlyGroup()
+        private IList<string> GetReadonlyGroup()
         {
             // TODO: Get from configuration?
             return new List<string>

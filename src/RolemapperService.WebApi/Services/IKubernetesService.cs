@@ -1,14 +1,14 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using k8s.Models;
 
 namespace RolemapperService.WebApi.Services
 {
     public interface IKubernetesService
     {
-        string GetAwsAuthConfigMap();
-        string GetConfigMap(string namespaceName, string configMapName);
-        bool PatchAwsAuthConfigMap(string configMapYaml);
-        bool PatchConfigMap(string namespaceName, string configMapName, string configMapYaml);
-        bool ReplaceAwsAuthConfigMap(string configMapYaml);
-        bool ReplaceConfigMap(string namespaceName, string configMapName, string configMapYaml);
+        Task<string> GetAwsAuthConfigMapRoleMap();
+        Task<string> PatchAwsAuthConfigMapRoleMap(string roleName, string roleArn);
+        Task<string> ReplaceAwsAuthConfigMapRoleMap(string roleName, string roleArn);
+    
     }
 }

@@ -13,34 +13,26 @@ namespace RolemapperService.WebApi.Controllers
     [ApiController]
     public class RoleController : ControllerBase
     {
-        private readonly IConfigMapService _configMapService;
         private readonly IKubernetesService _kubernetesService;
 
-        public RoleController(IConfigMapService configMapService, IKubernetesService kubernetesService)
+        public RoleController(IKubernetesService kubernetesService)
         {
-            _configMapService = configMapService;
             _kubernetesService = kubernetesService;
         }
 
         [HttpGet("")]
-        public ActionResult<string> Ping()
+        public async Task<ActionResult<string>> GetRoleMap()
         {
-            return Ok("OK");
+            var configMapRoleMap = await _kubernetesService.GetAwsAuthConfigMapRoleMap();
+            return Ok(configMapRoleMap);
         }
 
         [HttpPost("")]
-        public ActionResult<string> AddRole([FromBody]AddRoleRequest addRoleRequest)
+        public async Task<ActionResult<string>> AddRole([FromBody]AddRoleRequest addRoleRequest)
         {
-            var configMapYaml = _kubernetesService.GetAwsAuthConfigMap();
+            var updatedMapRolesYaml = await _kubernetesService.ReplaceAwsAuthConfigMapRoleMap(addRoleRequest.RoleName, addRoleRequest.RoleArn);
             
-            var updatedMapRolesYaml = _configMapService.AddRoleMapping(configMapYaml, addRoleRequest.RoleName, addRoleRequest.RoleArn);
-
-            if (_kubernetesService.PatchAwsAuthConfigMap(updatedMapRolesYaml))
-            {
-                return Ok(updatedMapRolesYaml);
-            }
-
-            return StatusCode(StatusCodes.Status500InternalServerError, "An error occured trying to add the role to the config map.");
+            return Ok(updatedMapRolesYaml);
         }
     }
 }

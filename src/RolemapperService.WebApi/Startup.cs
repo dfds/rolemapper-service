@@ -1,17 +1,22 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using k8s;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using RolemapperService.WebApi.Repositories;
 using RolemapperService.WebApi.Services;
 
 namespace RolemapperService.WebApi
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        private readonly IHostingEnvironment _hostingEnvironment;
+
+        public Startup(IConfiguration configuration, IHostingEnvironment hostingEnvironment)
         {
             Configuration = configuration;
+            _hostingEnvironment = hostingEnvironment;
         }
 
         public IConfiguration Configuration { get; }
@@ -21,8 +26,19 @@ namespace RolemapperService.WebApi
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
+            services.AddTransient<IKubernetes>(serviceProvider =>
+                        {
+                            var config =
+                            _hostingEnvironment.IsDevelopment()
+                                ? KubernetesClientConfiguration.BuildConfigFromConfigFile()
+                                : KubernetesClientConfiguration.InClusterConfig();
+
+                            return new Kubernetes(config);
+                        });
+
             services.AddTransient<IConfigMapService, ConfigMapService>();
             services.AddTransient<IKubernetesService, KubernetesService>();
+            services.AddTransient<IKubernetesRepository, KubernetesRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
