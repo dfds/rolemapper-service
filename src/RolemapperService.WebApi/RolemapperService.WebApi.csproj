@@ -13,7 +13,7 @@
     <PackageReference Include="Microsoft.AspNetCore.App" Version="2.1.4" />
     <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.1.2" PrivateAssets="All" />
     <!-- YamlDotNet version is bound to KubernetesClient dependency. -->
-    <PackageReference Include="YamlDotNet.Signed" Version="4.2.3" />
+    <!-- <PackageReference Include="YamlDotNet.Signed" Version="4.2.3" /> -->
   </ItemGroup>
 
 </Project>
