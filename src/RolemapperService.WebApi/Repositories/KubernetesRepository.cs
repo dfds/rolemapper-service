@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using k8s;
 using k8s.Models;
+using Microsoft.AspNetCore.JsonPatch;
 
 namespace RolemapperService.WebApi.Repositories
 {
@@ -26,10 +27,7 @@ namespace RolemapperService.WebApi.Repositories
         }
 
         public async Task<string> ReplaceAwsAuthConfigMapRoleMap(string configMapRoleMap)
-        {
-            // TODO: When ready to test actually replacing the config map in Kubernetes - remove line below.
-            return await Task.FromResult<string>(configMapRoleMap);
-            
+        {            
             var configMap = new V1ConfigMap
             {
                 Data = new Dictionary<string, string>
@@ -46,8 +44,10 @@ namespace RolemapperService.WebApi.Repositories
 
         public async Task<string> PatchAwsAuthConfigMapRoleMap(string configMapRoleMap)
         {
-            // TODO: Investigate how to use the patch object.
-            var configMapPatch = new V1Patch();
+            var patch = new JsonPatchDocument<V1ConfigMap>();
+            patch.Replace(c => c.Data["mapRoles"], configMapRoleMap);
+
+            var configMapPatch = new V1Patch(patch);
 
             var awsAuthConfigMap = await _client.PatchNamespacedConfigMapAsync(body: configMapPatch, name: ConfigMapName, namespaceParameter: ConfigMapNamespace);
             var awsAuthConfigMapMapRoles = awsAuthConfigMap.Data["mapRoles"];
