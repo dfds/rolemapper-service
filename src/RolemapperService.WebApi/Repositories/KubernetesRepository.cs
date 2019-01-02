@@ -28,12 +28,10 @@ namespace RolemapperService.WebApi.Repositories
 
         public async Task<string> ReplaceAwsAuthConfigMapRoleMap(string configMapRoleMap)
         {            
-            var configMap = new V1ConfigMap
+            var configMap = await _client.ReadNamespacedConfigMapAsync(name: ConfigMapName, namespaceParameter: ConfigMapNamespace);
+            configMap.Data = new Dictionary<string, string>
             {
-                Data = new Dictionary<string, string>
-                {
-                    { "mapRoles", configMapRoleMap }
-                }
+                { "mapRoles", configMapRoleMap }
             };
 
             var awsAuthConfigMap = await _client.ReplaceNamespacedConfigMapAsync(body: configMap, name: ConfigMapName, namespaceParameter: ConfigMapNamespace);
