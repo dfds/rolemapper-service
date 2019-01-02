@@ -57,7 +57,7 @@ namespace RolemapperService.WebApi.Services
             // TODO: Get from configuration?
             return new List<string>
             {
-                "kub-view"
+                "DFDS-ReadOnly"
             };
         }
     }
