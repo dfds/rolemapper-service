@@ -23,8 +23,9 @@ namespace RolemapperService.WebApi.Services
 
         public async Task<string> PatchAwsAuthConfigMapRoleMap(string roleName, string roleArn)
         {
-            // TODO: Determine what is needed for the patch object in KubernetesRepository.
-            var configMapRoleMap = string.Empty;
+            var configMapRoleMap = await _kubernetesRepository.GetAwsAuthConfigMapRoleMap();
+
+            configMapRoleMap = _configMapService.AddReadOnlyRoleMapping(configMapRoleMap, roleName, roleArn);
             var patchedConfigMapRoleMap = await _kubernetesRepository.PatchAwsAuthConfigMapRoleMap(configMapRoleMap);
 
             return patchedConfigMapRoleMap;
