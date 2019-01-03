@@ -33,7 +33,7 @@ namespace RolemapperService.WebApi.Tests
 
             // Act
             var result = sut.AddRoleMapping(mapRolesInput, roleARN, username, groups);
-
+            
             // Assert
             Assert.NotNull(result);
             Assert.Contains(groups.First(), result);
@@ -57,6 +57,54 @@ namespace RolemapperService.WebApi.Tests
             // Assert
             Assert.NotNull(result);
             Assert.Contains($"{username}:{{{{SessionName}}}}", result);
+        }
+
+        [Fact]
+        public void AddRoleMapping_MultipleMappings_ReturnsMultipleUsernamesAdded()
+        {
+            // Arrange
+            var sut = new ConfigMapService();
+            var roleARN1 = "arn:aws:iam::228426479489:role/KubernetesTest";
+            var username1 = "kubernetes-test";
+            var roleARN2 = "arn:aws:iam::228426479489:role/KubernetesTest2";
+            var username2 = "kubernetes-test2";
+            var groups = new List<string> 
+            {
+                "kub-test"
+            };
+
+            // Act
+            var result1 = sut.AddRoleMapping(mapRolesInput, roleARN1, username1, groups);
+            var result2 = sut.AddRoleMapping(result1, roleARN2, username2, groups);
+            
+            // Assert
+            Assert.NotNull(result2);
+            Assert.Contains(username1, result2);
+            Assert.Contains(username2, result2);
+        }
+
+        [Fact]
+        public void AddRoleMapping_MultipleMappings_DoesntAddYamlDocumentEnd()
+        {
+            // Arrange
+            string YamlDocumentEnd = "...";
+            var sut = new ConfigMapService();
+            var roleARN1 = "arn:aws:iam::228426479489:role/KubernetesTest";
+            var username1 = "kubernetes-test";
+            var roleARN2 = "arn:aws:iam::228426479489:role/KubernetesTest2";
+            var username2 = "kubernetes-test2";
+            var groups = new List<string> 
+            {
+                "kub-test"
+            };
+
+            // Act
+            var result1 = sut.AddRoleMapping(mapRolesInput, roleARN1, username1, groups);
+            var result2 = sut.AddRoleMapping(result1, roleARN2, username2, groups);
+            
+            // Assert
+            Assert.NotNull(result2);
+            Assert.DoesNotContain(YamlDocumentEnd, result2);
         }
     }
 }

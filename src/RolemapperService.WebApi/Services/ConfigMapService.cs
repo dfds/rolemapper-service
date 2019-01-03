@@ -45,8 +45,8 @@ namespace RolemapperService.WebApi.Services
 
             using (var writer = new StringWriter(yamlStringBuilder))
             {
-                stream.Save(writer);
-                modifiedYaml = configMapYaml + yamlStringBuilder.ToString();
+                stream.Save(writer, false);
+                modifiedYaml = configMapYaml + yamlStringBuilder.ToString().Replace("\n...", "");
             }
 
             return modifiedYaml;
