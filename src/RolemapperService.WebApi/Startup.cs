@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using RolemapperService.WebApi.Repositories;
 using RolemapperService.WebApi.Services;
+using RolemapperService.WebApi.Validators;
 
 namespace RolemapperService.WebApi
 {
@@ -39,6 +40,7 @@ namespace RolemapperService.WebApi
             services.AddTransient<IConfigMapService, ConfigMapService>();
             services.AddTransient<IKubernetesService, KubernetesService>();
             services.AddTransient<IKubernetesRepository, KubernetesRepository>();
+            services.AddTransient<IAddRoleRequestValidator, AddRoleRequestValidator>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
