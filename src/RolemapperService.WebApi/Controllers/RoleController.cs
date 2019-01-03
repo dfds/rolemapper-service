@@ -55,7 +55,7 @@ namespace RolemapperService.WebApi.Controllers
 
             try
             {           
-                updatedMapRolesYaml = await _kubernetesService.PatchAwsAuthConfigMapRoleMap(addRoleRequest.RoleName, addRoleRequest.RoleArn);
+                updatedMapRolesYaml = await _kubernetesService.ReplaceAwsAuthConfigMapRoleMap(addRoleRequest.RoleName, addRoleRequest.RoleArn);
             }
             catch (Exception ex)
             {
