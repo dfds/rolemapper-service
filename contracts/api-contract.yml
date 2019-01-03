@@ -26,6 +26,13 @@ paths:
           description: The role name is invalid.
         500:
           description: An error occured trying to create the role mapping.
+    get:
+      summary: Creates a new role mapping
+      responses:
+        200:
+          description: Role mapping was returned successfully.
+        500:
+          description: An error occured trying fetch role mappings.
 definitions:
   AddRoleRequest:
     type: object
