@@ -8,6 +8,7 @@ namespace RolemapperService.WebApi.Repositories
 {
     public interface IKubernetesRepository
     {
+        Task<string> GetAwsAuthConfigMap();
         Task<string> GetAwsAuthConfigMapRoleMap();
         Task<string> ReplaceAwsAuthConfigMapRoleMap(string configMapRoleMap);
         Task<string> PatchAwsAuthConfigMapRoleMap(string configMapRoleMap);

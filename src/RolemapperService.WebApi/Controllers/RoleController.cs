@@ -24,24 +24,6 @@ namespace RolemapperService.WebApi.Controllers
             _addRoleRequestValidator = addRoleRequestValidator;
         }
 
-        [HttpGet("")]
-        public async Task<ActionResult<string>> GetRoleMap()
-        {
-            var configMapRoleMap = string.Empty;
-
-            try
-            {            
-                configMapRoleMap = await _kubernetesService.GetAwsAuthConfigMapRoleMap();
-            }
-            catch (Exception ex)
-            {
-                Log.Error($"An error occured trying to get the role map: {ex.Message}");
-                return StatusCode(StatusCodes.Status500InternalServerError, $"An error occured trying to get the role map: {ex.Message}");
-            }
-
-            return Ok(configMapRoleMap);
-        }
-
         [HttpPost("")]
         public async Task<ActionResult<string>> AddRole([FromBody]AddRoleRequest addRoleRequest)
         {
@@ -54,7 +36,7 @@ namespace RolemapperService.WebApi.Controllers
             var updatedMapRolesYaml = string.Empty;
 
             try
-            {           
+            {
                 updatedMapRolesYaml = await _kubernetesService.ReplaceAwsAuthConfigMapRoleMap(addRoleRequest.RoleName, addRoleRequest.RoleArn);
             }
             catch (Exception ex)
@@ -64,6 +46,24 @@ namespace RolemapperService.WebApi.Controllers
             }
 
             return Ok(updatedMapRolesYaml);
+        }
+
+        [HttpGet("/api/configmap")]
+        public async Task<ActionResult<string>> GetConfigMap()
+        {
+            var configMapRoleMap = string.Empty;
+
+            try
+            {
+                configMapRoleMap = await _kubernetesService.GetAwsAuthConfigMap();
+            }
+            catch (Exception ex)
+            {
+                Log.Error($"An error occured trying to get the config map: {ex.Message}");
+                return StatusCode(StatusCodes.Status500InternalServerError, $"An error occured trying to get the config map: {ex.Message}");
+            }
+
+            return Ok(configMapRoleMap);
         }
     }
 }

@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using k8s;
 using k8s.Models;
 using Microsoft.AspNetCore.JsonPatch;
+using YamlDotNet.Serialization;
 
 namespace RolemapperService.WebApi.Repositories
 {
@@ -18,6 +19,16 @@ namespace RolemapperService.WebApi.Repositories
             _client = client;
         }
 
+        public async Task<string> GetAwsAuthConfigMap()
+        {
+            var awsAuthConfigMap = await _client.ReadNamespacedConfigMapAsync(name: ConfigMapName, namespaceParameter: ConfigMapNamespace);
+
+            var serializer = new SerializerBuilder().Build();
+            var awsAuthConfigMapYaml = serializer.Serialize(awsAuthConfigMap);
+
+            return awsAuthConfigMapYaml;
+        }
+
         public async Task<string> GetAwsAuthConfigMapRoleMap()
         {
             var awsAuthConfigMap = await _client.ReadNamespacedConfigMapAsync(name: ConfigMapName, namespaceParameter: ConfigMapNamespace);
@@ -27,7 +38,7 @@ namespace RolemapperService.WebApi.Repositories
         }
 
         public async Task<string> ReplaceAwsAuthConfigMapRoleMap(string configMapRoleMap)
-        {            
+        {
             var configMap = await _client.ReadNamespacedConfigMapAsync(name: ConfigMapName, namespaceParameter: ConfigMapNamespace);
             configMap.Data = new Dictionary<string, string>
             {

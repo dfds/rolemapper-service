@@ -26,13 +26,14 @@ paths:
           description: The role name is invalid.
         500:
           description: An error occured trying to create the role mapping.
+  /configmap:
     get:
-      summary: Creates a new role mapping
+      summary: Gets Kubernetes config map
       responses:
         200:
-          description: Role mapping was returned successfully.
+          description: Config map was returned successfully.
         500:
-          description: An error occured trying fetch role mappings.
+          description: An error occured trying fetch config map.
 definitions:
   AddRoleRequest:
     type: object

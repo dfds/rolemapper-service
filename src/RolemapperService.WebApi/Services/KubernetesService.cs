@@ -16,9 +16,9 @@ namespace RolemapperService.WebApi.Services
             _configMapService = configMapService;
         }
 
-        public async Task<string> GetAwsAuthConfigMapRoleMap()
+        public async Task<string> GetAwsAuthConfigMap()
         {
-            return await _kubernetesRepository.GetAwsAuthConfigMapRoleMap();
+            return await _kubernetesRepository.GetAwsAuthConfigMap();
         }
 
         public async Task<string> PatchAwsAuthConfigMapRoleMap(string roleName, string roleArn)
