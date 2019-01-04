@@ -13,6 +13,11 @@ readonly BUILD_NUMBER=${1:-"N/A"}
 readonly BUILD_SOURCES_DIRECTORY=${2:-${PWD}}
 readonly SERVICE_NAME="RolemapperService"
 
+clean_output_folder() {
+    rm -Rf output
+    mkdir output
+}
+
 restore_dependencies() {
     echo "Restoring dependencies"
     dotnet restore ${SERVICE_NAME}.sln
@@ -21,7 +26,18 @@ restore_dependencies() {
 run_tests() {
     echo "Running tests..."
     dotnet build -c Release ${SERVICE_NAME}.sln
-    dotnet test --logger:"trx;LogFileName=testresults.trx" --results-directory ${BUILD_SOURCES_DIRECTORY}/output ${SERVICE_NAME}.WebApi.Tests/${SERVICE_NAME}.WebApi.Tests.csproj
+
+    # dotnet test --logger:"trx;LogFileName=testresults.trx" --results-directory ${BUILD_SOURCES_DIRECTORY}/output ${SERVICE_NAME}.WebApi.Tests/${SERVICE_NAME}.WebApi.Tests.csproj
+
+    MSYS_NO_PATHCONV=1 dotnet test \
+        --logger:"trx;LogFileName=testresults.trx" \
+        RolemapperService.WebApi.Tests/RolemapperService.WebApi.Tests.csproj \
+        /p:CollectCoverage=true \
+        /p:CoverletOutputFormat=cobertura \
+        '/p:Include="[RolemapperService.WebApi]*"'
+
+    mv ./RolemapperService.WebApi.Tests/coverage.cobertura.xml "${BUILD_SOURCES_DIRECTORY}/output/"
+    mv ./RolemapperService.WebApi.Tests/TestResults/testresults.trx "${BUILD_SOURCES_DIRECTORY}/output/"
 }
 
 publish_binaries() {
@@ -61,6 +77,7 @@ push_container_image_dockercloud() {
     docker push ${image_name}
 }
 
+clean_output_folder
 
 cd ./src
 

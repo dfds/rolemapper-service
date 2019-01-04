@@ -12,6 +12,21 @@ steps:
       ./pipeline.sh $(Build.BuildId) $(System.DefaultWorkingDirectory)
     displayName: Pipeline Bash Script
     enabled: true
+
+  - task: PublishTestResults@2
+    displayName: Publish Test Results
+    inputs:
+      testRunner: VSTest
+      testResultsFiles: testresults.trx
+      searchFolder: '$(System.DefaultWorkingDirectory)/output'
+    condition: succeededOrFailed()
+
+  - task: PublishCodeCoverageResults@1
+    displayName: 'Publish code coverage'
+    inputs:
+      codeCoverageTool: Cobertura
+      summaryFileLocation: '$(System.DefaultWorkingDirectory)/output/coverage.cobertura.xml'
+
   - task: PublishBuildArtifacts@1
     displayName: "Publish Artifact: manifests"
     inputs:
