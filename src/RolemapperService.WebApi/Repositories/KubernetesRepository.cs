@@ -44,7 +44,7 @@ namespace RolemapperService.WebApi.Repositories
             };
 
             var awsAuthConfigMap = await _client.ReplaceNamespacedConfigMapAsync(body: configMap, name: ConfigMapName, namespaceParameter: ConfigMapNamespace);
-            var awsAuthConfigMapYaml = SerializeToYaml(awsAuthConfigMap.Data["mapRoles"]);
+            var awsAuthConfigMapYaml = SerializeToYaml(awsAuthConfigMap);
 
             return awsAuthConfigMapYaml;
         }
@@ -57,7 +57,7 @@ namespace RolemapperService.WebApi.Repositories
             var configMapPatch = new V1Patch(patch);
 
             var awsAuthConfigMap = await _client.PatchNamespacedConfigMapAsync(body: configMapPatch, name: ConfigMapName, namespaceParameter: ConfigMapNamespace);
-            var awsAuthConfigMapYaml = SerializeToYaml(awsAuthConfigMap.Data["mapRoles"]);
+            var awsAuthConfigMapYaml = SerializeToYaml(awsAuthConfigMap);
 
             return awsAuthConfigMapYaml;
         }
