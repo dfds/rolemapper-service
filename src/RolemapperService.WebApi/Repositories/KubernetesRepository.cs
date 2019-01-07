@@ -22,9 +22,7 @@ namespace RolemapperService.WebApi.Repositories
         public async Task<string> GetAwsAuthConfigMap()
         {
             var awsAuthConfigMap = await _client.ReadNamespacedConfigMapAsync(name: ConfigMapName, namespaceParameter: ConfigMapNamespace);
-
-            var serializer = new SerializerBuilder().Build();
-            var awsAuthConfigMapYaml = serializer.Serialize(awsAuthConfigMap);
+            var awsAuthConfigMapYaml = SerializeToYaml(awsAuthConfigMap);
 
             return awsAuthConfigMapYaml;
         }
@@ -46,9 +44,9 @@ namespace RolemapperService.WebApi.Repositories
             };
 
             var awsAuthConfigMap = await _client.ReplaceNamespacedConfigMapAsync(body: configMap, name: ConfigMapName, namespaceParameter: ConfigMapNamespace);
-            var awsAuthConfigMapMapRoles = awsAuthConfigMap.Data["mapRoles"];
+            var awsAuthConfigMapYaml = SerializeToYaml(awsAuthConfigMap.Data["mapRoles"]);
 
-            return awsAuthConfigMapMapRoles;
+            return awsAuthConfigMapYaml;
         }
 
         public async Task<string> PatchAwsAuthConfigMapRoleMap(string configMapRoleMap)
@@ -59,9 +57,17 @@ namespace RolemapperService.WebApi.Repositories
             var configMapPatch = new V1Patch(patch);
 
             var awsAuthConfigMap = await _client.PatchNamespacedConfigMapAsync(body: configMapPatch, name: ConfigMapName, namespaceParameter: ConfigMapNamespace);
-            var awsAuthConfigMapMapRoles = awsAuthConfigMap.Data["mapRoles"];
+            var awsAuthConfigMapYaml = SerializeToYaml(awsAuthConfigMap.Data["mapRoles"]);
 
-            return awsAuthConfigMapMapRoles;
+            return awsAuthConfigMapYaml;
+        }
+
+        private string SerializeToYaml(object objectToSerialize)
+        {
+            var serializer = new SerializerBuilder().Build();
+            var yamlSerializedObject = serializer.Serialize(objectToSerialize);
+
+            return yamlSerializedObject;
         }
     }
 }

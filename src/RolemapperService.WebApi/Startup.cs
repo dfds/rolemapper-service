@@ -1,4 +1,8 @@
-﻿using k8s;
+﻿using Amazon;
+using Amazon.Runtime;
+using Amazon.S3;
+using Amazon.S3.Transfer;
+using k8s;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -37,10 +41,33 @@ namespace RolemapperService.WebApi
                             return new Kubernetes(config);
                         });
 
+            services.AddTransient<AWSCredentials>(serviceProvider => new BasicAWSCredentials(
+                accessKey: Configuration["S3_AWS_ACCESS_KEY_ID"],
+                secretKey: Configuration["S3_AWS_SECRET_ACCESS_KEY"]
+            ));
+
+            services.AddTransient(serviceProvider => RegionEndpoint.GetBySystemName(Configuration["AWS_REGION"]));
+
+            services.AddTransient<IAmazonS3>(serviceProvider => new AmazonS3Client(
+                credentials: serviceProvider.GetRequiredService<AWSCredentials>(),
+                region: serviceProvider.GetRequiredService<RegionEndpoint>()
+            ));
+
+            services.AddTransient<ITransferUtility>(serviceProvider => new TransferUtility(
+                s3Client: serviceProvider.GetRequiredService<IAmazonS3>()
+            ));
+
             services.AddTransient<IConfigMapService, ConfigMapService>();
             services.AddTransient<IKubernetesService, KubernetesService>();
             services.AddTransient<IKubernetesRepository, KubernetesRepository>();
             services.AddTransient<IAddRoleRequestValidator, AddRoleRequestValidator>();
+
+            services.AddTransient<IPersistanceRepository>(serviceProvider => new AwsS3PersistanceRepository(
+                transferUtility: serviceProvider.GetRequiredService<ITransferUtility>(),
+                bucketName: Configuration["AWS_S3_BUCKET_NAME_CONFIG_MAP"]
+            ));
+
+            services.AddTransient<IConfigMapPersistanceService, ConfigMapPersistanceService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

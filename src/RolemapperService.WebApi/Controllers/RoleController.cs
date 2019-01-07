@@ -17,11 +17,15 @@ namespace RolemapperService.WebApi.Controllers
     {
         private readonly IKubernetesService _kubernetesService;
         private readonly IAddRoleRequestValidator _addRoleRequestValidator;
+        private readonly IConfigMapPersistanceService _configMapPersistanceService;
 
-        public RoleController(IKubernetesService kubernetesService, IAddRoleRequestValidator addRoleRequestValidator)
+        public RoleController(IKubernetesService kubernetesService, 
+                              IAddRoleRequestValidator addRoleRequestValidator,
+                              IConfigMapPersistanceService configMapPersistanceService)
         {
             _kubernetesService = kubernetesService;
             _addRoleRequestValidator = addRoleRequestValidator;
+            _configMapPersistanceService = configMapPersistanceService;
         }
 
         [HttpPost("")]
@@ -38,6 +42,7 @@ namespace RolemapperService.WebApi.Controllers
             try
             {
                 updatedMapRolesYaml = await _kubernetesService.ReplaceAwsAuthConfigMapRoleMap(addRoleRequest.RoleName, addRoleRequest.RoleArn);
+                await _configMapPersistanceService.StoreConfigMap(updatedMapRolesYaml);
             }
             catch (Exception ex)
             {
