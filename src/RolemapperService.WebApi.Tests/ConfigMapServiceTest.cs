@@ -106,5 +106,22 @@ namespace RolemapperService.WebApi.Tests
             Assert.NotNull(result2);
             Assert.DoesNotContain(YamlDocumentEnd, result2);
         }
+
+        [Fact]
+        public void AddReadOnlyRoleMapping_GivenValidInput_ReturnsValidOutputWithReadOnlyGroupAdded()
+        {
+            // Arrange
+            var sut = new ConfigMapService();
+            var roleARN = "arn:aws:iam::228426479489:role/KubernetesTest";
+            var username = "kubernetes-test";
+            var readOnlyGroup = "DFDS-ReadOnly";
+
+            // Act
+            var result = sut.AddReadOnlyRoleMapping(mapRolesInput, roleARN, username);
+            
+            // Assert
+            Assert.NotNull(result);
+            Assert.Contains(readOnlyGroup, result);
+        }
     }
 }
