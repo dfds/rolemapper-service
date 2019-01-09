@@ -46,7 +46,7 @@ namespace RolemapperService.WebApi
                 secretKey: Configuration["S3_AWS_SECRET_ACCESS_KEY"]
             ));
 
-            services.AddTransient(serviceProvider => RegionEndpoint.GetBySystemName(Configuration["AWS_REGION"]));
+            services.AddTransient(serviceProvider => RegionEndpoint.GetBySystemName(Configuration["S3_AWS_REGION"]));
 
             services.AddTransient<IAmazonS3>(serviceProvider => new AmazonS3Client(
                 credentials: serviceProvider.GetRequiredService<AWSCredentials>(),

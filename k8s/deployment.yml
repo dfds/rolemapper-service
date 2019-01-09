@@ -29,20 +29,23 @@ spec:
               memory: "128Mi"
               cpu: "200m"
           env:
-            - name: AWS_REGION
-              value: $(AWS_REGION)
+            - name: S3_AWS_REGION
+              valueFrom:
+                secretKeyRef:
+                  name: configmapbucket-binding
+                  key: S3_REGION
             - name: S3_AWS_ACCESS_KEY_ID
               valueFrom:
                 secretKeyRef:
-                  name: rolemapper-service
-                  key: s3-aws-access-key-id
+                  name: configmapbucket-binding
+                  key: S3_AWS_ACCESS_KEY_ID
             - name: S3_AWS_SECRET_ACCESS_KEY
               valueFrom:
                 secretKeyRef:
-                  name: rolemapper-service
-                  key: s3-aws-secret-access-key
+                  name: configmapbucket-binding
+                  key: S3_AWS_SECRET_ACCESS_KEY
             - name: AWS_S3_BUCKET_NAME_CONFIG_MAP
               valueFrom:
                 secretKeyRef:
-                  name: rolemapper-service
-                  key: s3-bucket-name
+                  name: configmapbucket-binding
+                  key: BUCKET_NAME
