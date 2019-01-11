@@ -12,7 +12,7 @@ steps:
       ./pipeline.sh $(Build.BuildId) $(System.DefaultWorkingDirectory)
       dotnet tool install dotnet-reportgenerator-globaltool --tool-path . --version 4.0.5
       mkdir $(System.DefaultWorkingDirectory)/output/reports
-      ./reportgenerator "-reports:$(System.DefaultWorkingDirectory)/output/coverage.cobertura.xml" "-targetdir:output/reports" "-reporttypes:HTMLInline;HTMLChart"
+      ./reportgenerator "-reports:$(System.DefaultWorkingDirectory)/output/coverage.cobertura.xml" "-targetdir:$(System.DefaultWorkingDirectory)/output/reports" "-reporttypes:HTMLInline;HTMLChart"
     displayName: Pipeline Bash Script
     enabled: true
 
