@@ -26,6 +26,7 @@ steps:
     inputs:
       codeCoverageTool: Cobertura
       summaryFileLocation: '$(System.DefaultWorkingDirectory)/output/coverage.cobertura.xml'
+      reportDirectory: '$(System.DefaultWorkingDirectory)/output/Reports'
 
   - task: PublishBuildArtifacts@1
     displayName: "Publish Artifact: manifests"
