@@ -40,5 +40,19 @@ namespace RolemapperService.WebApi.Tests
             Assert.NotNull(result);
             Assert.Contains(roleName, result);
         }
+
+        [Fact]
+        public async void GetAwsAuthConfigMap_ReturnsValidOutput()
+        {
+            // Arrange
+            var sut = new KubernetesService(new KubernetesRepositoryStub(), new ConfigMapService());
+            
+            // Act
+            var result = await sut.GetAwsAuthConfigMap();
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Contains("Kind: ConfigMap", result);
+        }
     }
 }
