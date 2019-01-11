@@ -4,7 +4,7 @@ using RolemapperService.WebApi.Services;
 
 namespace RolemapperService.WebApi.Tests.TestDoubles
 {
-    public class StubKubernetesRepository : IKubernetesRepository
+    public class KubernetesRepositoryStub : IKubernetesRepository
     {
         private readonly string _configMap = @"
         ApiVersion: v1

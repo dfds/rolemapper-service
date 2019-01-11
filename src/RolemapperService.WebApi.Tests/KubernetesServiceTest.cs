@@ -13,34 +13,32 @@ namespace RolemapperService.WebApi.Tests
         public async void ReplaceAwsAuthConfigMapRoleMap_GivenValidInput_ReturnsValidOutput()
         {
             // Arrange
-            var sut = new KubernetesService(new StubKubernetesRepository(), new ConfigMapService());
+            var sut = new KubernetesService(new KubernetesRepositoryStub(), new ConfigMapService());
             var roleName = "KubernetesTest";
             var roleARN = "arn:aws:iam::228426479489:role/KubernetesTest";
 
             // Act
             var result = await sut.ReplaceAwsAuthConfigMapRoleMap(roleName, roleARN);
-            Console.WriteLine(result);
 
             // Assert
             Assert.NotNull(result);
-            Assert.True(result.Contains(roleName));
+            Assert.Contains(roleName, result);
         }
 
         [Fact]
         public async void PatchAwsAuthConfigMapRoleMap_GivenValidInput_ReturnsValidOutput()
         {
             // Arrange
-            var sut = new KubernetesService(new StubKubernetesRepository(), new ConfigMapService());
+            var sut = new KubernetesService(new KubernetesRepositoryStub(), new ConfigMapService());
             var roleName = "KubernetesTest";
             var roleARN = "arn:aws:iam::228426479489:role/KubernetesTest";
 
             // Act
             var result = await sut.PatchAwsAuthConfigMapRoleMap(roleName, roleARN);
-            Console.WriteLine(result);
             
             // Assert
             Assert.NotNull(result);
-            Assert.True(result.Contains(roleName));
+            Assert.Contains(roleName, result);
         }
     }
 }
