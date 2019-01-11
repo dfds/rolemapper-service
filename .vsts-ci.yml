@@ -11,7 +11,8 @@ steps:
       chmod +x ./pipeline.sh
       ./pipeline.sh $(Build.BuildId) $(System.DefaultWorkingDirectory)
       dotnet tool install dotnet-reportgenerator-globaltool --tool-path . --version 4.0.5
-      ./reportgenerator "-reports:$(System.DefaultWorkingDirectory)/output/coverage.cobertura.xml" "-targetdir:output" "-reporttypes:HTMLInline;HTMLChart"
+      mkdir $(System.DefaultWorkingDirectory)/output/reports
+      ./reportgenerator "-reports:$(System.DefaultWorkingDirectory)/output/coverage.cobertura.xml" "-targetdir:output/reports" "-reporttypes:HTMLInline;HTMLChart"
     displayName: Pipeline Bash Script
     enabled: true
 
@@ -28,7 +29,7 @@ steps:
     inputs:
       codeCoverageTool: Cobertura
       summaryFileLocation: '$(System.DefaultWorkingDirectory)/output/coverage.cobertura.xml'
-      reportDirectory: '$(System.DefaultWorkingDirectory)/output'
+      reportDirectory: '$(System.DefaultWorkingDirectory)/output/reports'
 
   - task: PublishBuildArtifacts@1
     displayName: "Publish Artifact: manifests"
