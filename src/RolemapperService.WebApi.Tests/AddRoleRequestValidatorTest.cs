@@ -63,5 +63,25 @@ namespace RolemapperService.WebApi.Tests
             Assert.False(validRequest);
             Assert.NotEqual(string.Empty, validationErros);
         }
+
+        [Fact]
+        public void TryValidateAddRoleRequest_GivenEmptyRoleName_DoesNotValidate()
+        {
+            // Arrange
+            var sut = new AddRoleRequestValidator();
+            var emptyRoleName = string.Empty;
+            var request = new AddRoleRequest
+            {
+                RoleName = emptyRoleName
+            };
+            var validationErros = string.Empty;
+
+            // Act
+            var validRequest = sut.TryValidateAddRoleRequest(request, out validationErros);
+
+            // Assert
+            Assert.False(validRequest);
+            Assert.NotEqual(string.Empty, validationErros);
+        }
     }
 }
