@@ -15,14 +15,14 @@ namespace RolemapperService.WebApi.Tests
             {
                 RoleName = "MyRole"
             };
-            var validationErros = string.Empty;
+            var validationErrors = string.Empty;
 
             // Act
-            var validRequest = sut.TryValidateAddRoleRequest(request, out validationErros);
+            var validRequest = sut.TryValidateAddRoleRequest(request, out validationErrors);
 
             // Assert
             Assert.True(validRequest);
-            Assert.Equal(string.Empty, validationErros);
+            Assert.Equal(string.Empty, validationErrors);
         }
 
         [Fact]
@@ -34,14 +34,14 @@ namespace RolemapperService.WebApi.Tests
             {
                 RoleName = "å"
             };
-            var validationErros = string.Empty;
+            var validationErrors = string.Empty;
 
             // Act
-            var validRequest = sut.TryValidateAddRoleRequest(request, out validationErros);
+            var validRequest = sut.TryValidateAddRoleRequest(request, out validationErrors);
 
             // Assert
             Assert.False(validRequest);
-            Assert.NotEqual(string.Empty, validationErros);
+            Assert.NotEqual(string.Empty, validationErrors);
         }
 
         [Fact]
@@ -54,14 +54,14 @@ namespace RolemapperService.WebApi.Tests
             {
                 RoleName = roleNameLongerThan64Characters
             };
-            var validationErros = string.Empty;
+            var validationErrors = string.Empty;
 
             // Act
-            var validRequest = sut.TryValidateAddRoleRequest(request, out validationErros);
+            var validRequest = sut.TryValidateAddRoleRequest(request, out validationErrors);
 
             // Assert
             Assert.False(validRequest);
-            Assert.NotEqual(string.Empty, validationErros);
+            Assert.NotEqual(string.Empty, validationErrors);
         }
 
         [Fact]
@@ -74,14 +74,14 @@ namespace RolemapperService.WebApi.Tests
             {
                 RoleName = emptyRoleName
             };
-            var validationErros = string.Empty;
+            var validationErrors = string.Empty;
 
             // Act
-            var validRequest = sut.TryValidateAddRoleRequest(request, out validationErros);
+            var validRequest = sut.TryValidateAddRoleRequest(request, out validationErrors);
 
             // Assert
             Assert.False(validRequest);
-            Assert.NotEqual(string.Empty, validationErros);
+            Assert.NotEqual(string.Empty, validationErrors);
         }
     }
 }
