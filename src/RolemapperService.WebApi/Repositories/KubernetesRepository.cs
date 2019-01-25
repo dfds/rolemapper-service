@@ -21,7 +21,7 @@ namespace RolemapperService.WebApi.Repositories
 
         public async Task<string> GetAwsAuthConfigMap()
         {
-            var awsAuthConfigMap = await _client.ReadNamespacedConfigMapAsync(name: ConfigMapName, namespaceParameter: ConfigMapNamespace);
+            var awsAuthConfigMap = await GetConfigMap();
             var awsAuthConfigMapYaml = SerializeToYaml(awsAuthConfigMap);
 
             return awsAuthConfigMapYaml;
@@ -29,7 +29,7 @@ namespace RolemapperService.WebApi.Repositories
 
         public async Task<string> GetAwsAuthConfigMapRoleMap()
         {
-            var awsAuthConfigMap = await _client.ReadNamespacedConfigMapAsync(name: ConfigMapName, namespaceParameter: ConfigMapNamespace);
+            var awsAuthConfigMap = await GetConfigMap();
             var awsAuthConfigMapMapRoles = awsAuthConfigMap.Data["mapRoles"];
 
             return awsAuthConfigMapMapRoles;
@@ -37,14 +37,15 @@ namespace RolemapperService.WebApi.Repositories
 
         public async Task<string> ReplaceAwsAuthConfigMapRoleMap(string configMapRoleMap)
         {
-            var configMap = await _client.ReadNamespacedConfigMapAsync(name: ConfigMapName, namespaceParameter: ConfigMapNamespace);
-            configMap.Data = new Dictionary<string, string>
+            var awsAuthConfigMap = await GetConfigMap();
+            
+            awsAuthConfigMap.Data = new Dictionary<string, string>
             {
                 { "mapRoles", configMapRoleMap }
             };
 
-            var awsAuthConfigMap = await _client.ReplaceNamespacedConfigMapAsync(body: configMap, name: ConfigMapName, namespaceParameter: ConfigMapNamespace);
-            var awsAuthConfigMapYaml = SerializeToYaml(awsAuthConfigMap);
+            var awsAuthConfigMapReplaced = await _client.ReplaceNamespacedConfigMapAsync(body: awsAuthConfigMap, name: ConfigMapName, namespaceParameter: ConfigMapNamespace);
+            var awsAuthConfigMapYaml = SerializeToYaml(awsAuthConfigMapReplaced);
 
             return awsAuthConfigMapYaml;
         }
@@ -60,6 +61,11 @@ namespace RolemapperService.WebApi.Repositories
             var awsAuthConfigMapYaml = SerializeToYaml(awsAuthConfigMap);
 
             return awsAuthConfigMapYaml;
+        }
+
+        private async Task<V1ConfigMap> GetConfigMap()
+        {
+            return await _client.ReadNamespacedConfigMapAsync(name: ConfigMapName, namespaceParameter: ConfigMapNamespace, exact: true, export: true);
         }
 
         private string SerializeToYaml(object objectToSerialize)
