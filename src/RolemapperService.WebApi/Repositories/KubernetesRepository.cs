@@ -4,7 +4,9 @@ using System.Threading.Tasks;
 using k8s;
 using k8s.Models;
 using Microsoft.AspNetCore.JsonPatch;
+using RolemapperService.WebApi.Models;
 using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.NamingConventions;
 
 namespace RolemapperService.WebApi.Repositories
 {
@@ -68,10 +70,30 @@ namespace RolemapperService.WebApi.Repositories
             return await _client.ReadNamespacedConfigMapAsync(name: ConfigMapName, namespaceParameter: ConfigMapNamespace, exact: true, export: true);
         }
 
-        private string SerializeToYaml(object objectToSerialize)
+        private KubernetesConfigMap GetCustomConfigMap(V1ConfigMap apiConfigMap)
         {
-            var serializer = new SerializerBuilder().Build();
-            var yamlSerializedObject = serializer.Serialize(objectToSerialize);
+            return new KubernetesConfigMap
+            {
+                ApiVersion = apiConfigMap.ApiVersion,
+                Data = apiConfigMap.Data,
+                Kind = apiConfigMap.Kind,
+                Metadata = new Metadata
+                {
+                    Name = apiConfigMap.Metadata.Name,
+                    NamespaceProperty = apiConfigMap.Metadata.NamespaceProperty
+                }
+            };
+        }
+
+        private string SerializeToYaml(V1ConfigMap apiConfigMap)
+        {
+            var customConfigMap = GetCustomConfigMap(apiConfigMap);
+
+            var serializer = new SerializerBuilder()
+                .WithNamingConvention(new CamelCaseNamingConvention())
+                .Build();
+                
+            var yamlSerializedObject = serializer.Serialize(customConfigMap);
 
             return yamlSerializedObject;
         }
