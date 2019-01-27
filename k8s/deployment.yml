@@ -49,3 +49,5 @@ spec:
                 secretKeyRef:
                   name: configmapbucket-binding
                   key: BUCKET_NAME
+            - name: CONFIG_MAP_FILE_NAME
+              value: $(CONFIG_MAP_FILE_NAME)

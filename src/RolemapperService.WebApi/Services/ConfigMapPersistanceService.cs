@@ -11,16 +11,19 @@ namespace RolemapperService.WebApi.Services
 {
     public class ConfigMapPersistanceService : IConfigMapPersistanceService
     {
-        private static readonly string ConfigMapFilename = "ConfigMap.yml";
+        private readonly string _configMapFileName;
         private readonly IPersistanceRepository _persistanceRepository;
         
-        public ConfigMapPersistanceService(IPersistanceRepository persistanceRepository)
+        public ConfigMapPersistanceService(
+            IPersistanceRepository persistanceRepository, 
+            string configMapFileName = "configmap_lovelace_blaster.yml")
         {
             _persistanceRepository = persistanceRepository;
+            _configMapFileName = configMapFileName;
         }
         public async Task StoreConfigMap(string configMapYaml)
         {
-            await _persistanceRepository.StoreFile(ConfigMapFilename, configMapYaml);
+            await _persistanceRepository.StoreFile(_configMapFileName, configMapYaml);
         }
     }
 }

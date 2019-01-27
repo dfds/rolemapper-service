@@ -67,7 +67,10 @@ namespace RolemapperService.WebApi
                 bucketName: Configuration["AWS_S3_BUCKET_NAME_CONFIG_MAP"]
             ));
 
-            services.AddTransient<IConfigMapPersistanceService, ConfigMapPersistanceService>();
+            services.AddTransient<IConfigMapPersistanceService>(serviceProvider => new ConfigMapPersistanceService(
+                persistanceRepository: serviceProvider.GetRequiredService<IPersistanceRepository>(),
+                configMapFileName: Configuration["CONFIG_MAP_FILE_NAME"]
+            ));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
