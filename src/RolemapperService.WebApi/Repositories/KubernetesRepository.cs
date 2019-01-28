@@ -74,13 +74,13 @@ namespace RolemapperService.WebApi.Repositories
         {
             return new KubernetesConfigMap
             {
-                ApiVersion = apiConfigMap.ApiVersion,
-                Data = apiConfigMap.Data,
-                Kind = apiConfigMap.Kind,
+                ApiVersion = apiConfigMap?.ApiVersion,
+                Data = apiConfigMap?.Data,
+                Kind = apiConfigMap?.Kind,
                 Metadata = new Metadata
                 {
-                    Name = apiConfigMap.Metadata.Name,
-                    NamespaceProperty = apiConfigMap.Metadata.NamespaceProperty
+                    Name = apiConfigMap?.Metadata?.Name,
+                    NamespaceProperty = apiConfigMap?.Metadata?.NamespaceProperty
                 }
             };
         }
