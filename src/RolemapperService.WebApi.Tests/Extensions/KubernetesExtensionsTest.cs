@@ -21,7 +21,10 @@ namespace RolemapperService.WebApi.Tests
             // Assert
             Assert.NotNull(customConfigMap);
             Assert.Equal(kubeConfigMap.ApiVersion, customConfigMap.ApiVersion);
-            Assert.Equal(kubeConfigMap.ApiVersion, customConfigMap.ApiVersion);
+            Assert.Equal(kubeConfigMap.Data["mapRoles"], customConfigMap.Data["mapRoles"]);
+            Assert.Equal(kubeConfigMap.Kind, customConfigMap.Kind);
+            Assert.Equal(kubeConfigMap.Metadata.Name, customConfigMap.Metadata.Name);
+            Assert.Equal(kubeConfigMap.Metadata.NamespaceProperty, customConfigMap.Metadata.NamespaceProperty);
         }
 
         [Fact]
