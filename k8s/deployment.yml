@@ -32,22 +32,22 @@ spec:
             - name: S3_AWS_REGION
               valueFrom:
                 secretKeyRef:
-                  name: configmapbucket-binding
+                  name: dfds-oxygen-k8s-turing-configmap-bucket-binding
                   key: S3_REGION
             - name: S3_AWS_ACCESS_KEY_ID
               valueFrom:
                 secretKeyRef:
-                  name: configmapbucket-binding
+                  name: dfds-oxygen-k8s-turing-configmap-bucket-binding
                   key: S3_AWS_ACCESS_KEY_ID
             - name: S3_AWS_SECRET_ACCESS_KEY
               valueFrom:
                 secretKeyRef:
-                  name: configmapbucket-binding
+                  name: dfds-oxygen-k8s-turing-configmap-bucket-binding
                   key: S3_AWS_SECRET_ACCESS_KEY
             - name: AWS_S3_BUCKET_NAME_CONFIG_MAP
               valueFrom:
                 secretKeyRef:
-                  name: configmapbucket-binding
+                  name: dfds-oxygen-k8s-turing-configmap-bucket-binding
                   key: BUCKET_NAME
             - name: CONFIG_MAP_FILE_NAME
               value: $(CONFIG_MAP_FILE_NAME)
