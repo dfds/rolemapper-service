@@ -9,6 +9,7 @@ namespace RolemapperService.WebApi.Services
         Task<string> GetAwsAuthConfigMap();
         Task<string> PatchAwsAuthConfigMapRoleMap(string roleName, string roleArn);
         Task<string> ReplaceAwsAuthConfigMapRoleMap(string roleName, string roleArn);
+        Task CreateNamespace(string namespaceName);
     
     }
 }

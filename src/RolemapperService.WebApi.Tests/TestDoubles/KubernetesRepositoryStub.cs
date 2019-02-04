@@ -43,6 +43,11 @@ namespace RolemapperService.WebApi.Tests.TestDoubles
             groups:
             - DFDS-ReadOnly";
 
+        public Task CreateNamespace(string namespaceName)
+        {
+            throw new System.NotImplementedException();
+        }
+
         public Task<string> GetAwsAuthConfigMap()
         {
             return Task.FromResult(_configMap);

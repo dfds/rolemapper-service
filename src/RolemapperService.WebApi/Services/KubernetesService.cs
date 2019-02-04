@@ -16,6 +16,11 @@ namespace RolemapperService.WebApi.Services
             _configMapService = configMapService;
         }
 
+        public async Task CreateNamespace(string namespaceName)
+        {
+            await _kubernetesRepository.CreateNamespace(namespaceName);
+        }
+
         public async Task<string> GetAwsAuthConfigMap()
         {
             return await _kubernetesRepository.GetAwsAuthConfigMap();
