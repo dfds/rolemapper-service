@@ -16,15 +16,25 @@ namespace RolemapperService.WebApi.Controllers
     public class NamespaceController : ControllerBase
     {
         private readonly IKubernetesService _kubernetesService;
+        private readonly IAddNamespaceRequestValidator _addNamespaceRequestValidator;
 
-        public NamespaceController(IKubernetesService kubernetesService)
+        public NamespaceController(
+            IKubernetesService kubernetesService,
+            IAddNamespaceRequestValidator addNamespaceRequestValidator)
         {
             _kubernetesService = kubernetesService;
+            _addNamespaceRequestValidator = addNamespaceRequestValidator;
         }
 
         [HttpPost("")]
         public async Task<ActionResult> AddNamespace([FromBody]AddNamespaceRequest addNamespaceRequest)
         {
+            if (!_addNamespaceRequestValidator.TryValidateAddNamespaceRequest(addNamespaceRequest, out string validationError))
+            {
+                Log.Warning($"Add namespace called with invalid input. Validation error: {validationError}");
+                return BadRequest(validationError);
+            }
+
             try
             {
                 await _kubernetesService.CreateNamespace(addNamespaceRequest.NamespaceName);

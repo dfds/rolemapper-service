@@ -16,7 +16,7 @@ namespace RolemapperService.WebApi.Validators
             }
 
             // Role name 64 char max.
-            if (request.RoleName.Length > 64)
+            if (request.RoleName.Length > 63)
             {
                 validationError = "Name is invalid. A maximum of 64 characters is allowed.";
                 return false;
