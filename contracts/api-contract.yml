@@ -34,6 +34,20 @@ paths:
           description: Config map was returned successfully.
         500:
           description: An error occured trying fetch config map.
+  /namespaces:
+    post:
+      summary: Creates a new namespace
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: "#/definitions/AddNamespaceRequest"
+      responses:
+        200:
+          description: The namespace was created.
+        500:
+          description: An error occured trying to create the namespace.
 definitions:
   AddRoleRequest:
     type: object
@@ -41,4 +55,9 @@ definitions:
       roleName:
         type: string
       roleArn:
+        type: string
+  AddNamespaceRequest:
+    type: object
+    properties:
+      namespaceName:
         type: string
