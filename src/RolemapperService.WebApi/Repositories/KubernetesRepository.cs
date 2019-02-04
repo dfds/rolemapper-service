@@ -83,5 +83,94 @@ namespace RolemapperService.WebApi.Repositories
             
             var result = await _client.CreateNamespaceAsync(ns);
         }
+
+        public async Task<string> CreateNamespaceFullAccessClusterRole(string namespaceName)
+        {
+            var clusterRole = new V1ClusterRole
+            {
+                Metadata = new V1ObjectMeta
+                {
+                    Name = $"{namespaceName}-fullaccess",
+                    NamespaceProperty = namespaceName
+                },
+                Rules = new List<V1PolicyRule>
+                {
+                    new V1PolicyRule
+                    {
+                        ApiGroups = new List<string>
+                        {
+                            "",
+                            "extensions",
+                            "apps"
+                        },
+                        Resources = new List<string>
+                        {
+                            "*"
+                        },
+                        // ResourceNames = new List<string>
+                        // {
+                        //     "*"
+                        // },
+                        Verbs = new List<string>
+                        {
+                            "*"
+                        }
+                    },
+                    new V1PolicyRule
+                    {
+                        ApiGroups = new List<string>
+                        {
+                            "batch"
+                        },
+                        Resources = new List<string>
+                        {
+                            "jobs",
+                            "cronjobs"
+                        },
+                        // ResourceNames = new List<string>
+                        // {
+                        //     "*"
+                        // },
+                        Verbs = new List<string>
+                        {
+                            "*"
+                        }
+                    }
+                }
+            };
+            
+            var result = await _client.CreateClusterRoleAsync(clusterRole);
+
+            return result?.Metadata?.Name;
+        }
+
+        public async Task CreateGroupForRole(string groupName, string roleName)
+        {
+            // TODO: Group name should be something like "namespace-fullaccess".
+            var clusterRoleBinding = new V1ClusterRoleBinding
+            {
+                Metadata = new V1ObjectMeta
+                {
+                    Name = $"{roleName}-to-{groupName}"
+                },
+                Subjects = new List<V1Subject>
+                {
+                    new V1Subject
+                    {
+                        Kind = "Group",
+                        Name = groupName,
+                        ApiGroup = "rbac.authorization.k8s.io"
+                    }
+                },
+                RoleRef = new V1RoleRef
+                {
+                    Kind = "ClusterRole",
+                    Name = roleName,
+                    ApiGroup = "rbac.authorization.k8s.io"
+                }
+            };
+            
+            var result = await _client.CreateClusterRoleBindingAsync(clusterRoleBinding);
+        }
     }
 }
