@@ -46,6 +46,8 @@ paths:
       responses:
         200:
           description: The namespace was created.
+        400:
+          description: The namespace name is invalid.
         500:
           description: An error occured trying to create the namespace.
 definitions:
