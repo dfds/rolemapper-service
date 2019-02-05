@@ -18,7 +18,6 @@ namespace RolemapperService.WebApi.Controllers
         private readonly NamespaceRespoitory _namespaceRepository;
 
         public NamespaceController(
-            IKubernetesService kubernetesService,
             IAddNamespaceRequestValidator addNamespaceRequestValidator, 
             NamespaceRespoitory namespaceRepository)
         {
