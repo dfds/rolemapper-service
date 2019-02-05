@@ -12,6 +12,5 @@ namespace RolemapperService.WebApi.Repositories
         Task<string> GetAwsAuthConfigMapRoleMap();
         Task<string> ReplaceAwsAuthConfigMapRoleMap(string configMapRoleMap);
         Task<string> PatchAwsAuthConfigMapRoleMap(string configMapRoleMap);
-        Task CreateNamespace(string namespaceName);
     }
 }

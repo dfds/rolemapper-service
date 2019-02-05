@@ -71,19 +71,7 @@ namespace RolemapperService.WebApi.Repositories
             return await _client.ReadNamespacedConfigMapAsync(name: ConfigMapName, namespaceParameter: ConfigMapNamespace, exact: true, export: true);
         }
 
-        public async Task CreateNamespace(string namespaceName)
-        {
-            var ns = new V1Namespace
-            {
-                Metadata = new V1ObjectMeta
-                {
-                    Name = namespaceName
-                }
-            };
-            
-            var result = await _client.CreateNamespaceAsync(ns);
-        }
-
+    
         public async Task<string> CreateNamespaceFullAccessClusterRole(string namespaceName)
         {
             var clusterRole = new V1ClusterRole

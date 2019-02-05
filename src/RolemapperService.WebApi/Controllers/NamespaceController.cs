@@ -1,10 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using RolemapperService.WebApi.Models;
+using RolemapperService.WebApi.Repositories.Kubernetes;
 using RolemapperService.WebApi.Services;
 using RolemapperService.WebApi.Validators;
 using Serilog;
@@ -15,15 +14,16 @@ namespace RolemapperService.WebApi.Controllers
     [ApiController]
     public class NamespaceController : ControllerBase
     {
-        private readonly IKubernetesService _kubernetesService;
         private readonly IAddNamespaceRequestValidator _addNamespaceRequestValidator;
+        private readonly NamespaceRespoitory _namespaceRepository;
 
         public NamespaceController(
             IKubernetesService kubernetesService,
-            IAddNamespaceRequestValidator addNamespaceRequestValidator)
+            IAddNamespaceRequestValidator addNamespaceRequestValidator, 
+            NamespaceRespoitory namespaceRepository)
         {
-            _kubernetesService = kubernetesService;
             _addNamespaceRequestValidator = addNamespaceRequestValidator;
+            _namespaceRepository = namespaceRepository;
         }
 
         [HttpPost("")]
@@ -37,7 +37,7 @@ namespace RolemapperService.WebApi.Controllers
 
             try
             {
-                await _kubernetesService.CreateNamespace(addNamespaceRequest.NamespaceName);
+                await _namespaceRepository.CreateNamespace(addNamespaceRequest.NamespaceName);
                 return Ok();
             }
             catch (Exception ex)
