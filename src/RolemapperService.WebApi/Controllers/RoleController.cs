@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -51,24 +49,6 @@ namespace RolemapperService.WebApi.Controllers
             }
 
             return Ok(updatedMapRolesYaml);
-        }
-
-        [HttpGet("/api/configmap")]
-        public async Task<ActionResult<string>> GetConfigMap()
-        {
-            var configMapRoleMap = string.Empty;
-
-            try
-            {
-                configMapRoleMap = await _kubernetesService.GetAwsAuthConfigMap();
-            }
-            catch (Exception ex)
-            {
-                Log.Error($"An error occured trying to get the config map: {ex.Message}");
-                return StatusCode(StatusCodes.Status500InternalServerError, $"An error occured trying to get the config map: {ex.Message}");
-            }
-
-            return Ok(configMapRoleMap);
         }
     }
 }
