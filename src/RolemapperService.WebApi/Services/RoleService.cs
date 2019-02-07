@@ -8,9 +8,10 @@ namespace RolemapperService.WebApi.Services
         private readonly IConfigMapPersistanceService _configMapPersistanceService;
         private readonly IKubernetesRepository _kubernetesRepository;
         private readonly IConfigMapService _configMapService;
+
         public RoleService(
-            IConfigMapPersistanceService configMapPersistanceService, 
-            IKubernetesRepository kubernetesRepository, 
+            IConfigMapPersistanceService configMapPersistanceService,
+            IKubernetesRepository kubernetesRepository,
             IConfigMapService configMapService
         )
         {
@@ -30,19 +31,22 @@ namespace RolemapperService.WebApi.Services
             );
             await _configMapPersistanceService.StoreConfigMap(mapRolesYaml);
         }
-        
-        
+
+
         public async Task<string> ReplaceAwsAuthConfigMapRoleMap(string roleName, string roleArn)
         {
             var configMapRoleMap = await _kubernetesRepository.GetAwsAuthConfigMapRoleMap();
 
-            configMapRoleMap = _configMapService.AddReadOnlyRoleMapping(
-                configMapRoleMap, 
-                roleName, 
-                roleArn
+
+            var groups = new[] {"DFDS-ReadOnly", roleName};
+            configMapRoleMap = _configMapService.AddRoleMapping(
+                configMapRoleMap,
+                roleName,
+                roleArn,
+                groups
             );
-            
-            var newConfigMapRoleMap = 
+
+            var newConfigMapRoleMap =
                 await _kubernetesRepository.ReplaceAwsAuthConfigMapRoleMap(configMapRoleMap);
 
             return newConfigMapRoleMap;
