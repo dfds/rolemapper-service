@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using RolemapperService.WebApi.Repositories;
+using RolemapperService.WebApi.Repositories.Kubernetes;
 using RolemapperService.WebApi.Services;
 using RolemapperService.WebApi.Validators;
 
@@ -61,7 +62,12 @@ namespace RolemapperService.WebApi
             services.AddTransient<IKubernetesService, KubernetesService>();
             services.AddTransient<IKubernetesRepository, KubernetesRepository>();
             services.AddTransient<IAddRoleRequestValidator, AddRoleRequestValidator>();
-
+            services.AddTransient<IAddNamespaceRequestValidator, AddNamespaceRequestValidator>();
+            services.AddTransient<NamespaceRespoitory>();
+            services.AddTransient<RoleRepository>();
+            services.AddTransient<RoleBindingRepository>();
+            
+            
             services.AddTransient<IPersistanceRepository>(serviceProvider => new AwsS3PersistanceRepository(
                 transferUtility: serviceProvider.GetRequiredService<ITransferUtility>(),
                 bucketName: Configuration["AWS_S3_BUCKET_NAME_CONFIG_MAP"]
