@@ -5,22 +5,22 @@ namespace RolemapperService.WebApi.Services
 {
     public class KubernetesService : IKubernetesService
     {
-        private readonly IKubernetesRepository _kubernetesRepository;
+        private readonly IAwsAuthConfigMapRepository _awsAuthConfigMapRepository;
         private readonly IConfigMapService _configMapService;
 
         public KubernetesService(
-            IKubernetesRepository kubernetesRepository, 
+            IAwsAuthConfigMapRepository awsAuthConfigMapRepository, 
             IConfigMapService configMapService
         )
         {
-            _kubernetesRepository = kubernetesRepository;
+            _awsAuthConfigMapRepository = awsAuthConfigMapRepository;
             _configMapService = configMapService;
         }
 
 
         public async Task<string> GetAwsAuthConfigMap()
         {
-            return await _kubernetesRepository.GetAwsAuthConfigMap();
+            return await _awsAuthConfigMapRepository.GetConfigMap();
         }
 
         public async Task<string> PatchAwsAuthConfigMapRoleMap(
@@ -28,10 +28,10 @@ namespace RolemapperService.WebApi.Services
             string roleArn
         )
         {
-            var configMapRoleMap = await _kubernetesRepository.GetAwsAuthConfigMapRoleMap();
+            var configMapRoleMap = await _awsAuthConfigMapRepository.GetConfigMapRoleMap();
 
             configMapRoleMap = _configMapService.AddReadOnlyRoleMapping(configMapRoleMap, roleName, roleArn);
-            var patchedConfigMapRoleMap = await _kubernetesRepository.PatchAwsAuthConfigMapRoleMap(configMapRoleMap);
+            var patchedConfigMapRoleMap = await _awsAuthConfigMapRepository.PatchConfigMapRoleMap(configMapRoleMap);
 
             return patchedConfigMapRoleMap;
         }

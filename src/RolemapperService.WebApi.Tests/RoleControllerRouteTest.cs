@@ -19,7 +19,7 @@ namespace RolemapperService.WebApi.Tests
             using (var builder = new HttpClientBuilder())
             {
                 var client = builder
-                    .WithService<IKubernetesRepository>(new KubernetesRepositoryStub())
+                    .WithService<IAwsAuthConfigMapRepository>(new AwsAuthConfigMapRepositoryStub())
                     .WithService<IPersistanceRepository>(new PersistanceRepositoryStub())
                     .Build();
 
@@ -35,7 +35,7 @@ namespace RolemapperService.WebApi.Tests
             using (var builder = new HttpClientBuilder())
             {
                 var client = builder
-                    .WithService<IKubernetesRepository>(new KubernetesRepositoryStub())
+                    .WithService<IAwsAuthConfigMapRepository>(new AwsAuthConfigMapRepositoryStub())
                     .WithService<IPersistanceRepository>(new PersistanceRepositoryStub())
                     .Build();
 
