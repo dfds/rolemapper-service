@@ -36,20 +36,6 @@ namespace RolemapperService.WebApi.Services
             return patchedConfigMapRoleMap;
         }
 
-        public async Task<string> ReplaceAwsAuthConfigMapRoleMap(string roleName, string roleArn)
-        {
-            var configMapRoleMap = await _kubernetesRepository.GetAwsAuthConfigMapRoleMap();
-
-            configMapRoleMap = _configMapService.AddReadOnlyRoleMapping(
-                configMapRoleMap, 
-                roleName, 
-                roleArn
-            );
-            
-            var newConfigMapRoleMap = 
-                await _kubernetesRepository.ReplaceAwsAuthConfigMapRoleMap(configMapRoleMap);
-
-            return newConfigMapRoleMap;
-        }
+      
     }
 }

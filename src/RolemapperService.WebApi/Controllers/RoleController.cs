@@ -13,21 +13,19 @@ namespace RolemapperService.WebApi.Controllers
     [ApiController]
     public class RoleController : ControllerBase
     {
-        private readonly IKubernetesService _kubernetesService;
         private readonly IAddRoleRequestValidator _addRoleRequestValidator;
-        private readonly IConfigMapPersistanceService _configMapPersistanceService;
-
-        public RoleController(IKubernetesService kubernetesService, 
-                              IAddRoleRequestValidator addRoleRequestValidator,
-                              IConfigMapPersistanceService configMapPersistanceService)
+        private readonly IRoleService _roleService;
+        public RoleController(
+            IAddRoleRequestValidator addRoleRequestValidator, 
+            IRoleService roleService
+        )
         {
-            _kubernetesService = kubernetesService;
             _addRoleRequestValidator = addRoleRequestValidator;
-            _configMapPersistanceService = configMapPersistanceService;
+            _roleService = roleService;
         }
 
         [HttpPost("")]
-        public async Task<ActionResult<string>> AddRole([FromBody]AddRoleRequest addRoleRequest)
+        public async Task<ActionResult<string>> CreateRole([FromBody]AddRoleRequest addRoleRequest)
         {
             if (!_addRoleRequestValidator.TryValidateAddRoleRequest(addRoleRequest, out string validationError))
             {
@@ -39,11 +37,10 @@ namespace RolemapperService.WebApi.Controllers
 
             try
             {
-                updatedMapRolesYaml = await _kubernetesService.ReplaceAwsAuthConfigMapRoleMap(
-                    addRoleRequest.RoleName, 
+                await _roleService.CreateRole(
+                    addRoleRequest.RoleName,
                     addRoleRequest.RoleArn
                 );
-                await _configMapPersistanceService.StoreConfigMap(updatedMapRolesYaml);
             }
             catch (Exception ex)
             {
