@@ -66,6 +66,7 @@ namespace RolemapperService.WebApi
             services.AddTransient<NamespaceRespoitory>();
             services.AddTransient<RoleRepository>();
             services.AddTransient<RoleBindingRepository>();
+            services.AddTransient<IRoleService, RoleService>();
             
             
             services.AddTransient<IPersistanceRepository>(serviceProvider => new AwsS3PersistanceRepository(
