@@ -68,7 +68,12 @@ namespace RolemapperService.WebApi.Repositories
 
         private async Task<V1ConfigMap> GetConfigMap()
         {
-            return await _client.ReadNamespacedConfigMapAsync(name: ConfigMapName, namespaceParameter: ConfigMapNamespace, exact: true, export: true);
+            return await _client.ReadNamespacedConfigMapAsync(
+                name: ConfigMapName, 
+                namespaceParameter: ConfigMapNamespace, 
+                exact: true, 
+                export: true
+            );
         }
 
     

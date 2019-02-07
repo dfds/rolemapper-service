@@ -1,6 +1,5 @@
 
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -18,7 +17,12 @@ namespace RolemapperService.WebApi.Services
             return updatedMapRolesYaml;
         }
 
-        public string AddRoleMapping(string configMapYaml, string roleArn, string userName, IList<string> groups)
+        public string AddRoleMapping(
+            string configMapYaml, 
+            string roleArn, 
+            string userName, 
+            IList<string> groups
+        )
         {
             // If the role map already exist return existing map.
             if (configMapYaml.Contains(roleArn))
