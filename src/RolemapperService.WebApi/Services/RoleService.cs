@@ -35,12 +35,8 @@ namespace RolemapperService.WebApi.Services
 
         public async Task<string> ReplaceAwsAuthConfigMapRoleMap(string roleName, string roleArn)
         {
-            var configMapRoleMap = await _awsAuthConfigMapRepository.GetConfigMapRoleMap();
-
-
             var groups = new[] {"DFDS-ReadOnly", roleName};
-            configMapRoleMap = _configMapService.AddRoleMapping(
-                configMapRoleMap,
+            var configMapRoleMap = await _configMapService.AddRoleMapping(
                 roleName,
                 roleArn,
                 groups

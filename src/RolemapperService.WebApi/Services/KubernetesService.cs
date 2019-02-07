@@ -28,9 +28,7 @@ namespace RolemapperService.WebApi.Services
             string roleArn
         )
         {
-            var configMapRoleMap = await _awsAuthConfigMapRepository.GetConfigMapRoleMap();
-
-            configMapRoleMap = _configMapService.AddReadOnlyRoleMapping(configMapRoleMap, roleName, roleArn);
+            var configMapRoleMap = await _configMapService.AddReadOnlyRoleMapping(roleName, roleArn);
             var patchedConfigMapRoleMap = await _awsAuthConfigMapRepository.PatchConfigMapRoleMap(configMapRoleMap);
 
             return patchedConfigMapRoleMap;

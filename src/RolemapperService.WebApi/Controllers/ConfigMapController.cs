@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using RolemapperService.WebApi.Repositories;
 using RolemapperService.WebApi.Services;
 using Serilog;
 
@@ -11,11 +12,11 @@ namespace RolemapperService.WebApi.Controllers
     [ApiController]
     public class ConfigMapController : ControllerBase
     {
-        private readonly IKubernetesService _kubernetesService;
+        private readonly IAwsAuthConfigMapRepository _awsAuthConfigMapRepository;
 
-        public ConfigMapController(IKubernetesService kubernetesService)
+        public ConfigMapController(IAwsAuthConfigMapRepository awsAuthConfigMapRepository)
         {
-            _kubernetesService = kubernetesService;
+            _awsAuthConfigMapRepository = awsAuthConfigMapRepository;
         }
 
         [HttpGet("")]
@@ -25,7 +26,7 @@ namespace RolemapperService.WebApi.Controllers
 
             try
             {
-                configMapRoleMap = await _kubernetesService.GetAwsAuthConfigMap();
+                configMapRoleMap = await _awsAuthConfigMapRepository.GetConfigMap();
             }
             catch (Exception ex)
             {

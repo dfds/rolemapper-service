@@ -48,22 +48,22 @@ namespace RolemapperService.WebApi.Tests.TestDoubles
             throw new System.NotImplementedException();
         }
 
-        public Task<string> GetAwsAuthConfigMap()
+        public Task<string> GetConfigMap()
         {
             return Task.FromResult(_configMap);
         }
 
-        public Task<string> GetAwsAuthConfigMapRoleMap()
+        public Task<string> GetConfigMapRoleMap()
         {
             return Task.FromResult(_configMapRoleMap);
         }
 
-        public Task<string> PatchAwsAuthConfigMapRoleMap(string configMapRoleMap)
+        public Task<string> PatchConfigMapRoleMap(string configMapRoleMap)
         {
             return Task.FromResult(configMapRoleMap);
         }
 
-        public Task<string> ReplaceAwsAuthConfigMapRoleMap(string configMapRoleMap)
+        public Task<string> ReplaceConfigMapRoleMap(string configMapRoleMap)
         {
             return Task.FromResult(configMapRoleMap);
         }
