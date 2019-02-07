@@ -59,7 +59,6 @@ namespace RolemapperService.WebApi
             ));
 
             services.AddTransient<IConfigMapService, ConfigMapService>();
-            services.AddTransient<IKubernetesService, KubernetesService>();
             services.AddTransient<IAwsAuthConfigMapRepository, AwsAuthConfigMapRepository>();
             services.AddTransient<IAddRoleRequestValidator, AddRoleRequestValidator>();
             services.AddTransient<IAddNamespaceRequestValidator, AddNamespaceRequestValidator>();
