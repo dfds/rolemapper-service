@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using k8s;
 using k8s.Models;
@@ -13,13 +14,14 @@ namespace RolemapperService.WebApi.Repositories.Kubernetes
             _client = client;
         }
 
-        public async Task CreateNamespace(string namespaceName)
+        public async Task CreateNamespace(string namespaceName, string roleName)
         {
             var ns = new V1Namespace
             {
                 Metadata = new V1ObjectMeta
                 {
-                    Name = namespaceName
+                    Name = namespaceName,
+                    Annotations = new Dictionary<string, string>{{"iam.amazonaws.com/permitted",roleName}}
                 }
             };
             

@@ -63,3 +63,6 @@ definitions:
     properties:
       namespaceName:
         type: string
+      roleName:
+        type: string
+

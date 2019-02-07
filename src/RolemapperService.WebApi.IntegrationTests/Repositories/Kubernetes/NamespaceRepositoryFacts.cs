@@ -10,10 +10,11 @@ namespace RolemapperService.WebApi.IntegrationTests.Repositories.Kubernetes
     public class NamespaceRepositoryFacts
     {
         [FactRunsOnK8s]
-        public async Task Can_Create_A_Namespace()
+        public async Task A_Created_Namespace_Will_Have_the_KIAM_Annotation()
         {
             // Arrange
             var namespaceName = "namespace-from-test";
+            var awsRoleName = "awsRoleName";
             var config = KubernetesClientConfiguration.BuildConfigFromConfigFile();
             var client = new k8s.Kubernetes(config);
 
@@ -22,14 +23,17 @@ namespace RolemapperService.WebApi.IntegrationTests.Repositories.Kubernetes
             try
             {
                 // act
-                await sut.CreateNamespace(namespaceName);
+                await sut.CreateNamespace(namespaceName, awsRoleName);
 
-                
+
                 // Assert
                 var namespaces = await client.ListNamespaceAsync();
-                var namespacesNames = namespaces.Items.Select(n => n.Metadata.Name);
-                
-                Assert.Contains(namespaceName, namespacesNames);
+                var @namespace = namespaces.Items.Single(n => n.Metadata.Name == namespaceName);
+
+
+                var annotationValue = @namespace.Metadata.Annotations["iam.amazonaws.com/permitted"];
+
+                Assert.Equal(awsRoleName, annotationValue);
             }
             finally
             {

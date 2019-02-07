@@ -36,7 +36,11 @@ namespace RolemapperService.WebApi.Controllers
 
             try
             {
-                await _namespaceRepository.CreateNamespace(addNamespaceRequest.NamespaceName);
+                await _namespaceRepository.CreateNamespace(
+                    addNamespaceRequest.NamespaceName,
+                    addNamespaceRequest.RoleName
+                );
+                
                 return Ok();
             }
             catch (Exception ex)
