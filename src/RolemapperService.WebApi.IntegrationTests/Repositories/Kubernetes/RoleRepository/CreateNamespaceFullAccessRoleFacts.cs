@@ -27,7 +27,7 @@ namespace RolemapperService.WebApi.IntegrationTests.Repositories.Kubernetes.Role
             {
                 // Act
                 await namespaceRepository.CreateNamespace(subjectNameSpace, awsRoleName);
-                var roleName = await sut.CreateNamespaceFullAccessRole(subjectNameSpace);
+                await sut.CreateNamespaceFullAccessRole(subjectNameSpace);
 
                 // Assert
                 client.ListNamespacedRole(subjectNameSpace).Items.Single();
