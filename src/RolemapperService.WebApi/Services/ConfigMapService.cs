@@ -14,6 +14,15 @@ namespace RolemapperService.WebApi.Services
         private readonly IAwsAuthConfigMapRepository _awsAuthConfigMapRepository;
         private readonly IConfigMapPersistanceService _configMapPersistenceService;
 
+        public ConfigMapService(
+            IAwsAuthConfigMapRepository awsAuthConfigMapRepository, 
+            IConfigMapPersistanceService configMapPersistenceService
+        )
+        {
+            _awsAuthConfigMapRepository = awsAuthConfigMapRepository;
+            _configMapPersistenceService = configMapPersistenceService;
+        }
+
 
         public async Task AddRole(
             string roleName,
