@@ -14,18 +14,18 @@ namespace RolemapperService.WebApi.Controllers
     public class RoleController : ControllerBase
     {
         private readonly IAddRoleRequestValidator _addRoleRequestValidator;
-        private readonly IRoleService _roleService;
+        private readonly IConfigMapService _configMapService;
         public RoleController(
             IAddRoleRequestValidator addRoleRequestValidator, 
-            IRoleService roleService
+            IConfigMapService configMapService
         )
         {
             _addRoleRequestValidator = addRoleRequestValidator;
-            _roleService = roleService;
+            _configMapService = configMapService;
         }
 
         [HttpPost("")]
-        public async Task<ActionResult<string>> CreateRole([FromBody]AddRoleRequest addRoleRequest)
+        public async Task<ActionResult<string>> AddRole([FromBody]AddRoleRequest addRoleRequest)
         {
             if (!_addRoleRequestValidator.TryValidateAddRoleRequest(addRoleRequest, out string validationError))
             {
@@ -37,7 +37,7 @@ namespace RolemapperService.WebApi.Controllers
 
             try
             {
-                await _roleService.AddRole(
+                await _configMapService.AddRole(
                     addRoleRequest.RoleName,
                     addRoleRequest.RoleArn
                 );

@@ -12,46 +12,27 @@ namespace RolemapperService.WebApi.Services
     public class ConfigMapService : IConfigMapService
     {
         private readonly IAwsAuthConfigMapRepository _awsAuthConfigMapRepository;
+        private readonly IConfigMapPersistanceService _configMapPersistenceService;
 
-        public async Task<string> AddReadOnlyRoleMapping(string roleName, string roleArn)
-        {
-            var groups = GetReadonlyGroup();
-            var updatedMapRolesYaml = AddRoleMapping(roleArn, roleName, groups);
 
-            return await updatedMapRolesYaml;
-        }
-
-        public async Task<string> AddRoleMapping(
-            string roleArn, 
-            string userName, 
-            IList<string> groups
+        public async Task AddRole(
+            string roleName,
+            string roleArn
         )
         {
-            
-        var configMapYaml = await _awsAuthConfigMapRepository.GetConfigMap();
-            // If the role map already exist return existing map.
-            if (configMapYaml.Contains(roleArn))
-            {
-                return configMapYaml;
-            }
+            var configMapYaml = await _awsAuthConfigMapRepository.GetConfigMap();
 
+            var groups = new[] {"DFDS-ReadOnly", roleName};
             var modifiedYaml = ConfigMapEditor.AddRoleMapping(
                 configMapYaml,
                 roleArn,
-                userName,
+                roleName,
                 groups
             );
-
-            return modifiedYaml;
-        }
-
-        private IList<string> GetReadonlyGroup()
-        {
-            // TODO: Get from configuration?
-            return new List<string>
-            {
-                "DFDS-ReadOnly"
-            };
+            
+            
+            await _awsAuthConfigMapRepository.ReplaceConfigMapRoleMap(modifiedYaml);
+            await _configMapPersistenceService.StoreConfigMap(modifiedYaml);
         }
     }
 }

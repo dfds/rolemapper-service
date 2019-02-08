@@ -4,6 +4,8 @@ using System.Net;
 using System.Threading.Tasks;
 using RolemapperService.WebApi.Tests.TestDoubles;
 using RolemapperService.WebApi.Repositories;
+using RolemapperService.WebApi.Services;
+using RolemapperService.WebApi.Validators;
 
 namespace RolemapperService.WebApi.Tests
 {
@@ -31,8 +33,8 @@ namespace RolemapperService.WebApi.Tests
             using (var builder = new HttpClientBuilder())
             {
                 var client = builder
-                    .WithService<IAwsAuthConfigMapRepository>(new AwsAuthConfigMapRepositoryStub())
-                    .WithService<IPersistanceRepository>(new PersistanceRepositoryStub())
+                    .WithService<IAddRoleRequestValidator>(new AddRoleRequestValidator())
+                    .WithService<IConfigMapService>(new ConfigMapServiceStub())
                     .Build();
 
                 var stubInput = @"{

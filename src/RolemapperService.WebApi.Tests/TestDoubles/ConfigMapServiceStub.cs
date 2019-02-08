@@ -3,7 +3,7 @@ using RolemapperService.WebApi.Services;
 
 namespace RolemapperService.WebApi.Tests.TestDoubles
 {
-    public class RoleServiceStub :IRoleService
+    public class ConfigMapServiceStub : IConfigMapService
     {
         public Task AddRole(string roleName, string roleArn)
         {

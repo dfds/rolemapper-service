@@ -7,28 +7,28 @@ namespace RolemapperService.WebApi
 {
     public class TeamCreatedEventHandler : IEventHandler<TeamCreatedEvent>
     {
-        private readonly IRoleService _roleService;
+        private readonly IConfigMapService _configMapService;
         private readonly INamespaceRespoitory _namespaceRepository;
         private readonly IRoleRepository _roleRepository;
         private readonly IRoleBindingRepository _roleBindingRepository;
 
         public TeamCreatedEventHandler(
-            IRoleService roleService,
+            IConfigMapService configMapService,
             INamespaceRespoitory namespaceRepository,
             IRoleRepository roleRepository,
             IRoleBindingRepository roleBindingRepository
         )
         {
-            _roleService = roleService;
             _namespaceRepository = namespaceRepository;
             _roleRepository = roleRepository;
             _roleBindingRepository = roleBindingRepository;
+            _configMapService = configMapService;
         }
 
         public async Task HandleAsync(TeamCreatedEvent teamCreatedEvent)
         {
             var configmapRoleName = teamCreatedEvent.TeamName;
-            await _roleService.AddRole(
+            await _configMapService.AddRole(
                 roleName: configmapRoleName,
                 roleArn: teamCreatedEvent.RoleArn
             );
