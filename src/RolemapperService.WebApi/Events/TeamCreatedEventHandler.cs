@@ -37,7 +37,7 @@ namespace RolemapperService.WebApi
 
             await _namespaceRepository.CreateNamespace(
                 namespaceName: namespaceName,
-                roleName: teamCreatedEvent.RoleName
+                roleName: configmapRoleName
             );
 
             var namespaceRoleName = await _roleRepository
