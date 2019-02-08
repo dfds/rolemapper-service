@@ -6,7 +6,7 @@ using Xunit;
 
 namespace RolemapperService.WebApi.Tests.Events
 {
-    public class TeamCreatedEventHandlerFacts
+    public class CapabilityRegisteredEventHandlerFacts
     {
         [Fact]
         public async Task HandleAsync_Will_Use_Event_Payload_Correctly()
@@ -17,7 +17,7 @@ namespace RolemapperService.WebApi.Tests.Events
             var namespaceRepositorySpy = new NamespaceRepositorySpy();
             var roleRepositorySpy = new RoleRepositorySpy();
             var roleBindingRepositorySpy = new RoleBindingRepositorySpy();
-            var sut = new TeamCreatedEventHandler(
+            var sut = new CapabilityRegisteredEventHandler(
                 configMapServiceSpy,
                 namespaceRepositorySpy,
                 roleRepositorySpy,
@@ -26,7 +26,7 @@ namespace RolemapperService.WebApi.Tests.Events
 
             var teamName = "teamname";
             var roleArn = "rolearn";
-            var @event = new TeamCreatedEvent(teamName, roleArn);
+            var @event = new CapabilityRegisteredEvent(teamName, roleArn);
 
 
             // Act

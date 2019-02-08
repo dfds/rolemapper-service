@@ -5,14 +5,14 @@ using RolemapperService.WebApi.Services;
 
 namespace RolemapperService.WebApi
 {
-    public class TeamCreatedEventHandler : IEventHandler<TeamCreatedEvent>
+    public class CapabilityRegisteredEventHandler : IEventHandler<CapabilityRegisteredEvent>
     {
         private readonly IConfigMapService _configMapService;
         private readonly INamespaceRespoitory _namespaceRepository;
         private readonly IRoleRepository _roleRepository;
         private readonly IRoleBindingRepository _roleBindingRepository;
 
-        public TeamCreatedEventHandler(
+        public CapabilityRegisteredEventHandler(
             IConfigMapService configMapService,
             INamespaceRespoitory namespaceRepository,
             IRoleRepository roleRepository,
@@ -25,15 +25,15 @@ namespace RolemapperService.WebApi
             _configMapService = configMapService;
         }
 
-        public async Task HandleAsync(TeamCreatedEvent teamCreatedEvent)
+        public async Task HandleAsync(CapabilityRegisteredEvent capabilityRegisteredEvent)
         {
-            var configmapRoleName = teamCreatedEvent.TeamName;
+            var configmapRoleName = capabilityRegisteredEvent.CapabilityName;
             await _configMapService.AddRole(
                 roleName: configmapRoleName,
-                roleArn: teamCreatedEvent.RoleArn
+                roleArn: capabilityRegisteredEvent.RoleArn
             );
 
-            var namespaceName = teamCreatedEvent.TeamName;
+            var namespaceName = capabilityRegisteredEvent.CapabilityName;
 
             await _namespaceRepository.CreateNamespace(
                 namespaceName: namespaceName,
@@ -46,7 +46,7 @@ namespace RolemapperService.WebApi
             await _roleBindingRepository.BindNamespaceRoleToGroup(
                 namespaceName: namespaceName,
                 role: namespaceRoleName,
-                group: teamCreatedEvent.TeamName
+                group: capabilityRegisteredEvent.CapabilityName
             );
         }
     }

@@ -7,9 +7,9 @@ namespace RolemapperService.WebApi.Controllers
     [Route("api/events")]
     public class EventsController : ControllerBase
     {
-        private readonly  IEventHandler<TeamCreatedEvent> _teamCreatedEventHandler;
+        private readonly  IEventHandler<CapabilityRegisteredEvent> _teamCreatedEventHandler;
 
-        public EventsController( IEventHandler<TeamCreatedEvent> teamCreatedEventHandler)
+        public EventsController( IEventHandler<CapabilityRegisteredEvent> teamCreatedEventHandler)
         {
             _teamCreatedEventHandler = teamCreatedEventHandler;
         }
@@ -17,7 +17,7 @@ namespace RolemapperService.WebApi.Controllers
         [HttpPost("")]
         public async Task AddEvent([FromBody] Newtonsoft.Json.Linq.JObject jObject)
         {
-            var teamEvent = jObject.ToObject<TeamCreatedEvent>();
+            var teamEvent = jObject.ToObject<CapabilityRegisteredEvent>();
 
             await _teamCreatedEventHandler.HandleAsync(teamEvent);
         }

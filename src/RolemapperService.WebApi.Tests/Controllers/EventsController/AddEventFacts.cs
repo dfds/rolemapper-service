@@ -16,7 +16,7 @@ namespace RolemapperService.WebApi.Tests.Controllers.EventsController
             {
                 var teamCreatedEventHandlerStub = new TeamCreatedEventHandlerStub();
                 var client = builder
-                    .WithService<IEventHandler<TeamCreatedEvent>>(teamCreatedEventHandlerStub)
+                    .WithService<IEventHandler<CapabilityRegisteredEvent>>(teamCreatedEventHandlerStub)
                     .Build();
 
                 var input = @"{
