@@ -6,8 +6,10 @@ using k8s;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using RolemapperService.WebApi.Models.ExternalEvents;
 using RolemapperService.WebApi.Repositories;
 using RolemapperService.WebApi.Repositories.Kubernetes;
 using RolemapperService.WebApi.Services;
@@ -33,14 +35,14 @@ namespace RolemapperService.WebApi
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
             services.AddTransient<IKubernetes>(serviceProvider =>
-                        {
-                            var config =
-                            _hostingEnvironment.IsDevelopment()
-                                ? KubernetesClientConfiguration.BuildConfigFromConfigFile()
-                                : KubernetesClientConfiguration.InClusterConfig();
+            {
+                var config =
+                    _hostingEnvironment.IsDevelopment()
+                        ? KubernetesClientConfiguration.BuildConfigFromConfigFile()
+                        : KubernetesClientConfiguration.InClusterConfig();
 
-                            return new Kubernetes(config);
-                        });
+                return new Kubernetes(config);
+            });
 
             services.AddTransient<AWSCredentials>(serviceProvider => new BasicAWSCredentials(
                 accessKey: Configuration["S3_AWS_ACCESS_KEY_ID"],
@@ -62,11 +64,11 @@ namespace RolemapperService.WebApi
             services.AddTransient<IAwsAuthConfigMapRepository, AwsAuthConfigMapRepository>();
             services.AddTransient<IAddRoleRequestValidator, AddRoleRequestValidator>();
             services.AddTransient<IAddNamespaceRequestValidator, AddNamespaceRequestValidator>();
-            services.AddTransient<NamespaceRespoitory>();
-            services.AddTransient<RoleRepository>();
-            services.AddTransient<RoleBindingRepository>();
-            
-            
+            services.AddTransient<INamespaceRespoitory, NamespaceRespoitory>();
+            services.AddTransient<IRoleRepository, RoleRepository>();
+            services.AddTransient<IRoleBindingRepository, RoleBindingRepository>();
+
+
             services.AddTransient<IPersistanceRepository>(serviceProvider => new AwsS3PersistanceRepository(
                 transferUtility: serviceProvider.GetRequiredService<ITransferUtility>(),
                 bucketName: Configuration["AWS_S3_BUCKET_NAME_CONFIG_MAP"]
@@ -76,6 +78,10 @@ namespace RolemapperService.WebApi
                 persistanceRepository: serviceProvider.GetRequiredService<IPersistanceRepository>(),
                 configMapFileName: Configuration["CONFIG_MAP_FILE_NAME"]
             ));
+
+
+            // Event handlers
+            services.AddTransient<IEventHandler<CapabilityRegisteredEvent>, CapabilityRegisteredEventHandler>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
