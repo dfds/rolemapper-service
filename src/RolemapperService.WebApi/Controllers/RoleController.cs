@@ -37,7 +37,7 @@ namespace RolemapperService.WebApi.Controllers
 
             try
             {
-                await _roleService.CreateRole(
+                await _roleService.AddRole(
                     addRoleRequest.RoleName,
                     addRoleRequest.RoleArn
                 );

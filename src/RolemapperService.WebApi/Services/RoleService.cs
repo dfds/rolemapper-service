@@ -20,7 +20,7 @@ namespace RolemapperService.WebApi.Services
             _configMapService = configMapService;
         }
 
-        public async Task CreateRole(
+        public async Task AddRole(
             string roleName,
             string roleArn
         )

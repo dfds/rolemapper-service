@@ -5,7 +5,7 @@ using k8s.Models;
 
 namespace RolemapperService.WebApi.Repositories.Kubernetes
 {
-    public class RoleBindingRepository
+    public class RoleBindingRepository : IRoleBindingRepository
     {
         private readonly IKubernetes _client;
 

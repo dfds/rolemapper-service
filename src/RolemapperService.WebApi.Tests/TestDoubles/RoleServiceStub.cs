@@ -5,7 +5,7 @@ namespace RolemapperService.WebApi.Tests.TestDoubles
 {
     public class RoleServiceStub :IRoleService
     {
-        public Task CreateRole(string roleName, string roleArn)
+        public Task AddRole(string roleName, string roleArn)
         {
             return Task.CompletedTask;
         }

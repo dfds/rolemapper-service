@@ -1,14 +1,9 @@
-using System;
-using System.Collections.Generic;
 using Xunit;
-using RolemapperService.WebApi.Services;
-using System.Linq;
 using RolemapperService.WebApi.Tests.Builders;
 using System.Net;
 using System.Threading.Tasks;
 using RolemapperService.WebApi.Tests.TestDoubles;
 using RolemapperService.WebApi.Repositories;
-using RolemapperService.WebApi.Validators;
 
 namespace RolemapperService.WebApi.Tests
 {
@@ -36,8 +31,8 @@ namespace RolemapperService.WebApi.Tests
             using (var builder = new HttpClientBuilder())
             {
                 var client = builder
-                    .WithService<IAddRoleRequestValidator>(new AddRoleRequestValidatorStub())
-                    .WithService<IRoleService>(new RoleServiceStub())
+                    .WithService<IAwsAuthConfigMapRepository>(new AwsAuthConfigMapRepositoryStub())
+                    .WithService<IPersistanceRepository>(new PersistanceRepositoryStub())
                     .Build();
 
                 var stubInput = @"{

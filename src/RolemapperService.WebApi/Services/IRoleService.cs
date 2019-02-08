@@ -4,7 +4,7 @@ namespace RolemapperService.WebApi.Services
 {
     public interface IRoleService
     {
-        Task CreateRole(
+        Task AddRole(
             string roleName,
             string roleArn
         );
