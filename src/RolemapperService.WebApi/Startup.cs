@@ -34,31 +34,44 @@ namespace RolemapperService.WebApi
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
-            services.AddTransient<IKubernetes>(serviceProvider =>
+            if (_hostingEnvironment.IsDevelopment())
             {
-                var config =
-                    _hostingEnvironment.IsDevelopment()
-                        ? KubernetesClientConfiguration.BuildConfigFromConfigFile()
-                        : KubernetesClientConfiguration.InClusterConfig();
+                services.AddTransient<IKubernetes>(serviceProvider => 
+                    new Kubernetes(KubernetesClientConfiguration.BuildConfigFromConfigFile()));
 
-                return new Kubernetes(config);
-            });
+                services.AddTransient<IConfigMapPersistanceService, ConfigMapPersistanceServiceStub>();
+            }
+            else
+            {
+                services.AddTransient<IKubernetes>(serviceProvider => new Kubernetes(KubernetesClientConfiguration.InClusterConfig()));
+                services.AddTransient<AWSCredentials>(serviceProvider => new BasicAWSCredentials(
+                    accessKey: Configuration["S3_AWS_ACCESS_KEY_ID"],
+                    secretKey: Configuration["S3_AWS_SECRET_ACCESS_KEY"]
+                ));
 
-            services.AddTransient<AWSCredentials>(serviceProvider => new BasicAWSCredentials(
-                accessKey: Configuration["S3_AWS_ACCESS_KEY_ID"],
-                secretKey: Configuration["S3_AWS_SECRET_ACCESS_KEY"]
-            ));
+                services.AddTransient(serviceProvider =>
+                    RegionEndpoint.GetBySystemName(Configuration["S3_AWS_REGION"]));
 
-            services.AddTransient(serviceProvider => RegionEndpoint.GetBySystemName(Configuration["S3_AWS_REGION"]));
+                services.AddTransient<IAmazonS3>(serviceProvider => new AmazonS3Client(
+                    credentials: serviceProvider.GetRequiredService<AWSCredentials>(),
+                    region: serviceProvider.GetRequiredService<RegionEndpoint>()
+                ));
 
-            services.AddTransient<IAmazonS3>(serviceProvider => new AmazonS3Client(
-                credentials: serviceProvider.GetRequiredService<AWSCredentials>(),
-                region: serviceProvider.GetRequiredService<RegionEndpoint>()
-            ));
+                services.AddTransient<ITransferUtility>(serviceProvider => new TransferUtility(
+                    s3Client: serviceProvider.GetRequiredService<IAmazonS3>()
+                ));
 
-            services.AddTransient<ITransferUtility>(serviceProvider => new TransferUtility(
-                s3Client: serviceProvider.GetRequiredService<IAmazonS3>()
-            ));
+                services.AddTransient<IPersistanceRepository>(serviceProvider => new AwsS3PersistanceRepository(
+                    transferUtility: serviceProvider.GetRequiredService<ITransferUtility>(),
+                    bucketName: Configuration["AWS_S3_BUCKET_NAME_CONFIG_MAP"]
+                ));
+
+                services.AddTransient<IConfigMapPersistanceService>(serviceProvider => new ConfigMapPersistenceService(
+                    persistenceRepository: serviceProvider.GetRequiredService<IPersistanceRepository>(),
+                    configMapFileName: Configuration["CONFIG_MAP_FILE_NAME"]
+                ));
+            }
+
 
             services.AddTransient<IConfigMapService, ConfigMapService>();
             services.AddTransient<IAwsAuthConfigMapRepository, AwsAuthConfigMapRepository>();
@@ -67,18 +80,6 @@ namespace RolemapperService.WebApi
             services.AddTransient<INamespaceRespoitory, NamespaceRespoitory>();
             services.AddTransient<IRoleRepository, RoleRepository>();
             services.AddTransient<IRoleBindingRepository, RoleBindingRepository>();
-
-
-            services.AddTransient<IPersistanceRepository>(serviceProvider => new AwsS3PersistanceRepository(
-                transferUtility: serviceProvider.GetRequiredService<ITransferUtility>(),
-                bucketName: Configuration["AWS_S3_BUCKET_NAME_CONFIG_MAP"]
-            ));
-
-            services.AddTransient<IConfigMapPersistanceService>(serviceProvider => new ConfigMapPersistanceService(
-                persistanceRepository: serviceProvider.GetRequiredService<IPersistanceRepository>(),
-                configMapFileName: Configuration["CONFIG_MAP_FILE_NAME"]
-            ));
-
 
             // Event handlers
             services.AddTransient<IEventHandler<CapabilityRegisteredEvent>, CapabilityRegisteredEventHandler>();

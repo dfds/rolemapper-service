@@ -1,8 +1,9 @@
 using System.Collections.Generic;
+using System.Net;
 using System.Threading.Tasks;
 using k8s;
 using k8s.Models;
-using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.Rest;
 using RolemapperService.WebApi.Extensions;
 
 namespace RolemapperService.WebApi.Repositories
@@ -21,55 +22,66 @@ namespace RolemapperService.WebApi.Repositories
         public async Task<string> GetConfigMap()
         {
             var awsAuthConfigMap = await ReadConfigMap();
+
+            awsAuthConfigMap = awsAuthConfigMap ?? new V1ConfigMap();
             var awsAuthConfigMapYaml = awsAuthConfigMap.SerializeToYaml();
 
             return awsAuthConfigMapYaml;
         }
 
-        public async Task<string> GetConfigMapRoleMap()
+        public async Task WriteConfigMapRoleMap(string configMapRoleMap)
         {
             var awsAuthConfigMap = await ReadConfigMap();
-            var awsAuthConfigMapMapRoles = awsAuthConfigMap.Data["mapRoles"];
-
-            return awsAuthConfigMapMapRoles;
-        }
-
-        public async Task<string> ReplaceConfigMapRoleMap(string configMapRoleMap)
-        {
-            var awsAuthConfigMap = await ReadConfigMap();
+            if (awsAuthConfigMap == null)
+            {
+                awsAuthConfigMap = new V1ConfigMap
+                {
+                    Data = new Dictionary<string, string> {{"mapRoles", configMapRoleMap}},
+                    Metadata = new V1ObjectMeta
+                    {
+                        Name = ConfigMapName,
+                        NamespaceProperty = "kube-system"
+                    }
+                };
+                
+                
+                await _client.CreateNamespacedConfigMapAsync(
+                    body: awsAuthConfigMap,
+                    namespaceParameter: ConfigMapNamespace
+                );
+                
+                return;
+            }
 
             awsAuthConfigMap.Data = new Dictionary<string, string>
             {
-                { "mapRoles", configMapRoleMap }
+                {"mapRoles", configMapRoleMap}
             };
 
-            var awsAuthConfigMapReplaced = await _client.ReplaceNamespacedConfigMapAsync(body: awsAuthConfigMap, name: ConfigMapName, namespaceParameter: ConfigMapNamespace);
-            var awsAuthConfigMapYaml = awsAuthConfigMapReplaced.SerializeToYaml();
-
-            return awsAuthConfigMapYaml;
+            await _client.ReplaceNamespacedConfigMapAsync(
+                body: awsAuthConfigMap,
+                name: ConfigMapName, 
+                namespaceParameter: ConfigMapNamespace
+            );
         }
 
-        public async Task<string> PatchConfigMapRoleMap(string configMapRoleMap)
-        {
-            var patch = new JsonPatchDocument<V1ConfigMap>();
-            patch.Replace(c => c.Data["mapRoles"], configMapRoleMap);
-
-            var configMapPatch = new V1Patch(patch);
-
-            var awsAuthConfigMap = await _client.PatchNamespacedConfigMapAsync(body: configMapPatch, name: ConfigMapName, namespaceParameter: ConfigMapNamespace);
-            var awsAuthConfigMapYaml = awsAuthConfigMap.SerializeToYaml();
-
-            return awsAuthConfigMapYaml;
-        }
 
         private async Task<V1ConfigMap> ReadConfigMap()
         {
-            return await _client.ReadNamespacedConfigMapAsync(
-                name: ConfigMapName, 
-                namespaceParameter: ConfigMapNamespace, 
-                exact: true, 
-                export: true
-            );
+            try
+            {
+                return await _client.ReadNamespacedConfigMapAsync(
+                    name: ConfigMapName,
+                    namespaceParameter: ConfigMapNamespace,
+                    exact: true,
+                    export: true
+                );
+            }
+            catch (HttpOperationException httpOperationException) when (httpOperationException.Response.StatusCode ==
+                                                                        HttpStatusCode.NotFound)
+            {
+                return null;
+            }
         }
     }
 }

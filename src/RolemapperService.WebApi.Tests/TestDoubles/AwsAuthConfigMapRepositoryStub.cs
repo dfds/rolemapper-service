@@ -53,6 +53,11 @@ namespace RolemapperService.WebApi.Tests.TestDoubles
             return Task.FromResult(_configMap);
         }
 
+        public Task WriteConfigMapRoleMap(string configMapRoleMap)
+        {
+            return Task.CompletedTask;
+        }
+
         public Task<string> GetConfigMapRoleMap()
         {
             return Task.FromResult(_configMapRoleMap);

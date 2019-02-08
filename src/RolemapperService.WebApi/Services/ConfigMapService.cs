@@ -40,7 +40,7 @@ namespace RolemapperService.WebApi.Services
             );
             
             
-            await _awsAuthConfigMapRepository.ReplaceConfigMapRoleMap(modifiedYaml);
+            await _awsAuthConfigMapRepository.WriteConfigMapRoleMap(modifiedYaml);
             await _configMapPersistenceService.StoreConfigMap(modifiedYaml);
         }
     }
