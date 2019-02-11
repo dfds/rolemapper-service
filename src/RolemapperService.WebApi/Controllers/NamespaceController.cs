@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using RolemapperService.WebApi.Models;
 using RolemapperService.WebApi.Repositories.Kubernetes;
-using RolemapperService.WebApi.Services;
 using RolemapperService.WebApi.Validators;
 using Serilog;
 
@@ -15,21 +14,21 @@ namespace RolemapperService.WebApi.Controllers
     public class NamespaceController : ControllerBase
     {
         private readonly IAddNamespaceRequestValidator _addNamespaceRequestValidator;
-        private readonly NamespaceRespoitory _namespaceRepository;
-        private readonly RoleRepository _roleRepository;
-        private readonly RoleBindingRepository _roleBindingRepository;
+        private readonly INamespaceRespoitory _namespaceRepository;
+        private readonly IRoleRepository _roleRepository;
 
         public NamespaceController(
             IAddNamespaceRequestValidator addNamespaceRequestValidator,
-            NamespaceRespoitory namespaceRepository,
-            RoleRepository roleRepository, RoleBindingRepository roleBindingRepository)
+            INamespaceRespoitory namespaceRepository,
+            IRoleRepository roleRepository 
+        )
         {
+            
             _addNamespaceRequestValidator = addNamespaceRequestValidator;
             _namespaceRepository = namespaceRepository;
             _roleRepository = roleRepository;
-            _roleBindingRepository = roleBindingRepository;
         }
-
+        
         [HttpPost("")]
         public async Task<ActionResult> AddNamespace([FromBody] AddNamespaceRequest addNamespaceRequest)
         {
@@ -47,14 +46,8 @@ namespace RolemapperService.WebApi.Controllers
                     addNamespaceRequest.RoleName
                 );
 
-                var roleName = await _roleRepository
+               await _roleRepository
                     .CreateNamespaceFullAccessRole(addNamespaceRequest.NamespaceName);
-
-                await _roleBindingRepository.BindNamespaceRoleToGroup(
-                    addNamespaceRequest.NamespaceName,
-                    roleName,
-                    "DFDS-ReadOnly"
-                );
 
                 return Ok();
             }
