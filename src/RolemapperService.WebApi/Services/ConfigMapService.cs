@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using RolemapperService.WebApi.Extensions;
 using RolemapperService.WebApi.Repositories;
 using YamlDotNet.RepresentationModel;
 
@@ -29,19 +30,22 @@ namespace RolemapperService.WebApi.Services
             string roleArn
         )
         {
-            var configMapYaml = await _awsAuthConfigMapRepository.GetConfigMap();
+            var configMap = await _awsAuthConfigMapRepository.GetConfigMap();
 
+            configMap.Data = configMap.Data ?? new Dictionary<string, string> {{"mapRoles", ""}};
             var groups = new[] {"DFDS-ReadOnly", roleName};
             var modifiedYaml = ConfigMapEditor.AddRoleMapping(
-                configMapYaml,
+                configMap.Data["mapRoles"],
                 roleArn,
                 roleName,
                 groups
             );
+            configMap.Data["mapRoles"] = modifiedYaml;
             
+            await _awsAuthConfigMapRepository.WriteConfigMap(configMap);
             
-            await _awsAuthConfigMapRepository.WriteConfigMapRoleMap(modifiedYaml);
-            await _configMapPersistenceService.StoreConfigMap(modifiedYaml);
+            var awsAuthConfigMapYaml = configMap.SerializeToYaml();
+            await _configMapPersistenceService.StoreConfigMap(awsAuthConfigMapYaml);
         }
     }
 }

@@ -19,47 +19,37 @@ namespace RolemapperService.WebApi.Repositories
             _client = client;
         }
 
-        public async Task<string> GetConfigMap()
+         public async Task<V1ConfigMap> GetConfigMap()
         {
             var awsAuthConfigMap = await ReadConfigMap();
 
-            awsAuthConfigMap = awsAuthConfigMap ?? new V1ConfigMap();
-            var awsAuthConfigMapYaml = awsAuthConfigMap.SerializeToYaml();
-
-            return awsAuthConfigMapYaml;
+            awsAuthConfigMap = awsAuthConfigMap ?? new V1ConfigMap
+            {
+                Metadata = new V1ObjectMeta
+                {
+                    Name = ConfigMapName,
+                    NamespaceProperty = "kube-system"
+                }
+            };
+            
+            return awsAuthConfigMap;
         }
 
-        public async Task WriteConfigMapRoleMap(string configMapRoleMap)
+        public async Task WriteConfigMap(V1ConfigMap configMapRoleMap)
         {
             var awsAuthConfigMap = await ReadConfigMap();
             if (awsAuthConfigMap == null)
             {
-                awsAuthConfigMap = new V1ConfigMap
-                {
-                    Data = new Dictionary<string, string> {{"mapRoles", configMapRoleMap}},
-                    Metadata = new V1ObjectMeta
-                    {
-                        Name = ConfigMapName,
-                        NamespaceProperty = "kube-system"
-                    }
-                };
-                
-                
                 await _client.CreateNamespacedConfigMapAsync(
-                    body: awsAuthConfigMap,
+                    body: configMapRoleMap,
                     namespaceParameter: ConfigMapNamespace
                 );
-                
+
                 return;
             }
-
-            awsAuthConfigMap.Data = new Dictionary<string, string>
-            {
-                {"mapRoles", configMapRoleMap}
-            };
-
+            
             await _client.ReplaceNamespacedConfigMapAsync(
-                body: awsAuthConfigMap,
+                body: configMapRoleMap,
                 name: ConfigMapName, 
                 namespaceParameter: ConfigMapNamespace
             );

@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using RolemapperService.WebApi.Extensions;
 using RolemapperService.WebApi.Repositories;
 using RolemapperService.WebApi.Services;
 using Serilog;
@@ -22,11 +23,10 @@ namespace RolemapperService.WebApi.Controllers
         [HttpGet("")]
         public async Task<ActionResult<string>> GetConfigMap()
         {
-            var configMapRoleMap = string.Empty;
-
             try
             {
-                configMapRoleMap = await _awsAuthConfigMapRepository.GetConfigMap();
+                var configMapRoleMap = await _awsAuthConfigMapRepository.GetConfigMap();
+                return Ok(configMapRoleMap.SerializeToYaml());
             }
             catch (Exception ex)
             {
@@ -34,9 +34,6 @@ namespace RolemapperService.WebApi.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError,
                     $"An error occured trying to get the config map: {ex.Message}");
             }
-
-            
-            return Ok(configMapRoleMap);
         }
     }
 }

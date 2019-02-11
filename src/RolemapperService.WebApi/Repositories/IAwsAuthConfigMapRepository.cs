@@ -8,7 +8,7 @@ namespace RolemapperService.WebApi.Repositories
 {
     public interface IAwsAuthConfigMapRepository
     {
-        Task<string> GetConfigMap();
-        Task WriteConfigMapRoleMap(string configMapRoleMap);
+        Task<V1ConfigMap> GetConfigMap();
+        Task WriteConfigMap(V1ConfigMap configMapRoleMap);
     }
 }
