@@ -10,7 +10,7 @@ namespace RolemapperService.WebApi.Tests.Controllers.EventsController
     public class AddEventFacts
     {
         [Fact]
-        public async Task Will_Handle_TeamCreatedEvent()
+        public async Task Will_Handle_CapabilityRegisteredEvent()
         {
             using (var builder = new HttpClientBuilder())
             {
@@ -20,9 +20,8 @@ namespace RolemapperService.WebApi.Tests.Controllers.EventsController
                     .Build();
 
                 var input = @"{
-                                    ""teamName"": ""ADFS-ViewOnly"",
-                                    ""roleArn"": ""arn:aws:iam::738063116313:role/ADFS-ViewOnly"",
-                                    ""roleName"": ""ADFS-ViewOnly""
+                                    ""capabilityName"": ""ADFS-ViewOnly"",
+                                    ""roleArn"": ""arn:aws:iam::738063116313:role/ADFS-ViewOnly""
                                 }";
 
                 var response = await client.PostAsync("/api/events", new JsonContent(input));
