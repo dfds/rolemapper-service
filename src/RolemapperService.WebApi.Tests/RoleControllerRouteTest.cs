@@ -18,7 +18,7 @@ namespace RolemapperService.WebApi.Tests
             {
                 var client = builder
                     .WithService<IAwsAuthConfigMapRepository>(new AwsAuthConfigMapRepositoryStub())
-                    .WithService<IPersistanceRepository>(new PersistanceRepositoryStub())
+                    .WithService<IPersistenceRepository>(new PersistenceRepositoryStub())
                     .Build();
 
                 var response = await client.GetAsync("/api/configmap");

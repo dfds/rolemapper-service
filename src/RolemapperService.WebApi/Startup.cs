@@ -71,19 +71,15 @@ namespace RolemapperService.WebApi
                     s3Client: serviceProvider.GetRequiredService<IAmazonS3>()
                 ));
 
-                services.AddTransient<IPersistanceRepository>(serviceProvider => new AwsS3PersistanceRepository(
+                services.AddTransient<IPersistenceRepository>(serviceProvider => new AwsS3PersistenceRepository(
                     transferUtility: serviceProvider.GetRequiredService<ITransferUtility>(),
-                    bucketName: Configuration["AWS_S3_BUCKET_NAME_CONFIG_MAP"]
-                ));
-
-                services.AddTransient<IConfigMapPersistanceService>(serviceProvider => new ConfigMapPersistenceService(
-                    persistenceRepository: serviceProvider.GetRequiredService<IPersistanceRepository>(),
+                    bucketName: Configuration["AWS_S3_BUCKET_NAME_CONFIG_MAP"],
                     configMapFileName: Configuration["CONFIG_MAP_FILE_NAME"] ?? "configmap_lovelace_blaster.yml"
                 ));
             }
             else
             {
-                services.AddTransient<IConfigMapPersistanceService, ConfigMapPersistanceServiceStub>();
+                services.AddTransient<IPersistenceRepository, PersistenceRepositoryStub>();
             }
 
 

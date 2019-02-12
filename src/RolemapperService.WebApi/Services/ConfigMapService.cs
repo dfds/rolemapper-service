@@ -8,11 +8,11 @@ namespace RolemapperService.WebApi.Services
     public class ConfigMapService : IConfigMapService
     {
         private readonly IAwsAuthConfigMapRepository _awsAuthConfigMapRepository;
-        private readonly IConfigMapPersistanceService _configMapPersistenceService;
+        private readonly IPersistenceRepository _configMapPersistenceService;
 
         public ConfigMapService(
             IAwsAuthConfigMapRepository awsAuthConfigMapRepository, 
-            IConfigMapPersistanceService configMapPersistenceService
+            IPersistenceRepository configMapPersistenceService
         )
         {
             _awsAuthConfigMapRepository = awsAuthConfigMapRepository;
@@ -40,7 +40,7 @@ namespace RolemapperService.WebApi.Services
             await _awsAuthConfigMapRepository.WriteConfigMap(configMap);
             
             var awsAuthConfigMapYaml = configMap.SerializeToYaml();
-            await _configMapPersistenceService.StoreConfigMap(awsAuthConfigMapYaml);
+            await _configMapPersistenceService.StoreFile(awsAuthConfigMapYaml);
         }
     }
 }
