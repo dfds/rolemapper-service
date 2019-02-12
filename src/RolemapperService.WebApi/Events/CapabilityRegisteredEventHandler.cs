@@ -27,13 +27,15 @@ namespace RolemapperService.WebApi
 
         public async Task HandleAsync(CapabilityRegisteredEvent capabilityRegisteredEvent)
         {
-            var configmapRoleName = capabilityRegisteredEvent.CapabilityName;
+            var capabilityName = capabilityRegisteredEvent.CapabilityName.ToLower();
+            
+            var configmapRoleName = capabilityName;
             await _configMapService.AddRole(
                 roleName: configmapRoleName,
                 roleArn: capabilityRegisteredEvent.RoleArn
             );
 
-            var namespaceName = capabilityRegisteredEvent.CapabilityName;
+            var namespaceName = capabilityName;
 
             await _namespaceRepository.CreateNamespace(
                 namespaceName: namespaceName,
@@ -46,7 +48,7 @@ namespace RolemapperService.WebApi
             await _roleBindingRepository.BindNamespaceRoleToGroup(
                 namespaceName: namespaceName,
                 role: namespaceRoleName,
-                group: capabilityRegisteredEvent.CapabilityName
+                group: capabilityName
             );
         }
     }
