@@ -6,7 +6,6 @@ using k8s;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using RolemapperService.WebApi.Models.ExternalEvents;
@@ -34,16 +33,27 @@ namespace RolemapperService.WebApi
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
-            if (_hostingEnvironment.IsDevelopment())
+            
+            if (
+                string.IsNullOrWhiteSpace(Configuration["KUBERNETES_SERVICE_HOST"]) == false &&
+                string.IsNullOrWhiteSpace(Configuration["KUBERNETES_SERVICE_PORT"]) == false
+            )
             {
-                services.AddTransient<IKubernetes>(serviceProvider => 
-                    new Kubernetes(KubernetesClientConfiguration.BuildConfigFromConfigFile()));
-
-                services.AddTransient<IConfigMapPersistanceService, ConfigMapPersistanceServiceStub>();
+                services.AddTransient<IKubernetes>(serviceProvider => new Kubernetes(KubernetesClientConfiguration.InClusterConfig()));
             }
             else
             {
-                services.AddTransient<IKubernetes>(serviceProvider => new Kubernetes(KubernetesClientConfiguration.InClusterConfig()));
+                services.AddTransient<IKubernetes>(serviceProvider => new Kubernetes(KubernetesClientConfiguration.BuildConfigFromConfigFile()));
+            }
+    
+            
+            if (
+                string.IsNullOrWhiteSpace(Configuration["S3_AWS_ACCESS_KEY_ID"]) == false &&
+                string.IsNullOrWhiteSpace(Configuration["S3_AWS_SECRET_ACCESS_KEY"]) == false &&
+                string.IsNullOrWhiteSpace(Configuration["S3_AWS_REGION"]) == false &&
+                string.IsNullOrWhiteSpace(Configuration["AWS_S3_BUCKET_NAME_CONFIG_MAP"]) == false
+            )
+            {
                 services.AddTransient<AWSCredentials>(serviceProvider => new BasicAWSCredentials(
                     accessKey: Configuration["S3_AWS_ACCESS_KEY_ID"],
                     secretKey: Configuration["S3_AWS_SECRET_ACCESS_KEY"]
@@ -68,8 +78,12 @@ namespace RolemapperService.WebApi
 
                 services.AddTransient<IConfigMapPersistanceService>(serviceProvider => new ConfigMapPersistenceService(
                     persistenceRepository: serviceProvider.GetRequiredService<IPersistanceRepository>(),
-                    configMapFileName: Configuration["CONFIG_MAP_FILE_NAME"]
+                    configMapFileName: Configuration["CONFIG_MAP_FILE_NAME"] ?? "configmap_lovelace_blaster.yml"
                 ));
+            }
+            else
+            {
+                services.AddTransient<IConfigMapPersistanceService, ConfigMapPersistanceServiceStub>();
             }
 
 
