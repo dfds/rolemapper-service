@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using k8s;
@@ -34,6 +35,38 @@ namespace RolemapperService.WebApi.IntegrationTests.Repositories.Kubernetes
                 var annotationValue = @namespace.Metadata.Annotations["iam.amazonaws.com/permitted"];
 
                 Assert.Equal(awsRoleName, annotationValue);
+            }
+            finally
+            {
+                client.DeleteNamespace(
+                    body: new V1DeleteOptions(),
+                    name: namespaceName
+                );
+            }
+        }
+
+        [Fact]
+        public async Task Two_Namespace_Will_Create_A_Error()
+        {
+            // Arrange
+            var namespaceName = "namespace-from-test";
+            var awsRoleName = "awsRoleName";
+            var config = KubernetesClientConfiguration.BuildConfigFromConfigFile();
+            var client = new k8s.Kubernetes(config);
+
+            var sut = new NamespaceRespoitory(client);
+
+            try
+            {
+                await sut.CreateNamespace(namespaceName, awsRoleName);
+                
+                
+                // Act
+                var ex = await Assert.ThrowsAsync<Exception>(async () => await sut.CreateNamespace(namespaceName, awsRoleName));
+
+                // Assert
+                var expectedStart = "Error occured while communicating with k8s:";
+                Assert.StartsWith(expectedStart, ex.Message);
             }
             finally
             {

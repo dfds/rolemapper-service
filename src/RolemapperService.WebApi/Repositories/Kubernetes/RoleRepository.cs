@@ -1,7 +1,9 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using k8s;
 using k8s.Models;
+using Microsoft.Rest;
 
 namespace RolemapperService.WebApi.Repositories.Kubernetes
 {
@@ -68,10 +70,20 @@ namespace RolemapperService.WebApi.Repositories.Kubernetes
                     }
                 }
             };
-            
-            var result = await _client.CreateNamespacedRoleAsync(role, namespaceName);
+            try
+            {
+                var result = await _client.CreateNamespacedRoleAsync(role, namespaceName);
 
-            return result?.Metadata?.Name;
+                return result?.Metadata?.Name;
+            }
+            catch (HttpOperationException e) when (e.Response.Content.Length != 0)
+            {
+                throw new Exception(
+                    "Error occured while communicating with k8s:" + Environment.NewLine +
+                    e.Response.Content
+                    , e
+                );
+            }
         }
     }
 }
