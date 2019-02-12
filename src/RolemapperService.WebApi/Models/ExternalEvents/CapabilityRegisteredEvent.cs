@@ -6,7 +6,7 @@ namespace RolemapperService.WebApi.Models.ExternalEvents
     {
         public CapabilityRegisteredEvent(string capabilityName, string roleArn)
         {
-            CapabilityName = capabilityName ?? throw new ArgumentException($"{nameof(capabilityName)} can not be null");
+            CapabilityName = capabilityName.ToLower() ?? throw new ArgumentException($"{nameof(capabilityName)} can not be null");
             RoleArn = roleArn ?? throw new ArgumentException($"{nameof(roleArn)} can not be null");
         }
 
