@@ -27,6 +27,8 @@ namespace RolemapperService.WebApi
 
         public async Task HandleAsync(CapabilityRegisteredEvent capabilityRegisteredEvent)
         {
+            capabilityRegisteredEvent.CapabilityName = capabilityRegisteredEvent.CapabilityName.ToLower();
+            
             var configmapRoleName = capabilityRegisteredEvent.CapabilityName;
             await _configMapService.AddRole(
                 roleName: configmapRoleName,
