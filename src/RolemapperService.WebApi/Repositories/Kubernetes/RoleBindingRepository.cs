@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using System.Threading.Tasks;
+    using System.Threading.Tasks;
 using k8s;
 using k8s.Models;
 
@@ -20,7 +20,7 @@ namespace RolemapperService.WebApi.Repositories.Kubernetes
             {
                 Metadata = new V1ObjectMeta
                 {
-                    Name = $"{role} to {group}",
+                    Name = $"{role}-to-{group}",
                     NamespaceProperty = namespaceName
                 },
                 Subjects = new List<V1Subject>{new V1Subject

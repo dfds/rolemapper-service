@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using k8s;
 using k8s.Models;
 using RolemapperService.WebApi.Repositories.Kubernetes;
+using RolemapperService.WebApi.Wrappers;
 using Xunit;
 
 namespace RolemapperService.WebApi.IntegrationTests.Repositories.Kubernetes.RoleBindingRepository
@@ -15,9 +16,9 @@ namespace RolemapperService.WebApi.IntegrationTests.Repositories.Kubernetes.Role
             var config = KubernetesClientConfiguration.BuildConfigFromConfigFile();
 
             var client = new k8s.Kubernetes(config);
-
+            var wrapper = new KubernetesWrapper(client);
             var namespaceRepository = new NamespaceRespoitory(client);
-            var roleRepository = new WebApi.Repositories.Kubernetes.RoleRepository(client);
+            var roleRepository = new WebApi.Repositories.Kubernetes.RoleRepository(wrapper);
             var sut = new WebApi.Repositories.Kubernetes.RoleBindingRepository(client);
     
             var subjectNameSpace = "namespace-with-role-test";

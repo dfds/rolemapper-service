@@ -1,17 +1,17 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using k8s;
 using k8s.Models;
 using Microsoft.Rest;
+using RolemapperService.WebApi.Wrappers;
 
 namespace RolemapperService.WebApi.Repositories.Kubernetes
 {
     public class RoleRepository : IRoleRepository
     {
-        private readonly IKubernetes _client;
+        private readonly IKubernetesWrapper _client;
 
-        public RoleRepository(IKubernetes client)
+        public RoleRepository(IKubernetesWrapper client)
         {
             _client = client;
         }
@@ -31,7 +31,6 @@ namespace RolemapperService.WebApi.Repositories.Kubernetes
                     {
                         ApiGroups = new List<string>
                         {
-                            "",
                             "extensions",
                             "apps"
                         },
@@ -39,10 +38,6 @@ namespace RolemapperService.WebApi.Repositories.Kubernetes
                         {
                             "*"
                         },
-                        // ResourceNames = new List<string>
-                        // {
-                        //     "*"
-                        // },
                         Verbs = new List<string>
                         {
                             "*"
@@ -59,13 +54,75 @@ namespace RolemapperService.WebApi.Repositories.Kubernetes
                             "jobs",
                             "cronjobs"
                         },
-                        // ResourceNames = new List<string>
-                        // {
-                        //     "*"
-                        // },
                         Verbs = new List<string>
                         {
                             "*"
+                        }
+                    },
+                    new V1PolicyRule
+                    {
+                        ApiGroups = new List<string>
+                        {
+                            ""
+                        },
+                        Resources = new List<string>
+                        {
+                            "bindings",
+                            "componentstatuses",
+                            "configmaps",
+                            "endpoints",
+                            "events",
+                            "limitranges",
+                            "nodes",
+                            "nodes/proxy",
+                            "nodes/status",
+                            "persistentvolumeclaims",
+                            "persistentvolumeclaims/status",
+                            "persistentvolumes",
+                            "persistentvolumes/status",
+                            "pods",
+                            "pods/attach",
+                            "pods/binding",
+                            "pods/eviction",
+                            "pods/exec",
+                            "pods/log",
+                            "pods/portforward",
+                            "pods/proxy",
+                            "pods/status",
+                            "podtemplates",
+                            "replicationcontrollers",
+                            "replicationcontrollers/scale",
+                            "replicationcontrollers/status",
+                            "resourcequotas",
+                            "resourcequotas/status",
+                            "secrets",
+                            "serviceaccounts",
+                            "services",
+                            "services/proxy",
+                            "services/status"
+                        },
+                        Verbs = new List<string>
+                        {
+                            "*"
+                        }
+                    },
+                    new V1PolicyRule
+                    {
+                        ApiGroups = new List<string>
+                        {
+                            ""
+                        },
+                        Resources = new List<string>
+                        {
+                            "namespaces",
+                            "namespaces/finalize",
+                            "namespaces/status"
+                        },
+                        Verbs = new List<string>
+                        {
+                            "get",
+                            "list",
+                            "watch"
                         }
                     }
                 }

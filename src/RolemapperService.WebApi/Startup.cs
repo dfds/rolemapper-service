@@ -13,6 +13,7 @@ using RolemapperService.WebApi.Repositories;
 using RolemapperService.WebApi.Repositories.Kubernetes;
 using RolemapperService.WebApi.Services;
 using RolemapperService.WebApi.Validators;
+using RolemapperService.WebApi.Wrappers;
 
 namespace RolemapperService.WebApi
 {
@@ -90,6 +91,7 @@ namespace RolemapperService.WebApi
             services.AddTransient<INamespaceRespoitory, NamespaceRespoitory>();
             services.AddTransient<IRoleRepository, RoleRepository>();
             services.AddTransient<IRoleBindingRepository, RoleBindingRepository>();
+            services.AddTransient<IKubernetesWrapper, KubernetesWrapper>();
 
             // Event handlers
             services.AddTransient<IEventHandler<CapabilityRegisteredEvent>, CapabilityRegisteredEventHandler>();
