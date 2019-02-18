@@ -1,0 +1,8 @@
+
+graph TD;
+    Namespace-->|Has a |Role;
+    Role-->|Has a rolebinding to| Group;
+
+    style IAM-Role fill:#e6a059
+    IAM-Role -->|aws-iam-authenticator maps to a|User
+    User -->|Is part of| Group;
