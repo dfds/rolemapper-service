@@ -1,7 +1,7 @@
 # Rolemapper Service
 [![Build Status](https://dfds.visualstudio.com/DevelopmentExcellence/_apis/build/status/rolemapperservice-ci)](https://dfds.visualstudio.com/DevelopmentExcellence/_build/latest?definitionId=967)
 
-Service for mapping IAM roles to k8s cluster roles.
+Service managing k8s cluster with our business logics.
 
 ## Development
 
