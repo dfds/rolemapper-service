@@ -13,9 +13,13 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+<<<<<<< HEAD
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 using Prometheus;
+=======
+using RolemapperService.WebApi.Infrastructure.Messaging;
+>>>>>>> can listen to kafka
 using RolemapperService.WebApi.Models.ExternalEvents;
 using RolemapperService.WebApi.Repositories;
 using RolemapperService.WebApi.Repositories.Kubernetes;
@@ -109,8 +113,28 @@ namespace RolemapperService.WebApi
 
             services.AddHealthChecks()
                 .AddCheck("self", () => HealthCheckResult.Healthy());
+            
+
+            ConfigureDomainEvents(services);
+            
+            services.AddHostedService<ConsumerHostedService>();
+
         }
 
+        
+        
+        private static void ConfigureDomainEvents(IServiceCollection services)
+        {
+            var eventRegistry = new DomainEventRegistry();
+            services.AddSingleton(eventRegistry);
+
+
+            services.AddTransient<KafkaConsumerFactory.KafkaConfiguration>();
+            services.AddTransient<KafkaConsumerFactory>();
+>>>>>>> can listen to kafka
+        }
+
+        
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
