@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,16 +8,16 @@ using Microsoft.Extensions.Logging;
 
 namespace RolemapperService.WebApi.Infrastructure.Messaging
 {
-    public class ConsumerHostedService : IHostedService
+    public class KafkaConsumerHostedService : IHostedService
     {
         private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
-        private readonly ILogger<ConsumerHostedService> _logger;
+        private readonly ILogger<KafkaConsumerHostedService> _logger;
         private readonly IServiceProvider _serviceProvider;
         private readonly IEnumerable<string> _topics;
 
         private Task _executingTask;
 
-        public ConsumerHostedService(ILogger<ConsumerHostedService> logger, IServiceProvider serviceProvider)
+        public KafkaConsumerHostedService(ILogger<KafkaConsumerHostedService> logger, IServiceProvider serviceProvider)
         {
             Console.WriteLine($"Starting Kafka event consumer.");
 
@@ -37,7 +36,8 @@ namespace RolemapperService.WebApi.Infrastructure.Messaging
 
                     using (var consumer = consumerFactory.Create())
                     {
-                        _logger.LogInformation($"Event consumer started. Listening to topics: {string.Join(",", _topics)}");
+                        _logger.LogInformation(
+                            $"Event consumer started. Listening to topics: {string.Join(",", _topics)}");
                         consumer.Subscribe(_topics);
                         consumer.OnPartitionsRevoked += (sender, topicPartitions) => consumer.Unassign();
                         consumer.OnPartitionsAssigned += (sender, topicPartitions) => consumer.Assign(topicPartitions);
@@ -45,23 +45,24 @@ namespace RolemapperService.WebApi.Infrastructure.Messaging
                         // consume loop
                         while (!_cancellationTokenSource.IsCancellationRequested)
                         {
-                            if (consumer.Consume(out var msg, 1000))
+                            if (!consumer.Consume(out var msg, 1000))
+                            { continue; }
+
+                            using (var scope = _serviceProvider.CreateScope())
                             {
-                                using (var scope = _serviceProvider.CreateScope())
+                                _logger.LogInformation(
+                                    $"Received event: Topic: {msg.Topic} Partition: {msg.Partition}, Offset: {msg.Offset} {msg.Value}");
+
+                                try
                                 {
-                                    _logger.LogInformation($"Received event: Topic: {msg.Topic} Partition: {msg.Partition}, Offset: {msg.Offset} {msg.Value}");
+                                    var eventDispatcher = scope.ServiceProvider.GetRequiredService<IEventDispatcher>();
+                                    await eventDispatcher.Send(msg.Value);
 
-                                    try
-                                    {
-                                        var eventDispatcher = scope.ServiceProvider.GetRequiredService<IEventDispatcher>();
-                                        await eventDispatcher.Send(msg.Value);
-
-                                        await consumer.CommitAsync(msg);
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        _logger.LogError($"Error consuming event. Exception message: {ex.Message}", ex);
-                                    }
+                                    await consumer.CommitAsync(msg);
+                                }
+                                catch (Exception ex)
+                                {
+                                    _logger.LogError($"Error consuming event. Exception message: {ex.Message}", ex);
                                 }
                             }
                         }

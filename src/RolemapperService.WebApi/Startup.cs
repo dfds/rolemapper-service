@@ -117,7 +117,7 @@ namespace RolemapperService.WebApi
 
             ConfigureDomainEvents(services);
             
-            services.AddHostedService<ConsumerHostedService>();
+            services.AddHostedService<KafkaConsumerHostedService>();
 
         }
 
