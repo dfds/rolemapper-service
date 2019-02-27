@@ -30,7 +30,7 @@ namespace RolemapperService.WebApi.Infrastructure.Messaging
 
         public class KafkaConfiguration
         {
-            private const string KEY_PREFIX = "HARALD_KAFKA_";
+            private const string KEY_PREFIX = "KUBERNETES_SERVICE_KAFKA_";
             private readonly IConfiguration _configuration;
 
             public KafkaConfiguration(IConfiguration configuration)
