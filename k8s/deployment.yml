@@ -33,6 +33,20 @@ spec:
             limits:
               memory: "128Mi"
               cpu: "200m"
+          livenessProbe:
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 5
+            httpGet:
+              port: web
+              path: /healthz
+          readinessProbe:
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 5
+            httpGet:
+              port: web
+              path: /healthz
           env:
             - name: S3_AWS_REGION
               valueFrom:
@@ -56,17 +70,21 @@ spec:
                   key: BUCKET_NAME
             - name: CONFIG_MAP_FILE_NAME
               value: $(CONFIG_MAP_FILE_NAME)
-          livenessProbe:
-            initialDelaySeconds: 5
-            periodSeconds: 5
-            timeoutSeconds: 5
-            httpGet:
-              port: web
-              path: /healthz
-          readinessProbe:
-            initialDelaySeconds: 5
-            periodSeconds: 5
-            timeoutSeconds: 5
-            httpGet:
-              port: web
-              path: /healthz
+            - name: KUBERNETES_SERVICE_KAFKA_BOOTSTRAP_SERVERS
+              value: $(KUBERNETES_SERVICE_KAFKA_BOOTSTRAP_SERVERS)
+            - name: KUBERNETES_SERVICE_KAFKA_BROKER_VERSION_FALLBACK
+              value: "0.10.0.0"
+            - name: KUBERNETES_SERVICE_KAFKA_API_VERSION_FALLBACK_MS
+              value: "0"
+            - name: KUBERNETES_SERVICE_KAFKA_SASL_USERNAME
+              value: $(KUBERNETES_SERVICE_KAFKA_SASL_USERNAME)
+            - name: KUBERNETES_SERVICE_KAFKA_SASL_PASSWORD
+              value: $(KUBERNETES_SERVICE_KAFKA_SASL_PASSWORD)
+            - name: KUBERNETES_SERVICE_KAFKA_GROUP_ID
+              value: "$(KUBERNETES_SERVICE_KAFKA_GROUP_ID)"
+            - name: KUBERNETES_SERVICE_KAFKA_ENABLE_AUTO_COMMIT
+              value: "false"
+            - name: KUBERNETES_SERVICE_KAFKA_SASL_MECHANISMS
+              value: "PLAIN"
+            - name: KUBERNETES_SERVICE_KAFKA_SECURITY_PROTOCOL
+              value: "SASL_SSL"
