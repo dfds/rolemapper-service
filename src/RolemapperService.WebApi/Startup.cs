@@ -13,13 +13,12 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-<<<<<<< HEAD
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 using Prometheus;
-=======
+using RolemapperService.WebApi.Domain.Events;
+using RolemapperService.WebApi.EventHandlers;
 using RolemapperService.WebApi.Infrastructure.Messaging;
->>>>>>> can listen to kafka
 using RolemapperService.WebApi.Models.ExternalEvents;
 using RolemapperService.WebApi.Repositories;
 using RolemapperService.WebApi.Repositories.Kubernetes;
@@ -127,11 +126,22 @@ namespace RolemapperService.WebApi
         {
             var eventRegistry = new DomainEventRegistry();
             services.AddSingleton(eventRegistry);
+            services.AddTransient<IEventHandler<CapabilityCreatedDomainEvent>, CapabilityCreatedEventHandler>();
 
 
             services.AddTransient<KafkaConsumerFactory.KafkaConfiguration>();
             services.AddTransient<KafkaConsumerFactory>();
->>>>>>> can listen to kafka
+
+            var serviceProvider = services.BuildServiceProvider();
+
+            eventRegistry
+                .Register<CapabilityCreatedDomainEvent>(
+                    eventTypeName: "capability_created",
+                    topicName: "build.capabilities",
+                    eventHandler: serviceProvider.GetRequiredService<IEventHandler<CapabilityCreatedDomainEvent>>());
+
+            services.AddTransient<IEventDispatcher, EventDispatcher>();
+
         }
 
         
