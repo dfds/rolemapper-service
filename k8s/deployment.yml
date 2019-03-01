@@ -50,10 +50,7 @@ spec:
               path: /healthz
           env:
             - name: AWS_S3_BUCKET_NAME_CONFIG_MAP
-              valueFrom:
-                secretKeyRef:
-                  name: dfds-oxygen-k8s-turing-configmap-bucket-binding
-                  key: BUCKET_NAME
+              value: $(AWS_S3_BUCKET_NAME_CONFIG_MAP)
             - name: CONFIG_MAP_FILE_NAME
               value: $(CONFIG_MAP_FILE_NAME)
             - name: KUBERNETES_SERVICE_KAFKA_BOOTSTRAP_SERVERS
