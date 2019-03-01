@@ -61,24 +61,10 @@ namespace RolemapperService.WebApi
     
             
             if (
-                string.IsNullOrWhiteSpace(Configuration["S3_AWS_ACCESS_KEY_ID"]) == false &&
-                string.IsNullOrWhiteSpace(Configuration["S3_AWS_SECRET_ACCESS_KEY"]) == false &&
-                string.IsNullOrWhiteSpace(Configuration["S3_AWS_REGION"]) == false &&
                 string.IsNullOrWhiteSpace(Configuration["AWS_S3_BUCKET_NAME_CONFIG_MAP"]) == false
             )
             {
-                services.AddTransient<AWSCredentials>(serviceProvider => new BasicAWSCredentials(
-                    accessKey: Configuration["S3_AWS_ACCESS_KEY_ID"],
-                    secretKey: Configuration["S3_AWS_SECRET_ACCESS_KEY"]
-                ));
-
-                services.AddTransient(serviceProvider =>
-                    RegionEndpoint.GetBySystemName(Configuration["S3_AWS_REGION"]));
-
-                services.AddTransient<IAmazonS3>(serviceProvider => new AmazonS3Client(
-                    credentials: serviceProvider.GetRequiredService<AWSCredentials>(),
-                    region: serviceProvider.GetRequiredService<RegionEndpoint>()
-                ));
+                services.AddTransient<IAmazonS3>(serviceProvider => new AmazonS3Client());
 
                 services.AddTransient<ITransferUtility>(serviceProvider => new TransferUtility(
                     s3Client: serviceProvider.GetRequiredService<IAmazonS3>()
@@ -87,7 +73,7 @@ namespace RolemapperService.WebApi
                 services.AddTransient<IPersistenceRepository>(serviceProvider => new AwsS3PersistenceRepository(
                     transferUtility: serviceProvider.GetRequiredService<ITransferUtility>(),
                     bucketName: Configuration["AWS_S3_BUCKET_NAME_CONFIG_MAP"],
-                    configMapFileName: Configuration["CONFIG_MAP_FILE_NAME"] ?? "configmap_lovelace_blaster.yml"
+                    configMapFileName: Configuration["CONFIG_MAP_FILE_NAME"] ?? "configmap_hellman_blaster.yml"
                 ));
             }
             else
