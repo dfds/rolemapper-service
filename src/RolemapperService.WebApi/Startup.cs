@@ -64,7 +64,7 @@ namespace RolemapperService.WebApi
                 string.IsNullOrWhiteSpace(Configuration["AWS_S3_BUCKET_NAME_CONFIG_MAP"]) == false
             )
             {
-                services.AddTransient<IAmazonS3>(serviceProvider => new AmazonS3Client());
+                services.AddTransient<IAmazonS3>(serviceProvider => new AmazonS3Client(RegionEndpoint.EUWest1));
 
                 services.AddTransient<ITransferUtility>(serviceProvider => new TransferUtility(
                     s3Client: serviceProvider.GetRequiredService<IAmazonS3>()
