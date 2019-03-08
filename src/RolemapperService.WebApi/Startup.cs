@@ -18,6 +18,7 @@ using Microsoft.Extensions.Hosting;
 using Prometheus;
 using RolemapperService.WebApi.Domain.Events;
 using RolemapperService.WebApi.EventHandlers;
+using RolemapperService.WebApi.HealthChecks;
 using RolemapperService.WebApi.Infrastructure.Messaging;
 using RolemapperService.WebApi.Models.ExternalEvents;
 using RolemapperService.WebApi.Repositories;
@@ -41,6 +42,27 @@ namespace RolemapperService.WebApi
 
         public IConfiguration Configuration { get; }
 
+        public IServiceCollection AddPersistenceRepository(IServiceCollection services)
+        {
+            var regionEndpoint = RegionEndpoint.GetBySystemName(Configuration["AWS_S3_BUCKET_REGION"]);
+            services.AddTransient<IAmazonS3>(serviceProvider => new AmazonS3Client(regionEndpoint));
+
+            services.AddTransient<ITransferUtility>(serviceProvider => new TransferUtility(
+                s3Client: serviceProvider.GetRequiredService<IAmazonS3>()
+            ));
+
+            services.AddTransient<IPersistenceRepository>(serviceProvider => new AwsS3PersistenceRepository(
+                transferUtility: serviceProvider.GetRequiredService<ITransferUtility>(),
+                bucketName: Configuration["AWS_S3_BUCKET_NAME_CONFIG_MAP"],
+                configMapFileName: Configuration["CONFIG_MAP_FILE_NAME"]
+            ));
+
+            services.AddTransient<S3BucketHealthCheck>(serviceProvider => new S3BucketHealthCheck(
+                amazonS3: serviceProvider.GetRequiredService<IAmazonS3>(),
+                bucketName: Configuration["AWS_S3_BUCKET_NAME_CONFIG_MAP"])
+            );
+            return services;
+        }
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
@@ -58,29 +80,9 @@ namespace RolemapperService.WebApi
             {
                 services.AddTransient<IKubernetes>(serviceProvider => new Kubernetes(KubernetesClientConfiguration.BuildConfigFromConfigFile()));
             }
-    
-            
-            if (
-                string.IsNullOrWhiteSpace(Configuration["AWS_S3_BUCKET_NAME_CONFIG_MAP"]) == false
-            )
-            {
-                services.AddTransient<IAmazonS3>(serviceProvider => new AmazonS3Client(RegionEndpoint.EUWest1));
 
-                services.AddTransient<ITransferUtility>(serviceProvider => new TransferUtility(
-                    s3Client: serviceProvider.GetRequiredService<IAmazonS3>()
-                ));
 
-                services.AddTransient<IPersistenceRepository>(serviceProvider => new AwsS3PersistenceRepository(
-                    transferUtility: serviceProvider.GetRequiredService<ITransferUtility>(),
-                    bucketName: Configuration["AWS_S3_BUCKET_NAME_CONFIG_MAP"],
-                    configMapFileName: Configuration["CONFIG_MAP_FILE_NAME"] ?? "configmap_hellman_blaster.yml"
-                ));
-            }
-            else
-            {
-                services.AddTransient<IPersistenceRepository, PersistenceRepositoryStub>();
-            }
-
+            services = AddPersistenceRepository(services);
 
             services.AddTransient<IConfigMapService, ConfigMapService>();
             services.AddTransient<IAwsAuthConfigMapRepository, AwsAuthConfigMapRepository>();
@@ -97,7 +99,8 @@ namespace RolemapperService.WebApi
             services.AddHostedService<MetricHostedService>();
 
             services.AddHealthChecks()
-                .AddCheck("self", () => HealthCheckResult.Healthy());
+                .AddCheck("self", () => HealthCheckResult.Healthy())
+                .AddCheck<S3BucketHealthCheck>("S3 bucket");
             
 
             ConfigureDomainEvents(services);
