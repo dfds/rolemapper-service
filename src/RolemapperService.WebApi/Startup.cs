@@ -2,7 +2,6 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Amazon;
-using Amazon.Runtime;
 using Amazon.S3;
 using Amazon.S3.Transfer;
 using k8s;
@@ -44,6 +43,15 @@ namespace RolemapperService.WebApi
 
         public IServiceCollection AddPersistenceRepository(IServiceCollection services)
         {
+            if (string.IsNullOrWhiteSpace(Configuration["AWS_S3_BUCKET_REGION"]) ||
+                string.IsNullOrWhiteSpace(Configuration["AWS_S3_BUCKET_NAME_CONFIG_MAP"]) ||
+                string.IsNullOrWhiteSpace(Configuration["CONFIG_MAP_FILE_NAME"]))
+            {
+                services.AddTransient<IPersistenceRepository, PersistenceRepositoryStub>();
+
+                return services;
+            }
+
             var regionEndpoint = RegionEndpoint.GetBySystemName(Configuration["AWS_S3_BUCKET_REGION"]);
             services.AddTransient<IAmazonS3>(serviceProvider => new AmazonS3Client(regionEndpoint));
 
@@ -63,22 +71,25 @@ namespace RolemapperService.WebApi
             );
             return services;
         }
+
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
-            
+
             if (
                 string.IsNullOrWhiteSpace(Configuration["KUBERNETES_SERVICE_HOST"]) == false &&
                 string.IsNullOrWhiteSpace(Configuration["KUBERNETES_SERVICE_PORT"]) == false
             )
             {
-                services.AddTransient<IKubernetes>(serviceProvider => new Kubernetes(KubernetesClientConfiguration.InClusterConfig()));
+                services.AddTransient<IKubernetes>(serviceProvider =>
+                    new Kubernetes(KubernetesClientConfiguration.InClusterConfig()));
             }
             else
             {
-                services.AddTransient<IKubernetes>(serviceProvider => new Kubernetes(KubernetesClientConfiguration.BuildConfigFromConfigFile()));
+                services.AddTransient<IKubernetes>(serviceProvider =>
+                    new Kubernetes(KubernetesClientConfiguration.BuildConfigFromConfigFile()));
             }
 
 
@@ -101,16 +112,14 @@ namespace RolemapperService.WebApi
             services.AddHealthChecks()
                 .AddCheck("self", () => HealthCheckResult.Healthy())
                 .AddCheck<S3BucketHealthCheck>("S3 bucket");
-            
+
 
             ConfigureDomainEvents(services);
-            
-            services.AddHostedService<KafkaConsumerHostedService>();
 
+            services.AddHostedService<KafkaConsumerHostedService>();
         }
 
-        
-        
+
         private static void ConfigureDomainEvents(IServiceCollection services)
         {
             var eventRegistry = new DomainEventRegistry();
@@ -130,10 +139,9 @@ namespace RolemapperService.WebApi
                     eventHandler: serviceProvider.GetRequiredService<IEventHandler<CapabilityCreatedDomainEvent>>());
 
             services.AddTransient<IEventDispatcher, EventDispatcher>();
-
         }
 
-        
+
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
@@ -193,9 +201,10 @@ namespace RolemapperService.WebApi
         static MyPrometheusStuff()
         {
             HealthChecksResult = Metrics.CreateGauge("healthcheck",
-                "Shows health check status (status=unhealthy|degraded|healthy) 1 for triggered, otherwise 0", new GaugeConfiguration
+                "Shows health check status (status=unhealthy|degraded|healthy) 1 for triggered, otherwise 0",
+                new GaugeConfiguration
                 {
-                    LabelNames = new[] { HealthCheckLabelServiceName, HealthCheckLabelStatusName },
+                    LabelNames = new[] {HealthCheckLabelServiceName, HealthCheckLabelStatusName},
                     SuppressInitialValue = false
                 });
 
@@ -203,7 +212,7 @@ namespace RolemapperService.WebApi
                 "Shows duration of the health check execution in seconds",
                 new GaugeConfiguration
                 {
-                    LabelNames = new[] { HealthCheckLabelServiceName },
+                    LabelNames = new[] {HealthCheckLabelServiceName},
                     SuppressInitialValue = false
                 });
         }
