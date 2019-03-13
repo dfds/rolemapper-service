@@ -8,12 +8,6 @@ namespace RolemapperService.WebApi.Tests.Events
 {
     public class CapabilityRegisteredEventHandlerFacts
     {
-        
-        [Fact]
-        public void failme() {
-            Assert.True(false);
-        }
-
         [Fact]
         public async Task HandleAsync_Will_Use_Event_Payload_Correctly()
         {
