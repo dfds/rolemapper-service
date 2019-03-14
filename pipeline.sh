@@ -11,7 +11,7 @@ readonly REGION=${AWS_DEFAULT_REGION:-"eu-central-1"}
 readonly IMAGE_NAME='rolemapper-service'
 readonly BUILD_NUMBER=${1:-"N/A"}
 readonly BUILD_SOURCES_DIRECTORY=${2:-${PWD}}
-readonly SERVICE_NAME="RolemapperService"
+readonly SERVICE_NAME="K8sJanitor"
 
 clean_output_folder() {
     rm -Rf output
@@ -31,18 +31,19 @@ run_tests() {
 
     MSYS_NO_PATHCONV=1 dotnet test \
         --logger:"trx;LogFileName=testresults.trx" \
-        RolemapperService.WebApi.Tests/RolemapperService.WebApi.Tests.csproj \
+        K8sJanitor.WebApi.Tests/K8sJanitor.WebApi.Tests.csproj \
         /p:CollectCoverage=true \
         /p:CoverletOutputFormat=cobertura \
-        '/p:Include="[RolemapperService.WebApi]*"'
+        '/p:Include="[K8sJanitor.WebApi]*"'
 
-    mv ./RolemapperService.WebApi.Tests/coverage.cobertura.xml "${BUILD_SOURCES_DIRECTORY}/output/"
-    mv ./RolemapperService.WebApi.Tests/TestResults/testresults.trx "${BUILD_SOURCES_DIRECTORY}/output/"
+    echo "Exit code: $?"
+    mv ./K8sJanitor.WebApi.Tests/coverage.cobertura.xml "${BUILD_SOURCES_DIRECTORY}/output/"
+    mv ./K8sJanitor.WebApi.Tests/TestResults/testresults.trx "${BUILD_SOURCES_DIRECTORY}/output/"
 }
 
 publish_binaries() {
     echo "Publishing binaries..."
-    dotnet publish -c Release -o ${BUILD_SOURCES_DIRECTORY}/output/app ${SERVICE_NAME}.WebApi/${SERVICE_NAME}.WebApi.csproj
+    dotnet publish -c Release -o ${BUILD_SOURCES_DIRECTORY}/output/app K8sJanitor.WebApi/K8sJanitor.WebApi.csproj
 }
 
 build_container_image() {
@@ -83,11 +84,11 @@ cd ./src
 
 restore_dependencies
 run_tests
-publish_binaries
+#publish_binaries
 
 cd ..
 
-build_container_image
+#build_container_image
 
 if [[ "${BUILD_NUMBER}" != "N/A" ]]; then
     push_container_image

@@ -54,5 +54,5 @@ $ dotnet build
 Followed by:
 
 ```shell
-$ dotnet run --project RolemapperService.WebApi/RolemapperService.WebApi.csproj
+$ dotnet run --project K8sJanitor.WebApi/K8sJanitor.WebApi.csproj
 ```
