@@ -84,11 +84,11 @@ cd ./src
 
 restore_dependencies
 run_tests
-#publish_binaries
+publish_binaries
 
 cd ..
 
-#build_container_image
+build_container_image
 
 if [[ "${BUILD_NUMBER}" != "N/A" ]]; then
     push_container_image
