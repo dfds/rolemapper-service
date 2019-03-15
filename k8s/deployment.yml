@@ -2,26 +2,26 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: rolemapper-service
+  name: k8s-janitor
   namespace: $(kubernetes-namespace)
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: rolemapper-service
+      app: k8s-janitor
   template:
     metadata:
       labels:
-        app: rolemapper-service
+        app: k8s-janitor
       annotations:
         iam.amazonaws.com/role: eks-hellman-self-service
         prometheus.io/port: "8080"
         prometheus.io/scrape: "true"
     spec:
-      serviceAccountName: rolemapper-sa
+      serviceAccountName: k8s-janitor-sa
       containers:
-        - name: rolemapper-service
-          image: 579478677147.dkr.ecr.eu-central-1.amazonaws.com/ded/rolemapper-service:$(Build.BuildId)
+        - name: k8s-janitor
+          image: 579478677147.dkr.ecr.eu-central-1.amazonaws.com/ded/k8s-janitor:$(Build.BuildId)
           ports:
             - containerPort: 80
               name: web

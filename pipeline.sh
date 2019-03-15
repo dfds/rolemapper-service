@@ -8,7 +8,7 @@ set -eu -o pipefail
 
 # build parameters
 readonly REGION=${AWS_DEFAULT_REGION:-"eu-central-1"}
-readonly IMAGE_NAME='rolemapper-service'
+readonly IMAGE_NAME='k8s-janitor'
 readonly BUILD_NUMBER=${1:-"N/A"}
 readonly BUILD_SOURCES_DIRECTORY=${2:-${PWD}}
 readonly SERVICE_NAME="K8sJanitor"
@@ -69,7 +69,7 @@ push_container_image_dockercloud() {
     echo "Login to docker..."
     docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}
 
-    image_name="dfdsdk/rolemapper-service:${BUILD_NUMBER}"
+    image_name="dfdsdk/k8s-janitor-service:${BUILD_NUMBER}"
 
     echo "Tagging container image..."
     docker tag ${IMAGE_NAME}:latest ${image_name}

@@ -8,7 +8,7 @@ metadata:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: rolemapper-sa
+  name: k8s-janitor-sa
   namespace: selfservice
 
 ---
@@ -16,7 +16,7 @@ metadata:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: rolemapper-configmap-updater
+  name: k8s-janitor-configmap-updater
 rules:
 - apiGroups: ["rbac.authorization.k8s.io"]
   resources: ["roles", "rolebindings"]
@@ -32,14 +32,14 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: rolemapper-configmap-updater-binding
+  name: k8s-janitor-configmap-updater-binding
 subjects:
   - kind: ServiceAccount
-    name: rolemapper-sa
+    name: k8s-janitor-sa
     namespace: selfservice
 roleRef:
   kind: ClusterRole
-  name: rolemapper-configmap-updater
+  name: k8s-janitor-configmap-updater
   apiGroup: rbac.authorization.k8s.io
 
 ---

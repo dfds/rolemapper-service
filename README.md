@@ -1,5 +1,5 @@
-# Rolemapper Service
-[![Build Status](https://dfds.visualstudio.com/DevelopmentExcellence/_apis/build/status/rolemapperservice-ci)](https://dfds.visualstudio.com/DevelopmentExcellence/_build/latest?definitionId=967)
+# k8s-janitor Service
+[![Build Status](https://dfds.visualstudio.com/DevelopmentExcellence/_apis/build/status/k8s-janitorservice-ci)](https://dfds.visualstudio.com/DevelopmentExcellence/_build/latest?definitionId=967)
 
 Service managing k8s cluster with our business logics.
 
@@ -35,7 +35,7 @@ __Please note:__ the script above is a linux bash script and needs a bash runtim
 Now you should be able to start a container by running the following on your command line:
 
 ```shell
-$ docker run -it --rm -p 8080:80 rolemapper-service
+$ docker run -it --rm -p 8080:80 k8s-janitor
 ```
 
 You should be able to navigate to `http://localhost:8080` in a browser.

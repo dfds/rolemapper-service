@@ -2,7 +2,7 @@
 # apiVersion: extensions/v1beta1
 # kind: Ingress
 # metadata:
-#   name: rolemapper-service
+#   name: k8s-janitor
 #   namespace: $(kubernetes-namespace)
 #   annotations:
 #     kubernetes.io/ingress.class: traefik
@@ -14,6 +14,6 @@
 #         paths:
 #           - path: /rolemapperservice
 #             backend:
-#               serviceName: rolemapper-service
+#               serviceName: k8s-janitor
 #               servicePort: external
 # 
