@@ -124,7 +124,7 @@ namespace K8sJanitor.WebApi
         {
             var eventRegistry = new DomainEventRegistry();
             services.AddSingleton(eventRegistry);
-            services.AddTransient<IEventHandler<CapabilityCreatedDomainEvent>, CapabilityCreatedEventHandler>();
+            services.AddTransient<IEventHandler<ContextAddedToCapabilityDomainEvent>, ContextAddedToCapabilityDomainEventHandler>();
 
 
             services.AddTransient<KafkaConsumerFactory.KafkaConfiguration>();
@@ -132,11 +132,11 @@ namespace K8sJanitor.WebApi
 
             var serviceProvider = services.BuildServiceProvider();
 
-            eventRegistry
-                .Register<CapabilityCreatedDomainEvent>(
-                    eventTypeName: "capability_created",
-                    topicName: "build.capabilities",
-                    eventHandler: serviceProvider.GetRequiredService<IEventHandler<CapabilityCreatedDomainEvent>>());
+            var topic = "build.capabilities";
+            eventRegistry.Register<ContextAddedToCapabilityDomainEvent>(
+                eventTypeName: "context_added_to_capability",
+                topicName: topic,
+                eventHandler: serviceProvider.GetRequiredService<IEventHandler<ContextAddedToCapabilityDomainEvent>>() );
 
             services.AddTransient<IEventDispatcher, EventDispatcher>();
         }
