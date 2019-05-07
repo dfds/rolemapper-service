@@ -8,13 +8,13 @@ namespace K8sJanitor.WebApi
     public class CapabilityRegisteredEventHandler : IEventHandler<CapabilityRegisteredEvent>
     {
         private readonly IConfigMapService _configMapService;
-        private readonly INamespaceRespoitory _namespaceRepository;
+        private readonly INamespaceRepository _namespaceRepository;
         private readonly IRoleRepository _roleRepository;
         private readonly IRoleBindingRepository _roleBindingRepository;
 
         public CapabilityRegisteredEventHandler(
             IConfigMapService configMapService,
-            INamespaceRespoitory namespaceRepository,
+            INamespaceRepository namespaceRepository,
             IRoleRepository roleRepository,
             IRoleBindingRepository roleBindingRepository
         )

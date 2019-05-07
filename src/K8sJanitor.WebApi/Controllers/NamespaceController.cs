@@ -14,12 +14,12 @@ namespace K8sJanitor.WebApi.Controllers
     public class NamespaceController : ControllerBase
     {
         private readonly IAddNamespaceRequestValidator _addNamespaceRequestValidator;
-        private readonly INamespaceRespoitory _namespaceRepository;
+        private readonly INamespaceRepository _namespaceRepository;
         private readonly IRoleRepository _roleRepository;
 
         public NamespaceController(
             IAddNamespaceRequestValidator addNamespaceRequestValidator,
-            INamespaceRespoitory namespaceRepository,
+            INamespaceRepository namespaceRepository,
             IRoleRepository roleRepository 
         )
         {

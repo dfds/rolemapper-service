@@ -20,7 +20,7 @@ namespace K8sJanitor.WebApi.IntegrationTests.Repositories.Kubernetes.RoleReposit
             var client = new k8s.Kubernetes(config);
             var wrapper = new KubernetesWrapper(client);
 
-            var namespaceRepository = new NamespaceRespoitory(client);
+            var namespaceRepository = new NamespaceRepository(client);
             var subjectNameSpace = "namespace-with-role-test";
             var awsRoleName = "notUSed";
 

@@ -17,7 +17,7 @@ namespace K8sJanitor.WebApi.IntegrationTests.Repositories.Kubernetes.RoleBinding
 
             var client = new k8s.Kubernetes(config);
             var wrapper = new KubernetesWrapper(client);
-            var namespaceRepository = new NamespaceRespoitory(client);
+            var namespaceRepository = new NamespaceRepository(client);
             var roleRepository = new WebApi.Repositories.Kubernetes.RoleRepository(wrapper);
             var sut = new WebApi.Repositories.Kubernetes.RoleBindingRepository(client);
     

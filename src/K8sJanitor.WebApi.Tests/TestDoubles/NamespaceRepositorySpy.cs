@@ -4,7 +4,7 @@ using K8sJanitor.WebApi.Repositories.Kubernetes;
 
 namespace K8sJanitor.WebApi.Tests.TestDoubles
 {
-    public class NamespaceRepositorySpy : INamespaceRespoitory
+    public class NamespaceRepositorySpy : INamespaceRepository
     {
         public List<KeyValuePair<string, string>> Namespaces { get; }
 

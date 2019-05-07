@@ -99,7 +99,7 @@ namespace K8sJanitor.WebApi
             services.AddTransient<IAwsAuthConfigMapRepository, AwsAuthConfigMapRepository>();
             services.AddTransient<IAddRoleRequestValidator, AddRoleRequestValidator>();
             services.AddTransient<IAddNamespaceRequestValidator, AddNamespaceRequestValidator>();
-            services.AddTransient<INamespaceRespoitory, NamespaceRespoitory>();
+            services.AddTransient<INamespaceRepository, NamespaceRepository>();
             services.AddTransient<IRoleRepository, RoleRepository>();
             services.AddTransient<IRoleBindingRepository, RoleBindingRepository>();
             services.AddTransient<IKubernetesWrapper, KubernetesWrapper>();

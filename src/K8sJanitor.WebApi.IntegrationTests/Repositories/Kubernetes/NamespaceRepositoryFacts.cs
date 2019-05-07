@@ -19,7 +19,7 @@ namespace K8sJanitor.WebApi.IntegrationTests.Repositories.Kubernetes
             var config = KubernetesClientConfiguration.BuildConfigFromConfigFile();
             var client = new k8s.Kubernetes(config);
 
-            var sut = new NamespaceRespoitory(client);
+            var sut = new NamespaceRepository(client);
 
             try
             {
@@ -54,7 +54,7 @@ namespace K8sJanitor.WebApi.IntegrationTests.Repositories.Kubernetes
             var config = KubernetesClientConfiguration.BuildConfigFromConfigFile();
             var client = new k8s.Kubernetes(config);
 
-            var sut = new NamespaceRespoitory(client);
+            var sut = new NamespaceRepository(client);
 
             try
             {

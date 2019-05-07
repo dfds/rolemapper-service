@@ -8,11 +8,11 @@ using Microsoft.Rest;
 
 namespace K8sJanitor.WebApi.Repositories.Kubernetes
 {
-    public class NamespaceRespoitory : INamespaceRespoitory
+    public class NamespaceRepository : INamespaceRepository
     {
         private readonly IKubernetes _client;
 
-        public NamespaceRespoitory(IKubernetes client)
+        public NamespaceRepository(IKubernetes client)
         {
             _client = client;
         }
