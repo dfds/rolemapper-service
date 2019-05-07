@@ -16,5 +16,7 @@ namespace K8sJanitor.WebApi.EventHandlers
            
             return Task.CompletedTask;
         }
+        
+        
     }
 }
