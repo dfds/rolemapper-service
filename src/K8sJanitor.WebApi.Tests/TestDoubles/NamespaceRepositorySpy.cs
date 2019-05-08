@@ -21,6 +21,11 @@ namespace K8sJanitor.WebApi.Tests.TestDoubles
             return Task.CompletedTask;
         }
 
+        public Task CreateNamespaceAsync(NamespaceName namespaceName, IDictionary<string, string> labels)
+        {
+            throw new System.NotImplementedException();
+        }
+
         public Task CreateNamespaceAsync(NamespaceName namespaceName)
         {
             throw new System.NotImplementedException();

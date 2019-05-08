@@ -1,23 +1,38 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using K8sJanitor.WebApi.Domain.Events;
 using K8sJanitor.WebApi.Models;
+using K8sJanitor.WebApi.Repositories.Kubernetes;
 
 namespace K8sJanitor.WebApi.EventHandlers
 {
     public class ContextAddedToCapabilityDomainEventHandler : IEventHandler<ContextAddedToCapabilityDomainEvent>, WebApi.IEventHandler<ContextAddedToCapabilityDomainEvent>
     {
-        public Task HandleAsync(ContextAddedToCapabilityDomainEvent domainEvent)
-        {
-            Console.WriteLine($"ContextId: \"{domainEvent.Data.ContextId}\" ContextName: \"{domainEvent.Data.ContextName}\" is added to CapabilityId: \"{domainEvent.Data.CapabilityId}\" CapabilityName: \"{domainEvent.Data.CapabilityName}\"");
+        private readonly INamespaceRepository _namespaceRepository;
 
+        public ContextAddedToCapabilityDomainEventHandler(INamespaceRepository namespaceRepository)
+        {
+            _namespaceRepository = namespaceRepository;
+        }
+
+        public async Task HandleAsync(ContextAddedToCapabilityDomainEvent domainEvent)
+        {
             var namespaceName = CreateNamespaceName(
                 capabilityId: domainEvent.Data.CapabilityId,
                 capabilityName: domainEvent.Data.CapabilityName,
                 contextName: domainEvent.Data.ContextName
             );
-            Console.WriteLine($"Name will be: \"{namespaceName}\"");
-            return Task.CompletedTask;
+
+            var labels = new Dictionary<string, string>
+            {
+                {"capability-id", domainEvent.Data.CapabilityId.ToString()},
+                {"capability-name", domainEvent.Data.CapabilityName},
+                {"context-id", domainEvent.Data.ContextId.ToString()},
+                {"context-name", domainEvent.Data.ContextName}
+            };
+
+            await _namespaceRepository.CreateNamespaceAsync(namespaceName, labels);
         }
 
         public NamespaceName CreateNamespaceName(
@@ -26,9 +41,9 @@ namespace K8sJanitor.WebApi.EventHandlers
             string contextName
         )
         {
-            var uniqueContext = capabilityName + "-" + capabilityId.ToString().Substring(0, 8);
-
-            var name = uniqueContext + "." + contextName;
+            var uniqueCapability = capabilityName + "-" + capabilityId.ToString().Substring(0, 8);
+ 
+            var name = uniqueCapability + "." + contextName;
             
             return NamespaceName.Create(name);
         }
