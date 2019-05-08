@@ -41,7 +41,7 @@ namespace K8sJanitor.WebApi.Controllers
 
             try
             {
-                await _namespaceRepository.CreateNamespace(
+                await _namespaceRepository.CreateNamespaceAsync(
                     addNamespaceRequest.NamespaceName,
                     addNamespaceRequest.RoleName
                 );

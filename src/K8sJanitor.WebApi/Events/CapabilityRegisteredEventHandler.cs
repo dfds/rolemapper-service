@@ -37,7 +37,7 @@ namespace K8sJanitor.WebApi
 
             var namespaceName = capabilityName;
 
-            await _namespaceRepository.CreateNamespace(
+            await _namespaceRepository.CreateNamespaceAsync(
                 namespaceName: namespaceName,
                 roleName: configmapRoleName
             );

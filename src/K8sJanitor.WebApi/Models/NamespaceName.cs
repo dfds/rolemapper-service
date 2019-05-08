@@ -12,7 +12,7 @@ namespace K8sJanitor.WebApi.Models
 
         public static NamespaceName Create(string name)
         {
-            name = name.ToLower();
+            name = name.ToLower().Replace(" ", "-");
             if (Regex.IsMatch(name, @"[a-z0-9\-\.]") == false)
             {
                 throw new ArgumentException($"namespace name can only contain letters, digits, -, and .");

@@ -28,7 +28,7 @@ namespace K8sJanitor.WebApi.IntegrationTests.Repositories.Kubernetes.RoleReposit
             try
             {
                 // Act
-                await namespaceRepository.CreateNamespace(subjectNameSpace, awsRoleName);
+                await namespaceRepository.CreateNamespaceAsync(subjectNameSpace, awsRoleName);
                 await sut.CreateNamespaceFullAccessRole(subjectNameSpace);
 
                 // Assert

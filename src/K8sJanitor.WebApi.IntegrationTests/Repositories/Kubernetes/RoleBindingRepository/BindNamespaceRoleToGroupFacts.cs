@@ -27,7 +27,7 @@ namespace K8sJanitor.WebApi.IntegrationTests.Repositories.Kubernetes.RoleBinding
 
             try
             {
-                await namespaceRepository.CreateNamespace(subjectNameSpace, awsRoleName);
+                await namespaceRepository.CreateNamespaceAsync(subjectNameSpace, awsRoleName);
                 var roleName = await roleRepository.CreateNamespaceFullAccessRole(subjectNameSpace);
                 
                 // Act
