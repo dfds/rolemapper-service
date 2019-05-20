@@ -3,3 +3,22 @@ curl -X POST -H "Content-Type: application/vnd.kafka.json.v2+json" \
           "http://localhost:8082/topics/build.capabilities"
  
  ###
+ 
+curl -X POST -H "Content-Type: application/vnd.kafka.json.v2+json" \
+--data '{
+        "version": "1",
+        "eventName": "aws_context_account_created",
+        "x-correlationId": "874ba750-ae81-446f-90c7-01b49228c327",
+        "x-sender": "eg. FQDN of assembly",
+        "payload": {
+            "capabilityId": "bc3f3bbe-eeee-4230-8b2f-d0e1c327c59c",
+            "capabilityName": "PAX Bookings",
+            "capabilityRootId": "pax-bookings-A43aS",
+            "contextId": "0d03e3ad-2118-46b7-970e-0ca87b59a202",
+            "contextName": "blue",
+            "accountId": "1234567890",
+            "roleArn": "arn:aws:iam::1234567890:role/pax-bookings-A43aS",
+            "roleEmail": "aws.pax-bookings-a43as@dfds.com"
+        }
+    }' \
+"http://localhost:5000/api/events"

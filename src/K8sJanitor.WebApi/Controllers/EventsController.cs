@@ -1,25 +1,25 @@
 using System.Threading.Tasks;
+using K8sJanitor.WebApi.Infrastructure.Messaging;
 using Microsoft.AspNetCore.Mvc;
-using K8sJanitor.WebApi.Models.ExternalEvents;
 
 namespace K8sJanitor.WebApi.Controllers
 {
     [Route("api/events")]
     public class EventsController : ControllerBase
     {
-        private readonly  IEventHandler<CapabilityRegisteredEvent> _teamCreatedEventHandler;
+        private readonly  IEventDispatcher _eventDispatcher;
 
-        public EventsController( IEventHandler<CapabilityRegisteredEvent> teamCreatedEventHandler)
+        public EventsController(IEventDispatcher eventDispatcher)
         {
-            _teamCreatedEventHandler = teamCreatedEventHandler;
+            _eventDispatcher = eventDispatcher;
         }
 
         [HttpPost("")]
         public async Task AddEvent([FromBody] Newtonsoft.Json.Linq.JObject jObject)
         {
-            var teamEvent = jObject.ToObject<CapabilityRegisteredEvent>();
+            var eventJson = jObject.ToString(Newtonsoft.Json.Formatting.None);
 
-            await _teamCreatedEventHandler.HandleAsync(teamEvent);
+            await _eventDispatcher.Send(eventJson);
         }
     }
 }
