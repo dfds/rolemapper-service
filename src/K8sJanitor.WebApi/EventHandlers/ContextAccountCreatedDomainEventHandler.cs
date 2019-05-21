@@ -85,7 +85,7 @@ namespace K8sJanitor.WebApi.EventHandlers
         {
             var uniqueCapability = capabilityName + "-" + capabilityId.ToString().Substring(0, 8);
  
-            var name = uniqueCapability + "." + contextName;
+            var name = uniqueCapability + "-" + contextName;
             
             return NamespaceName.Create(name);
         }
