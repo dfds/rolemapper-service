@@ -10,7 +10,7 @@ namespace K8sJanitor.WebApi.Repositories.Kubernetes
 
         Task CreateNamespaceAsync(
             NamespaceName namespaceName,
-            IDictionary<string, string> labels
+            IEnumerable<Label> labels
         );
         Task CreateNamespaceAsync(NamespaceName namespaceName);
 

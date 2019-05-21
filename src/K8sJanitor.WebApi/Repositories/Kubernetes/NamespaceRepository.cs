@@ -37,7 +37,7 @@ namespace K8sJanitor.WebApi.Repositories.Kubernetes
         
         public async Task CreateNamespaceAsync(
             NamespaceName namespaceName, 
-            IDictionary<string, string> labels
+            IEnumerable<Label> labels
         )
         {
             var ns = new V1Namespace
@@ -45,7 +45,7 @@ namespace K8sJanitor.WebApi.Repositories.Kubernetes
                 Metadata = new V1ObjectMeta
                 {
                     Name = namespaceName,
-                    Labels = labels
+                    Labels = labels.ToDictionary(l => l.Key, l => l.Value)
                 }
             };
 

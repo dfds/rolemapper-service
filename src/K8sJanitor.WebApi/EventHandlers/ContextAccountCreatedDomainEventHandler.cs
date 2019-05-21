@@ -52,13 +52,15 @@ namespace K8sJanitor.WebApi.EventHandlers
                 capabilityName: domainEvent.Data.CapabilityName,
                 contextName: domainEvent.Data.ContextName
             );
-            var labels = new Dictionary<string, string>
+            
+            var labels = new List<Label>
             {
-                {"capability-id", domainEvent.Data.CapabilityId.ToString()},
-                {"capability-name", domainEvent.Data.CapabilityName},
-                {"context-id", domainEvent.Data.ContextId.ToString()},
-                {"context-name", domainEvent.Data.ContextName}
+                Label.CreateSafely("capability-id", domainEvent.Data.CapabilityId.ToString()),
+                Label.CreateSafely("capability-name", domainEvent.Data.CapabilityName),
+                Label.CreateSafely("context-id", domainEvent.Data.ContextId.ToString()),
+                Label.CreateSafely("context-name", domainEvent.Data.ContextName)
             };
+            
             await _namespaceRepository.CreateNamespaceAsync(namespaceName, labels);
 
             return namespaceName;

@@ -29,7 +29,7 @@ namespace K8sJanitor.WebApi.Tests.TestDoubles
             return Task.CompletedTask;
         }
 
-        public Task CreateNamespaceAsync(NamespaceName namespaceName, IDictionary<string, string> labels)
+        public Task CreateNamespaceAsync(NamespaceName namespaceName, IEnumerable<Label> labels)
         {
             var @namespace = new Namespace
             {
@@ -75,7 +75,7 @@ namespace K8sJanitor.WebApi.Tests.TestDoubles
             public NamespaceName NamespaceName { get; set; }
             public string RoleName { get; set; }
             public IDictionary<string, string> Annotations { get; set; }
-            public IDictionary<string, string> Labels { get; set; }
+            public IEnumerable<Label> Labels { get; set; }
         }
     }
 }
