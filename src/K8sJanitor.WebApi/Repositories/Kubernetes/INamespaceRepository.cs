@@ -13,5 +13,8 @@ namespace K8sJanitor.WebApi.Repositories.Kubernetes
             IDictionary<string, string> labels
         );
         Task CreateNamespaceAsync(NamespaceName namespaceName);
+
+        Task AddAnnotations(NamespaceName namespaceName, Dictionary<string, string> annotations);
+
     }
 }

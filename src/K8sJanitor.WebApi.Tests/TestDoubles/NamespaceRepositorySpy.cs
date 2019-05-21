@@ -30,5 +30,10 @@ namespace K8sJanitor.WebApi.Tests.TestDoubles
         {
             throw new System.NotImplementedException();
         }
+
+        public Task AddAnnotations(NamespaceName namespaceName, Dictionary<string, string> annotations)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }
