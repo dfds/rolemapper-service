@@ -8,7 +8,7 @@ using K8sJanitor.WebApi.Services;
 
 namespace K8sJanitor.WebApi.EventHandlers
 {
-    public class ContextAccountCreatedDomainEventHandler  : IEventHandler<ContextAccountCreatedDomainEvent>, WebApi.IEventHandler<ContextAccountCreatedDomainEvent>
+    public class ContextAccountCreatedDomainEventHandler  : IEventHandler<ContextAccountCreatedDomainEvent>
     {
         private readonly IConfigMapService _configMapService;
         private readonly INamespaceRepository _namespaceRepository;

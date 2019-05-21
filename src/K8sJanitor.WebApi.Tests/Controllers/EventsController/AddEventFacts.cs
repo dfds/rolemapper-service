@@ -1,5 +1,6 @@
 using System.Net;
 using System.Threading.Tasks;
+using K8sJanitor.WebApi.EventHandlers;
 using K8sJanitor.WebApi.Models.ExternalEvents;
 using K8sJanitor.WebApi.Tests.Builders;
 using K8sJanitor.WebApi.Tests.TestDoubles;
