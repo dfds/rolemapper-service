@@ -62,7 +62,7 @@ namespace K8sJanitor.WebApi.Tests
         
         
         [Fact]
-        public void Correct_WILL_truncate_string_lenght_over_63()
+        public void Correct_WILL_truncate_string_length_over_63()
         {
             // Arrange
             var input = "foobaafoobaafoobaafoobaafoobaafoobaafoobaafoobaafoobaafoobaafoob";

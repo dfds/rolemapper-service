@@ -57,7 +57,7 @@ namespace K8sJanitor.WebApi.Models
                 throw new ArgumentException("Must end with an alphanumeric character", parameterName);
             }
 
-            if (Regex.IsMatch(parameterValue, @"^[a-z0-9A-Z\.-_]$") == false)
+            if (Regex.IsMatch(parameterValue, @"^[a-z0-9A-Z-_.]*$") == false)
             {
                 throw new ArgumentException("Can only contain alphanumeric characters,'.','-' and '_'", parameterName);
             }
