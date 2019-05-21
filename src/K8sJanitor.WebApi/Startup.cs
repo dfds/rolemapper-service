@@ -124,7 +124,6 @@ namespace K8sJanitor.WebApi
         {
             var eventRegistry = new DomainEventRegistry();
             services.AddSingleton(eventRegistry);
-            services.AddTransient<IEventHandler<ContextAddedToCapabilityDomainEvent>, ContextAddedToCapabilityDomainEventHandler>();
             services.AddTransient<IEventHandler<ContextAccountCreatedDomainEvent>, ContextAccountCreatedDomainEventHandler>();
 
 
@@ -134,11 +133,6 @@ namespace K8sJanitor.WebApi
             var serviceProvider = services.BuildServiceProvider();
 
             var topic = "build.capabilities";
-            eventRegistry.Register<ContextAddedToCapabilityDomainEvent>(
-                eventTypeName: "context_added_to_capability",
-                topicName: topic,
-                eventHandler: serviceProvider.GetRequiredService<IEventHandler<ContextAddedToCapabilityDomainEvent>>() );
-            
             eventRegistry.Register<ContextAccountCreatedDomainEvent>(
                 eventTypeName: "aws_context_account_created",
                 topicName: topic,
