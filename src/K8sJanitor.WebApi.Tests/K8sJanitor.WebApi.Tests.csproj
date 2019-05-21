@@ -22,4 +22,8 @@
     <ProjectReference Include="..\K8sJanitor.WebApi\K8sJanitor.WebApi.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Controllers\EventsController" />
+  </ItemGroup>
+
 </Project>
