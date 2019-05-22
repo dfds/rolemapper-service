@@ -6,6 +6,7 @@ using K8sJanitor.WebApi.Tests.TestDoubles;
 using K8sJanitor.WebApi.Repositories;
 using K8sJanitor.WebApi.Services;
 using K8sJanitor.WebApi.Validators;
+using K8sJanitor.WebApi.Wrappers;
 
 namespace K8sJanitor.WebApi.Tests
 {
@@ -19,6 +20,7 @@ namespace K8sJanitor.WebApi.Tests
                 var client = builder
                     .WithService<IAwsAuthConfigMapRepository>(new AwsAuthConfigMapRepositoryStub())
                     .WithService<IPersistenceRepository>(new PersistenceRepositoryStub())
+                    .WithService<IKubernetesWrapper>(new KubernetesWrapperDummy())
                     .Build();
 
                 var response = await client.GetAsync("/api/configmap");
@@ -35,6 +37,7 @@ namespace K8sJanitor.WebApi.Tests
                 var client = builder
                     .WithService<IAddRoleRequestValidator>(new AddRoleRequestValidator())
                     .WithService<IConfigMapService>(new ConfigMapServiceStub())
+                    .WithService<IKubernetesWrapper>(new KubernetesWrapperDummy())
                     .Build();
 
                 var stubInput = @"{

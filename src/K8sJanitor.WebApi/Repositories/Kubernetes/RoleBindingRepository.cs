@@ -2,14 +2,15 @@ using System.Collections.Generic;
     using System.Threading.Tasks;
 using k8s;
 using k8s.Models;
+using K8sJanitor.WebApi.Wrappers;
 
 namespace K8sJanitor.WebApi.Repositories.Kubernetes
 {
     public class RoleBindingRepository : IRoleBindingRepository
     {
-        private readonly IKubernetes _client;
+        private readonly IKubernetesWrapper _client;
 
-        public RoleBindingRepository(IKubernetes client)
+        public RoleBindingRepository(IKubernetesWrapper client)
         {
             _client = client;
         }

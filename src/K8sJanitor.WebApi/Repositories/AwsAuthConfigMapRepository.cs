@@ -5,16 +5,17 @@ using k8s;
 using k8s.Models;
 using Microsoft.Rest;
 using K8sJanitor.WebApi.Extensions;
+using K8sJanitor.WebApi.Wrappers;
 
 namespace K8sJanitor.WebApi.Repositories
 {
     public class AwsAuthConfigMapRepository : IAwsAuthConfigMapRepository
     {
-        private readonly IKubernetes _client;
+        private readonly IKubernetesWrapper _client;
         private static readonly string ConfigMapName = "aws-auth";
         private static readonly string ConfigMapNamespace = "kube-system";
 
-        public AwsAuthConfigMapRepository(IKubernetes client)
+        public AwsAuthConfigMapRepository(IKubernetesWrapper client)
         {
             _client = client;
         }

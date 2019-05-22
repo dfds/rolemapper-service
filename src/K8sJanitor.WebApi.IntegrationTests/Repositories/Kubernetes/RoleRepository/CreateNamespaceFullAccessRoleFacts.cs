@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using k8s;
@@ -20,8 +21,8 @@ namespace K8sJanitor.WebApi.IntegrationTests.Repositories.Kubernetes.RoleReposit
             var client = new k8s.Kubernetes(config);
             var wrapper = new KubernetesWrapper(client);
 
-            var namespaceRepository = new NamespaceRepository(client);
-            var subjectNameSpace = "namespace-with-role-test";
+            var namespaceRepository = new NamespaceRepository(wrapper);
+            var subjectNameSpace = "namespace-with-role-test-" + Guid.NewGuid().ToString().Substring(0,5);
             var awsRoleName = "notUSed";
 
             var sut = new WebApi.Repositories.Kubernetes.RoleRepository(wrapper);

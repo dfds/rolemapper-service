@@ -5,6 +5,7 @@ using Amazon;
 using Amazon.S3;
 using Amazon.S3.Transfer;
 using k8s;
+using k8s.Exceptions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
@@ -82,13 +83,18 @@ namespace K8sJanitor.WebApi
                 string.IsNullOrWhiteSpace(Configuration["KUBERNETES_SERVICE_PORT"]) == false
             )
             {
-                services.AddTransient<IKubernetes>(serviceProvider =>
-                    new Kubernetes(KubernetesClientConfiguration.InClusterConfig()));
+                services.AddTransient<IKubernetesWrapper>(k =>
+                    new KubernetesWrapper(new Kubernetes(KubernetesClientConfiguration.InClusterConfig())));
+            }
+            else if(ExecuteAgainstK8s.Allowed)
+            {  
+                services.AddTransient<IKubernetesWrapper>(k =>
+                    new KubernetesWrapper(new Kubernetes(KubernetesClientConfiguration.BuildConfigFromConfigFile())));
             }
             else
             {
-                services.AddTransient<IKubernetes>(serviceProvider =>
-                    new Kubernetes(KubernetesClientConfiguration.BuildConfigFromConfigFile()));
+                services.AddTransient<IKubernetesWrapper>(k =>
+                    new KubernetesWrapper(null));
             }
 
 
@@ -101,7 +107,6 @@ namespace K8sJanitor.WebApi
             services.AddTransient<INamespaceRepository, NamespaceRepository>();
             services.AddTransient<IRoleRepository, RoleRepository>();
             services.AddTransient<IRoleBindingRepository, RoleBindingRepository>();
-            services.AddTransient<IKubernetesWrapper, KubernetesWrapper>();
 
             services.AddHostedService<MetricHostedService>();
 

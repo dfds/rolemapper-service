@@ -2,20 +2,19 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using k8s;
 using k8s.Models;
 using K8sJanitor.WebApi.Models;
+using K8sJanitor.WebApi.Wrappers;
 using Microsoft.AspNetCore.JsonPatch;
-using Microsoft.AspNetCore.JsonPatch.Operations;
 using Microsoft.Rest;
 
 namespace K8sJanitor.WebApi.Repositories.Kubernetes
 {
     public class NamespaceRepository : INamespaceRepository
     {
-        private readonly IKubernetes _client;
+        private readonly IKubernetesWrapper _client;
 
-        public NamespaceRepository(IKubernetes client)
+        public NamespaceRepository(IKubernetesWrapper client)
         {
             _client = client;
         }

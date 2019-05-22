@@ -6,6 +6,7 @@ using k8s;
 using k8s.Models;
 using K8sJanitor.WebApi.Models;
 using K8sJanitor.WebApi.Repositories.Kubernetes;
+using K8sJanitor.WebApi.Wrappers;
 using Xunit;
 
 namespace K8sJanitor.WebApi.IntegrationTests.Repositories.Kubernetes
@@ -22,7 +23,7 @@ namespace K8sJanitor.WebApi.IntegrationTests.Repositories.Kubernetes
             var config = KubernetesClientConfiguration.BuildConfigFromConfigFile();
             var client = new k8s.Kubernetes(config);
 
-            var sut = new NamespaceRepository(client);
+            var sut = new NamespaceRepository(new KubernetesWrapper(client));
 
             try
             {
@@ -66,7 +67,7 @@ namespace K8sJanitor.WebApi.IntegrationTests.Repositories.Kubernetes
             var config = KubernetesClientConfiguration.BuildConfigFromConfigFile();
             var client = new k8s.Kubernetes(config);
 
-            var sut = new NamespaceRepository(client);
+            var sut = new NamespaceRepository(new KubernetesWrapper(client));
 
             try
             {
@@ -109,7 +110,7 @@ namespace K8sJanitor.WebApi.IntegrationTests.Repositories.Kubernetes
             var config = KubernetesClientConfiguration.BuildConfigFromConfigFile();
             var client = new k8s.Kubernetes(config);
 
-            var sut = new NamespaceRepository(client);
+            var sut = new NamespaceRepository(new KubernetesWrapper(client));
 
             try
             {
@@ -149,7 +150,7 @@ namespace K8sJanitor.WebApi.IntegrationTests.Repositories.Kubernetes
             var config = KubernetesClientConfiguration.BuildConfigFromConfigFile();
             var client = new k8s.Kubernetes(config);
 
-            var sut = new NamespaceRepository(client);
+            var sut = new NamespaceRepository(new KubernetesWrapper(client));
 
             try
             {
@@ -175,16 +176,16 @@ namespace K8sJanitor.WebApi.IntegrationTests.Repositories.Kubernetes
             }
         }
 
-        [Fact]
+        [FactRunsOnK8s]
         public async Task Two_Namespace_Will_Create_A_Error()
         {
             // Arrange
-            var namespaceName = "namespace-from-test";
+            var namespaceName = "namespace-from-test-" + Guid.NewGuid().ToString().Substring(0,5);
             var awsRoleName = "awsRoleName";
             var config = KubernetesClientConfiguration.BuildConfigFromConfigFile();
             var client = new k8s.Kubernetes(config);
 
-            var sut = new NamespaceRepository(client);
+            var sut = new NamespaceRepository(new KubernetesWrapper(client));
 
             try
             {

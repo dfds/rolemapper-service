@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using k8s;
@@ -10,18 +11,18 @@ namespace K8sJanitor.WebApi.IntegrationTests.Repositories.Kubernetes.RoleBinding
 {
     public class BindNamespaceRoleToGroupFacts
     {
-        [Fact]
+        [FactRunsOnK8s]
         public async Task Bind_To_A_Existing_Namespace()
         {
             var config = KubernetesClientConfiguration.BuildConfigFromConfigFile();
 
             var client = new k8s.Kubernetes(config);
             var wrapper = new KubernetesWrapper(client);
-            var namespaceRepository = new NamespaceRepository(client);
+            var namespaceRepository = new NamespaceRepository(wrapper);
             var roleRepository = new WebApi.Repositories.Kubernetes.RoleRepository(wrapper);
-            var sut = new WebApi.Repositories.Kubernetes.RoleBindingRepository(client);
+            var sut = new WebApi.Repositories.Kubernetes.RoleBindingRepository(wrapper);
     
-            var subjectNameSpace = "namespace-with-role-test";
+            var subjectNameSpace = "namespace-with-role-test-" + Guid.NewGuid().ToString().Substring(0,5);
             var awsRoleName = "notUSed";
             var groupName = "a-test-group";
 
