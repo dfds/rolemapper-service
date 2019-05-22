@@ -19,7 +19,7 @@ namespace K8sJanitor.WebApi.Wrappers
             bool? exact = null,
             bool? export = null,
             string pretty = null,
-            CancellationToken cancellationToken= default
+            CancellationToken cancellationToken= default(CancellationToken)
         );
         
         Task<V1Namespace> ReadNamespaceAsync(
@@ -27,7 +27,7 @@ namespace K8sJanitor.WebApi.Wrappers
             bool? exact = null,
             bool? export = null,
             string pretty = null,
-            CancellationToken cancellationToken= default
+            CancellationToken cancellationToken= default(CancellationToken)
         );
 
         Task<HttpOperationResponse<V1Namespace>> PatchNamespaceWithHttpMessagesAsync(
@@ -35,20 +35,20 @@ namespace K8sJanitor.WebApi.Wrappers
             string name,
             string pretty = null,
             Dictionary<string, List<string>> customHeaders = null,
-            CancellationToken cancellationToken = default
+            CancellationToken cancellationToken = default(CancellationToken)
         );
 
         Task CreateNamespaceAsync(
             V1Namespace body,
             string pretty = null,
-            CancellationToken cancellationToken = default
+            CancellationToken cancellationToken = default(CancellationToken)
         );
 
         Task<V1RoleBinding> CreateNamespacedRoleBindingAsync(
             V1RoleBinding body,
             string namespaceParameter,
             string pretty = null,
-            CancellationToken cancellationToken = default
+            CancellationToken cancellationToken = default(CancellationToken)
         );
     }
 }

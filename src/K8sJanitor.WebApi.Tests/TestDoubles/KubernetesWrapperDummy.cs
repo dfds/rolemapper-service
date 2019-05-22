@@ -26,30 +26,30 @@ namespace K8sJanitor.WebApi.Tests.TestDoubles
         }
 
         public Task<V1ConfigMap> ReadNamespacedConfigMapAsync(string name, string namespaceParameter, bool? exact = null, bool? export = null,
-            string pretty = null, CancellationToken cancellationToken = default)
+            string pretty = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             return Task.FromResult(new V1ConfigMap());
         }
 
         public Task<V1Namespace> ReadNamespaceAsync(string name, bool? exact = null, bool? export = null, string pretty = null,
-            CancellationToken cancellationToken = default)
+            CancellationToken cancellationToken = default(CancellationToken))
         {
             return Task.FromResult(new V1Namespace());
         }
 
         public Task<HttpOperationResponse<V1Namespace>> PatchNamespaceWithHttpMessagesAsync(V1Patch body, string name, string pretty = null,
-            Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default)
+            Dictionary<string, List<string>> customHeaders = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             return Task.FromResult(new HttpOperationResponse<V1Namespace>());
         }
 
-        public Task CreateNamespaceAsync(V1Namespace body, string pretty = null, CancellationToken cancellationToken = default)
+        public Task CreateNamespaceAsync(V1Namespace body, string pretty = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             return Task.CompletedTask;
         }
 
         public Task<V1RoleBinding> CreateNamespacedRoleBindingAsync(V1RoleBinding body, string namespaceParameter, string pretty = null,
-            CancellationToken cancellationToken = default)
+            CancellationToken cancellationToken = default(CancellationToken))
         {
             return Task.FromResult(new V1RoleBinding());
         }
