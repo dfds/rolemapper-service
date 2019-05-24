@@ -20,7 +20,6 @@ using K8sJanitor.WebApi.Domain.Events;
 using K8sJanitor.WebApi.EventHandlers;
 using K8sJanitor.WebApi.HealthChecks;
 using K8sJanitor.WebApi.Infrastructure.Messaging;
-using K8sJanitor.WebApi.Models.ExternalEvents;
 using K8sJanitor.WebApi.Repositories;
 using K8sJanitor.WebApi.Repositories.Kubernetes;
 using K8sJanitor.WebApi.Services;
@@ -110,7 +109,6 @@ namespace K8sJanitor.WebApi
             services.AddTransient<IRoleBindingRepository, RoleBindingRepository>();
 
             // Event handlers
-            services.AddTransient<IEventHandler<CapabilityRegisteredEvent>, CapabilityRegisteredEventHandler>();
 
             services.AddHostedService<MetricHostedService>();
 
@@ -130,6 +128,7 @@ namespace K8sJanitor.WebApi
             var eventRegistry = new DomainEventRegistry();
             services.AddSingleton(eventRegistry);
             services.AddTransient<IEventHandler<ContextAccountCreatedDomainEvent>, ContextAccountCreatedDomainEventHandler>();
+            services.AddTransient<IEventHandler<CapabilityRegisteredDomainEvent>, CapabilityRegisteredEventHandler>();
 
 
             services.AddTransient<KafkaConsumerFactory.KafkaConfiguration>();
@@ -142,6 +141,11 @@ namespace K8sJanitor.WebApi
                 eventTypeName: "aws_context_account_created",
                 topicName: topic,
                 eventHandler: serviceProvider.GetRequiredService<IEventHandler<ContextAccountCreatedDomainEvent>>() );
+
+            eventRegistry.Register(
+                eventTypeName: "capability_registered",
+                topicName: topic,
+                eventHandler: serviceProvider.GetRequiredService<IEventHandler<CapabilityRegisteredDomainEvent>>() );
 
             services.AddTransient<IEventDispatcher, EventDispatcher>();
         }

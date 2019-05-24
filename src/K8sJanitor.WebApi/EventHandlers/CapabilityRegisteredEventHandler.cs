@@ -1,12 +1,12 @@
 using System.Threading.Tasks;
+using K8sJanitor.WebApi.Domain.Events;
 using K8sJanitor.WebApi.EventHandlers;
-using K8sJanitor.WebApi.Models.ExternalEvents;
 using K8sJanitor.WebApi.Repositories.Kubernetes;
 using K8sJanitor.WebApi.Services;
 
 namespace K8sJanitor.WebApi
 {
-    public class CapabilityRegisteredEventHandler : IEventHandler<CapabilityRegisteredEvent>
+    public class CapabilityRegisteredEventHandler : IEventHandler<CapabilityRegisteredDomainEvent>
     {
         private readonly IConfigMapService _configMapService;
         private readonly INamespaceRepository _namespaceRepository;
@@ -26,14 +26,14 @@ namespace K8sJanitor.WebApi
             _configMapService = configMapService;
         }
 
-        public async Task HandleAsync(CapabilityRegisteredEvent capabilityRegisteredEvent)
+        public async Task HandleAsync(CapabilityRegisteredDomainEvent capabilityRegisteredDomainEvent)
         {
-            var capabilityName = capabilityRegisteredEvent.CapabilityName.ToLower();
+            var capabilityName = capabilityRegisteredDomainEvent.Data.CapabilityName.ToLower();
             
             var configmapRoleName = capabilityName;
             await _configMapService.AddRole(
                 roleName: configmapRoleName,
-                roleArn: capabilityRegisteredEvent.RoleArn
+                roleArn: capabilityRegisteredDomainEvent.Data.RoleArn
             );
 
             var namespaceName = capabilityName;

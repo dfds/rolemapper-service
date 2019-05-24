@@ -1,7 +1,9 @@
+using System;
 using System.Linq;
 using System.Threading.Tasks;
-using K8sJanitor.WebApi.Models.ExternalEvents;
+using K8sJanitor.WebApi.Domain.Events;
 using K8sJanitor.WebApi.Tests.TestDoubles;
+using Newtonsoft.Json.Linq;
 using Xunit;
 
 namespace K8sJanitor.WebApi.Tests.Events
@@ -24,9 +26,16 @@ namespace K8sJanitor.WebApi.Tests.Events
                 roleBindingRepositorySpy
             );
 
-            var teamName = "teamname";
+            var capabilityName = "capabilityName".ToLower();
             var roleArn = "rolearn";
-            var @event = new CapabilityRegisteredEvent(teamName, roleArn);
+
+            var data = new CapabilityRegisteredDomainEventData(capabilityName, roleArn);
+            var g = new GeneralDomainEvent(
+                Guid.Empty,
+                "capability_registered",
+                JObject.FromObject(data)
+            );
+            var @event = new CapabilityRegisteredDomainEvent(g);
 
 
             // Act
@@ -34,17 +43,18 @@ namespace K8sJanitor.WebApi.Tests.Events
 
 
             // Assert
-            Assert.Equal(teamName, configMapServiceSpy.Roles.Single().Key);
+            Assert.Equal(capabilityName, configMapServiceSpy.Roles.Single().Key);
             Assert.Equal(roleArn, configMapServiceSpy.Roles.Single().Value);
 
-            Assert.Equal(teamName, namespaceRepositorySpy.Namespaces.Single().Key);
-            Assert.Equal(teamName, namespaceRepositorySpy.Namespaces.Single().Value);
+            Assert.Equal(capabilityName, namespaceRepositorySpy.Namespaces.Single().NamespaceName);
+            Assert.Equal(capabilityName, namespaceRepositorySpy.Namespaces.Single().NamespaceName);
 
-            Assert.Equal(teamName, roleRepositorySpy.Namespaces.Single());
+            Assert.Equal(capabilityName, roleRepositorySpy.Namespaces.Single());
 
-            Assert.Equal(teamName, roleBindingRepositorySpy.NamespaceRoleToGroupBindings.Single().Item1);
-            Assert.Equal(teamName + "-full-access-role", roleBindingRepositorySpy.NamespaceRoleToGroupBindings.Single().Item2);
-            Assert.Equal(teamName,roleBindingRepositorySpy.NamespaceRoleToGroupBindings.Single().Item3);
+            Assert.Equal(capabilityName, roleBindingRepositorySpy.NamespaceRoleToGroupBindings.Single().Item1);
+            Assert.Equal(capabilityName + "-full-access-role",
+                roleBindingRepositorySpy.NamespaceRoleToGroupBindings.Single().Item2);
+            Assert.Equal(capabilityName, roleBindingRepositorySpy.NamespaceRoleToGroupBindings.Single().Item3);
         }
     }
 }

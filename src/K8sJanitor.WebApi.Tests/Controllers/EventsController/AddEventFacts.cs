@@ -1,7 +1,6 @@
 using System.Net;
 using System.Threading.Tasks;
-using K8sJanitor.WebApi.EventHandlers;
-using K8sJanitor.WebApi.Models.ExternalEvents;
+using K8sJanitor.WebApi.Infrastructure.Messaging;
 using K8sJanitor.WebApi.Tests.Builders;
 using K8sJanitor.WebApi.Tests.TestDoubles;
 using Xunit;
@@ -16,13 +15,25 @@ namespace K8sJanitor.WebApi.Tests.Controllers.EventsController
             using (var builder = new HttpClientBuilder())
             {
                 var teamCreatedEventHandlerStub = new TeamCreatedEventHandlerStub();
+
+                var eventRegistry = new DomainEventRegistry();
+                eventRegistry.Register(
+                    eventTypeName: "capability_registered",
+                    topicName: "foo",
+                    eventHandler: teamCreatedEventHandlerStub);
+
+
                 var client = builder
-                    .WithService<IEventHandler<CapabilityRegisteredEvent>>(teamCreatedEventHandlerStub)
+                    .WithService<DomainEventRegistry>(eventRegistry)
+
                     .Build();
 
                 var input = @"{
-                                    ""capabilityName"": ""ADFS-ViewOnly"",
-                                    ""roleArn"": ""arn:aws:iam::738063116313:role/ADFS-ViewOnly""
+                                    ""type"": ""capability_registered"",
+                                    ""data"": {
+                                        ""capabilityName"": ""ADFS-ViewOnly"",
+                                        ""roleArn"": ""arn:aws:iam::738063116313:role/ADFS-ViewOnly""
+                                    }
                                 }";
 
                 var response = await client.PostAsync("/api/events", new JsonContent(input));
