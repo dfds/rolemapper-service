@@ -20,6 +20,7 @@ using K8sJanitor.WebApi.Domain.Events;
 using K8sJanitor.WebApi.EventHandlers;
 using K8sJanitor.WebApi.HealthChecks;
 using K8sJanitor.WebApi.Infrastructure.Messaging;
+using K8sJanitor.WebApi.Models.ExternalEvents;
 using K8sJanitor.WebApi.Repositories;
 using K8sJanitor.WebApi.Repositories.Kubernetes;
 using K8sJanitor.WebApi.Services;
@@ -107,6 +108,9 @@ namespace K8sJanitor.WebApi
             services.AddTransient<INamespaceRepository, NamespaceRepository>();
             services.AddTransient<IRoleRepository, RoleRepository>();
             services.AddTransient<IRoleBindingRepository, RoleBindingRepository>();
+
+            // Event handlers
+            services.AddTransient<IEventHandler<CapabilityRegisteredEvent>, CapabilityRegisteredEventHandler>();
 
             services.AddHostedService<MetricHostedService>();
 
