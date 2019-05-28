@@ -31,8 +31,10 @@ namespace K8sJanitor.WebApi.Tests.Events
 
             var data = new CapabilityRegisteredDomainEventData(capabilityName, roleArn);
             var g = new GeneralDomainEvent(
-                Guid.Empty,
+                "1",
                 "capability_registered",
+                Guid.NewGuid(),
+                "sender",
                 JObject.FromObject(data)
             );
             var @event = new CapabilityRegisteredDomainEvent(g);

@@ -33,7 +33,7 @@ namespace K8sJanitor.WebApi.EventHandlers
         {
             var namespaceName = await CreateNameSpace(domainEvent);
             
-            await ConnectAwsArnToNameSpace(namespaceName, domainEvent.Data.RoleArn);
+            await ConnectAwsArnToNameSpace(namespaceName, domainEvent.Payload.RoleArn);
           
             var namespaceRoleName = await _roleRepository
                 .CreateNamespaceFullAccessRole(namespaceName);
@@ -48,17 +48,17 @@ namespace K8sJanitor.WebApi.EventHandlers
         public async Task<NamespaceName> CreateNameSpace(ContextAccountCreatedDomainEvent domainEvent)
         {
             var namespaceName = CreateNamespaceName(
-                capabilityId: domainEvent.Data.CapabilityId,
-                capabilityName: domainEvent.Data.CapabilityName,
-                contextName: domainEvent.Data.ContextName
+                capabilityId: domainEvent.Payload.CapabilityId,
+                capabilityName: domainEvent.Payload.CapabilityName,
+                contextName: domainEvent.Payload.ContextName
             );
             
             var labels = new List<Label>
             {
-                Label.CreateSafely("capability-id", domainEvent.Data.CapabilityId.ToString()),
-                Label.CreateSafely("capability-name", domainEvent.Data.CapabilityName),
-                Label.CreateSafely("context-id", domainEvent.Data.ContextId.ToString()),
-                Label.CreateSafely("context-name", domainEvent.Data.ContextName)
+                Label.CreateSafely("capability-id", domainEvent.Payload.CapabilityId.ToString()),
+                Label.CreateSafely("capability-name", domainEvent.Payload.CapabilityName),
+                Label.CreateSafely("context-id", domainEvent.Payload.ContextId.ToString()),
+                Label.CreateSafely("context-name", domainEvent.Payload.ContextName)
             };
             
             await _namespaceRepository.CreateNamespaceAsync(namespaceName, labels);

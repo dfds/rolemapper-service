@@ -28,12 +28,12 @@ namespace K8sJanitor.WebApi
 
         public async Task HandleAsync(CapabilityRegisteredDomainEvent capabilityRegisteredDomainEvent)
         {
-            var capabilityName = capabilityRegisteredDomainEvent.Data.CapabilityName.ToLower();
+            var capabilityName = capabilityRegisteredDomainEvent.Payload.CapabilityName.ToLower();
             
             var configmapRoleName = capabilityName;
             await _configMapService.AddRole(
                 roleName: configmapRoleName,
-                roleArn: capabilityRegisteredDomainEvent.Data.RoleArn
+                roleArn: capabilityRegisteredDomainEvent.Payload.RoleArn
             );
 
             var namespaceName = capabilityName;

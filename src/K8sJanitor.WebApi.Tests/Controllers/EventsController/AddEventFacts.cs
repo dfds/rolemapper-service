@@ -29,8 +29,9 @@ namespace K8sJanitor.WebApi.Tests.Controllers.EventsController
                     .Build();
 
                 var input = @"{
-                                    ""type"": ""capability_registered"",
-                                    ""data"": {
+                                    ""eventName"": ""capability_registered"",
+                                    ""version"": ""1"",
+                                    ""payload"": {
                                         ""capabilityName"": ""ADFS-ViewOnly"",
                                         ""roleArn"": ""arn:aws:iam::738063116313:role/ADFS-ViewOnly""
                                     }

@@ -5,15 +5,20 @@ namespace K8sJanitor.WebApi.Domain.Events
 {
     public class CapabilityRegisteredDomainEvent : IDomainEvent<CapabilityRegisteredDomainEventData>
     {
-        public Guid MessageId { get; }
-        public string Type { get; }
-        public CapabilityRegisteredDomainEventData Data { get; }
+        public string Version { get; }
+        public string EventName { get; }
+        public Guid XCorrelationId { get; }
+        public string XSender { get; }
+        public CapabilityRegisteredDomainEventData Payload { get; }
 
         public CapabilityRegisteredDomainEvent(GeneralDomainEvent domainEvent)
         {
-            MessageId = domainEvent.MessageId;
-            Type = domainEvent.Type;
-            Data = (domainEvent.Data as JObject)?.ToObject<CapabilityRegisteredDomainEventData>();
+            Version = domainEvent.Version;
+            EventName = domainEvent.EventName;
+            XCorrelationId = domainEvent.XCorrelationId;
+            XSender = domainEvent.XSender;
+            Payload = (domainEvent.Payload as JObject)?.ToObject<CapabilityRegisteredDomainEventData>();
+     
         }
     }
 

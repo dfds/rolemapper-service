@@ -39,6 +39,8 @@ namespace K8sJanitor.WebApi.Tests.EventHandlers
 
             var generalDomainEvent =
                 new GeneralDomainEvent(
+                    "1",
+                    "eventName",
                     Guid.NewGuid(),
                     string.Empty,
                     JObject.FromObject(contextAccountCreatedDomainEventData)

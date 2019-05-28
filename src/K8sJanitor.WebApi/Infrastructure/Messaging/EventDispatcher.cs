@@ -27,7 +27,7 @@ namespace K8sJanitor.WebApi.Infrastructure.Messaging
 
         public async Task SendAsync(GeneralDomainEvent generalDomainEvent)
         {
-            var eventType = _eventRegistry.GetInstanceTypeFor(generalDomainEvent.Type);
+            var eventType = _eventRegistry.GetInstanceTypeFor(generalDomainEvent.EventName);
             dynamic domainEvent = Activator.CreateInstance(eventType, generalDomainEvent);
             dynamic handlersList = _eventRegistry.GetEventHandlersFor(domainEvent);
             

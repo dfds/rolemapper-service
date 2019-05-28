@@ -5,16 +5,22 @@ namespace K8sJanitor.WebApi.Domain.Events
 {
     public class ContextAccountCreatedDomainEvent : IDomainEvent<ContextAccountCreatedDomainEventData>
     {
-        public Guid MessageId { get; private set; }
-        public string Type { get; private set; }
-        public ContextAccountCreatedDomainEventData Data { get; private set;}
-
+       
         public ContextAccountCreatedDomainEvent(GeneralDomainEvent domainEvent)
         {
-            MessageId = domainEvent.MessageId;
-            Type = domainEvent.Type;
-            Data = (domainEvent.Data as JObject)?.ToObject<ContextAccountCreatedDomainEventData>();
+            Version = domainEvent.Version;
+            EventName = domainEvent.EventName;
+            XCorrelationId = domainEvent.XCorrelationId;
+            XSender = domainEvent.XSender;
+            Payload = (domainEvent.Payload as JObject)?.ToObject<ContextAccountCreatedDomainEventData>();
         }
+
+        public string Version { get; }
+        public string EventName { get; }
+        public Guid XCorrelationId { get; }
+        public string XSender { get; }
+        public ContextAccountCreatedDomainEventData Payload { get; }
+        
     }
 
     public class ContextAccountCreatedDomainEventData
