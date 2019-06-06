@@ -47,7 +47,7 @@ namespace K8sJanitor.WebApi.EventHandlers
 
         public async Task<NamespaceName> CreateNameSpace(ContextAccountCreatedDomainEvent domainEvent)
         {
-            var namespaceName = CreateNamespaceName(capabilityRootId: domainEvent.Payload.CapabilityRootId);
+            var namespaceName = NamespaceName.Create(domainEvent.Payload.CapabilityRootId);
 
             var labels = new List<Label>
             {
@@ -72,16 +72,6 @@ namespace K8sJanitor.WebApi.EventHandlers
             );
             var annotations = new Dictionary<string, string> {{"iam.amazonaws.com/permitted", roleName}};
             await _namespaceRepository.AddAnnotations(namespaceName, annotations);
-        }
-
-
-        public NamespaceName CreateNamespaceName(Guid capabilityRootId)
-        {
-            var name = capabilityRootId.ToString();
-
-            return NamespaceName.Create(name);
-        }
+        } 
     }
-
-
 }

@@ -27,6 +27,7 @@ namespace K8sJanitor.WebApi.Domain.Events
     {
         public Guid CapabilityId { get; private set; }
         public string CapabilityName { get; private set; }
+        public string CapabilityRootId { get; private set; }
         public Guid ContextId { get; private set; }
         public string ContextName { get; private set; }
         public string AccountId { get; private set; }
@@ -36,6 +37,7 @@ namespace K8sJanitor.WebApi.Domain.Events
         public ContextAccountCreatedDomainEventData(
             Guid capabilityId, 
             string capabilityName, 
+            string capabilityRootId,
             Guid contextId, 
             string contextName, 
             string accountId, 
@@ -45,6 +47,7 @@ namespace K8sJanitor.WebApi.Domain.Events
         {
             CapabilityId = capabilityId;
             CapabilityName = capabilityName;
+            CapabilityRootId = capabilityRootId;
             ContextId = contextId;
             ContextName = contextName;
             AccountId = accountId;
