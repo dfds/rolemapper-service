@@ -7,10 +7,10 @@ curl -X POST -H "Content-Type: application/vnd.kafka.json.v2+json" \
 curl -X POST -H "Content-Type: application/vnd.kafka.json.v2+json" \
 --data '{
         "version": "1",
-        "Type": "aws_context_account_created",
+        "EventType": "aws_context_account_created",
         "x-correlationId": "874ba750-ae81-446f-90c7-01b49228c327",
         "x-sender": "eg. FQDN of assembly",
-        "data": {
+        "payload": {
             "capabilityId": "bc3f3bbe-eeee-4230-8b2f-d0e1c327c59c",
             "capabilityName": "PAX Bookings",
             "capabilityRootId": "pax-bookings-A43aS",
