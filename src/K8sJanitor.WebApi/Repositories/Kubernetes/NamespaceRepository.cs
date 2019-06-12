@@ -83,8 +83,7 @@ namespace K8sJanitor.WebApi.Repositories.Kubernetes
             patch.Replace(n => n.Metadata, metadata);
             await _client.PatchNamespaceWithHttpMessagesAsync(new V1Patch(patch), namespaceName);
         }
-
-
+        
         public async Task CreateNamespaceAsync(string namespaceName, string roleName)
         {
             var ns = new V1Namespace
@@ -104,6 +103,11 @@ namespace K8sJanitor.WebApi.Repositories.Kubernetes
             try
             {
                 await _client.CreateNamespaceAsync(@namespace);
+            }
+            catch (HttpOperationException e) when (e.Response.Content.Contains("\"reason\":\"AlreadyExists\""))
+            {
+                throw new NamespaceAlreadyExistException(
+                    $"Namespace: \"{@namespace.Metadata.Name}\" can not be created, it already exits");
             }
             catch (HttpOperationException e) when (e.Response.Content.Length != 0)
             {

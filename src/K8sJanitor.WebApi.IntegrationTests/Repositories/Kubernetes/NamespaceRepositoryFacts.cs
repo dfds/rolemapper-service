@@ -192,13 +192,9 @@ namespace K8sJanitor.WebApi.IntegrationTests.Repositories.Kubernetes
                 await sut.CreateNamespaceAsync(namespaceName, awsRoleName);
 
 
-                // Act
-                var ex = await Assert.ThrowsAsync<Exception>(async () =>
+                // Act / Assert
+                await Assert.ThrowsAsync<NamespaceAlreadyExistException>(async () =>
                     await sut.CreateNamespaceAsync(namespaceName, awsRoleName));
-
-                // Assert
-                var expectedStart = "Error occured while communicating with k8s:";
-                Assert.StartsWith(expectedStart, ex.Message);
             }
             finally
             {

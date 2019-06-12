@@ -31,7 +31,9 @@ namespace K8sJanitor.WebApi.EventHandlers
 
         public async Task HandleAsync(ContextAccountCreatedDomainEvent domainEvent)
         {
-            var namespaceName = await CreateNameSpace(domainEvent);
+            var namespaceName = NamespaceName.Create(domainEvent.Payload.CapabilityRootId);
+            
+            await CreateNameSpace(namespaceName, domainEvent);
 
             await ConnectAwsArnToNameSpace(namespaceName, domainEvent.Payload.RoleArn);
 
@@ -45,10 +47,11 @@ namespace K8sJanitor.WebApi.EventHandlers
             );
         }
 
-        public async Task<NamespaceName> CreateNameSpace(ContextAccountCreatedDomainEvent domainEvent)
+        public async Task CreateNameSpace(
+            NamespaceName namespaceName,
+            ContextAccountCreatedDomainEvent domainEvent
+        )
         {
-            var namespaceName = NamespaceName.Create(domainEvent.Payload.CapabilityRootId);
-
             var labels = new List<Label>
             {
                 Label.CreateSafely("capability-id", domainEvent.Payload.CapabilityId.ToString()),
@@ -58,8 +61,6 @@ namespace K8sJanitor.WebApi.EventHandlers
             };
 
             await _namespaceRepository.CreateNamespaceAsync(namespaceName, labels);
-
-            return namespaceName;
         }
 
         public async Task ConnectAwsArnToNameSpace(NamespaceName namespaceName, string roleArn)
