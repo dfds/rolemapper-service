@@ -60,7 +60,7 @@ namespace K8sJanitor.WebApi.Infrastructure.Messaging
 
             if (registration == null)
             {
-                throw new MessagingException($"Error! Could not determine \"event instance type\" due to no registration was found for type {eventType}!");
+                throw new EventTypeNotFoundException($"Error! Could not determine \"event instance type\" due to no registration was found for type {eventType}!");
             }
 
             return registration.EventInstanceType;
@@ -72,7 +72,7 @@ namespace K8sJanitor.WebApi.Infrastructure.Messaging
 
             if (registration.Equals(default(KeyValuePair<Type, List<object>>)))
             {
-                throw new MessagingException($"Error! Could not determine \"event handlers\" due to no registration was found for type {domainEvent.GetType().FullName}!");
+                throw new EventHandlerNotFoundException($"Error! Could not determine \"event handlers\" due to no registration was found for type {domainEvent.GetType().FullName}!");
             }
 
             return registration.Value;

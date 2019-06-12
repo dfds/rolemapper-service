@@ -57,7 +57,11 @@ namespace K8sJanitor.WebApi.Infrastructure.Messaging
                                 {
                                     var eventDispatcher = scope.ServiceProvider.GetRequiredService<IEventDispatcher>();
                                     await eventDispatcher.Send(msg.Value);
-
+                                    await consumer.CommitAsync(msg);
+                                }
+                                catch (Exception ex) when (ex is EventTypeNotFoundException || ex is EventHandlerNotFoundException )
+                                {
+                                    _logger.LogWarning($"Message skipped. Exception message: {ex.Message}", ex);
                                     await consumer.CommitAsync(msg);
                                 }
                                 catch (Exception ex)
