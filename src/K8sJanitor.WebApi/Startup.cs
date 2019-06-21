@@ -6,6 +6,7 @@ using Amazon.S3;
 using Amazon.S3.Transfer;
 using k8s;
 using k8s.Exceptions;
+using K8sJanitor.WebApi.Application;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
@@ -20,11 +21,13 @@ using K8sJanitor.WebApi.Domain.Events;
 using K8sJanitor.WebApi.EventHandlers;
 using K8sJanitor.WebApi.HealthChecks;
 using K8sJanitor.WebApi.Infrastructure.Messaging;
+using K8sJanitor.WebApi.Infrastructure.Persistence;
 using K8sJanitor.WebApi.Repositories;
 using K8sJanitor.WebApi.Repositories.Kubernetes;
 using K8sJanitor.WebApi.Services;
 using K8sJanitor.WebApi.Validators;
 using K8sJanitor.WebApi.Wrappers;
+using Microsoft.EntityFrameworkCore;
 using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
 
 namespace K8sJanitor.WebApi
@@ -96,7 +99,15 @@ namespace K8sJanitor.WebApi
                 services.AddTransient<IKubernetesWrapper>(k =>
                     new KubernetesWrapper(null));
             }
+            
+            var connectionString = Configuration["K8SJANITOR_SERVICE_DATABASE_CONNECTIONSTRING"];
 
+            services
+                .AddEntityFrameworkNpgsql()
+                .AddDbContext<K8sServiceDbContext>((serviceProvider, options) =>
+                    {
+                        options.UseNpgsql(connectionString);
+                    });
 
             services = AddPersistenceRepository(services);
 
@@ -129,10 +140,28 @@ namespace K8sJanitor.WebApi
             services.AddSingleton(eventRegistry);
             services.AddTransient<IEventHandler<ContextAccountCreatedDomainEvent>, ContextAccountCreatedDomainEventHandler>();
             services.AddTransient<IEventHandler<CapabilityRegisteredDomainEvent>, CapabilityRegisteredEventHandler>();
+            services.AddTransient<IEventHandler<K8sNamespaceCreatedAndAwsArnConnectedEvent>, K8sNamespaceCreatedAndAwsArnConnectedEventHandler>();
 
+            // Event publishing
+            services.AddTransient<Outbox>(); // To be removed
+            services.AddTransient<DomainEventEnvelopeRepository>();
+            services.AddTransient<K8sApplicationService>();
+            services.AddTransient<K8sOutboxEnabledDecorator>(); // To be removed
+            
+            services.AddTransient<IK8sApplicationService>(_serviceProvider => new K8sTransactionalDecorator(
+                inner: new K8sOutboxEnabledDecorator(
+                    inner: _serviceProvider.GetRequiredService<K8sApplicationService>(),
+                    dbContext: _serviceProvider.GetRequiredService<K8sServiceDbContext>(),
+                    outbox: _serviceProvider.GetRequiredService<Outbox>()
+                ), 
+                dbContext: _serviceProvider.GetRequiredService<K8sServiceDbContext>()
+                ));
 
             services.AddTransient<KafkaConsumerFactory.KafkaConfiguration>();
+            services.AddTransient<KafkaPublisherFactory>();
             services.AddTransient<KafkaConsumerFactory>();
+
+            services.AddHostedService<PublishingService>();
 
             var serviceProvider = services.BuildServiceProvider();
 
@@ -146,6 +175,13 @@ namespace K8sJanitor.WebApi
                 eventTypeName: "capability_registered",
                 topicName: topic,
                 eventHandler: serviceProvider.GetRequiredService<IEventHandler<CapabilityRegisteredDomainEvent>>() );
+            
+            // Published events
+            eventRegistry.Register(
+                eventTypeName: "k8s_namespace_created_and_aws_arn_connected",
+                topicName: topic,
+                eventHandler: serviceProvider.GetRequiredService<IEventHandler<K8sNamespaceCreatedAndAwsArnConnectedEvent>>()
+            );
 
             services.AddTransient<IEventDispatcher, EventDispatcher>();
         }

@@ -29,6 +29,8 @@ namespace K8sJanitor.WebApi.EventHandlers
         }
 
 
+        // k8s_namespace_created_and_aws_arn_connected Event should be emitted at some point
+        // doing this method.
         public async Task HandleAsync(ContextAccountCreatedDomainEvent domainEvent)
         {
             var namespaceName = NamespaceName.Create(domainEvent.Payload.CapabilityRootId);

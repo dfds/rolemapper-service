@@ -62,3 +62,26 @@ services:
       KAFKA_REST_BOOTSTRAP_SERVERS: 'broker:39092'
       KAFKA_REST_LISTENERS: "http://0.0.0.0:8082"
       KAFKA_REST_SCHEMA_REGISTRY_URL: 'http://schema-registry:8081'
+
+  database:
+    image: postgres:latest
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=p
+      - POSTGRES_DB=k8sjanitordb
+
+
+  db-migration:
+    build: ../db
+    depends_on:
+      - database
+    environment:
+      - LOCAL-DEVELOPMENT=1
+      - PGDATABASE=k8sjanitordb
+      - PGHOST=database
+      - PGPORT=5432
+      - PGUSER=postgres
+      - PGPASSWORD=p
+      - PGSSLMODE=disable

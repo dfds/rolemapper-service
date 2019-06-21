@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using K8sJanitor.WebApi.Domain.Events;
 using K8sJanitor.WebApi.EventHandlers;
 
 namespace K8sJanitor.WebApi.Infrastructure.Messaging
@@ -64,6 +65,18 @@ namespace K8sJanitor.WebApi.Infrastructure.Messaging
             }
 
             return registration.EventInstanceType;
+        }
+
+        public string GetTypeNameFor(IDomainEvent<object> domainEvent)
+        {
+            var registration = _registrations.SingleOrDefault(x => x.EventInstanceType == domainEvent.GetType());
+
+            if (registration == null)
+            {
+                throw new MessagingException($"Error! Could not determine \"event type name\" due to no registration was found for type {domainEvent.GetType().FullName}!");
+            }
+
+            return registration.EventType;
         }
 
         public List<object> GetEventHandlersFor<TEvent>(TEvent domainEvent)
