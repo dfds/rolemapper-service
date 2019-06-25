@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Threading.Tasks;
 using k8s.Models;
 using Microsoft.Rest;
@@ -18,11 +19,12 @@ namespace K8sJanitor.WebApi.Repositories.Kubernetes
 
         public async Task<string> CreateNamespaceFullAccessRole(string namespaceName)
         {
+            var roleName = $"{namespaceName}-fullaccess";
             var role = new V1Role
             {
                 Metadata = new V1ObjectMeta
                 {
-                    Name = $"{namespaceName}-fullaccess",
+                    Name = roleName,
                     NamespaceProperty = namespaceName
                 },
                 Rules = new List<V1PolicyRule>
@@ -132,6 +134,10 @@ namespace K8sJanitor.WebApi.Repositories.Kubernetes
                 var result = await _client.CreateNamespacedRoleAsync(role, namespaceName);
 
                 return result?.Metadata?.Name;
+            }
+            catch (HttpOperationException e) when(e.Response.StatusCode == HttpStatusCode.Conflict)
+            {
+                throw new RoleAlreadyExistException($"Role with name {roleName} already exist in kubernetes. Not creating.", roleName);
             }
             catch (HttpOperationException e) when (e.Response.Content.Length != 0)
             {

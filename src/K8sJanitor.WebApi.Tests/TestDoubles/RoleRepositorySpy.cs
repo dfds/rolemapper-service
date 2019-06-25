@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using K8sJanitor.WebApi.Repositories.Kubernetes;
@@ -18,6 +19,21 @@ namespace K8sJanitor.WebApi.Tests.TestDoubles
             Namespaces.Add(namespaceName);
 
             return Task.FromResult(namespaceName + "-full-access-role");
+        }
+    }
+    
+    public class ErrornousRoleRepository : IRoleRepository
+    {
+        private readonly Exception _exceptionToThrow;
+
+        public Task<string> CreateNamespaceFullAccessRole(string namespaceName)
+        {
+            throw _exceptionToThrow;
+        }
+
+        public ErrornousRoleRepository(RoleAlreadyExistException exceptionToThrow)
+        {
+            _exceptionToThrow = exceptionToThrow;
         }
     }
 }

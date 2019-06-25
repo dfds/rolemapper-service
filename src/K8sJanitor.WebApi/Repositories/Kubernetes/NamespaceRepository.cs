@@ -65,11 +65,10 @@ namespace K8sJanitor.WebApi.Repositories.Kubernetes
 
                 if (annotationAdded) {return;}
                 
-                
                 var annotationToStoreValue = annotationsToStore[a.Key];
-
                 if (annotationToStoreValue != a.Value)
                 {
+                    // TODO Change the exception type to AnnotationAlreadyExistWithDifferentValue
                     throw new Exception($"The annotation \"{a.Key}\" already exist with the value \"{annotationToStoreValue}\" you are trying to add the value \"{a.Value}\"");
                 }
             });

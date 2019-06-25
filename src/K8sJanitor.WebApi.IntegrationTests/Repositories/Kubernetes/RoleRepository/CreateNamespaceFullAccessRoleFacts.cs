@@ -43,5 +43,40 @@ namespace K8sJanitor.WebApi.IntegrationTests.Repositories.Kubernetes.RoleReposit
                 );
             }
         }
+        
+        [FactRunsOnK8s]
+        public async Task Create_already_existing_role_should_result_in_typed_exception()
+        {
+            // Arrange
+            var config = KubernetesClientConfiguration.BuildConfigFromConfigFile();
+
+            var client = new k8s.Kubernetes(config);
+            var wrapper = new KubernetesWrapper(client);
+
+            var namespaceRepository = new NamespaceRepository(wrapper);
+            var subjectNameSpace = "namespace-with-role-test-" + Guid.NewGuid().ToString().Substring(0,5);
+            var awsRoleName = "notUSed";
+
+            var sut = new WebApi.Repositories.Kubernetes.RoleRepository(wrapper);
+            try
+            {
+                // Act
+                await namespaceRepository.CreateNamespaceAsync(subjectNameSpace, awsRoleName);
+                await sut.CreateNamespaceFullAccessRole(subjectNameSpace);
+                
+                // Assert
+                await Assert.ThrowsAsync<RoleAlreadyExistException>(() => sut.CreateNamespaceFullAccessRole(subjectNameSpace));
+
+            }
+            finally
+            {
+                client.DeleteNamespace(
+                    body: new V1DeleteOptions(),
+                    name: subjectNameSpace
+                );
+            }
+        }
+
+
     }
 }

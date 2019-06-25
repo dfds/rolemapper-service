@@ -9,11 +9,11 @@ namespace K8sJanitor.WebApi.Infrastructure.Messaging
     public class EventDispatcher : IEventDispatcher
     {
         private readonly ILogger<EventDispatcher> _logger;
-        private readonly DomainEventRegistry _eventRegistry;
+        private readonly IDomainEventRegistry _eventRegistry;
         
         public EventDispatcher(
             ILogger<EventDispatcher> logger,
-            DomainEventRegistry eventRegistry)
+            IDomainEventRegistry eventRegistry)
         {
             _logger = logger;
             _eventRegistry = eventRegistry;

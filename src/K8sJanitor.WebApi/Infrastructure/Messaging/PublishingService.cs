@@ -11,12 +11,12 @@ namespace K8sJanitor.WebApi.Infrastructure.Messaging
     public class PublishingService : BackgroundService
     {
         private readonly IServiceProvider _serviceProvider;
-        private PublishingEventsQueue _eventsQueue;
+        private IPublishingEventsQueue _eventsQueue;
 
         public PublishingService(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
-            _eventsQueue = _serviceProvider.GetService<PublishingEventsQueue>();
+            _eventsQueue = _serviceProvider.GetService<IPublishingEventsQueue>();
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -51,7 +51,7 @@ namespace K8sJanitor.WebApi.Infrastructure.Messaging
                     Log.Information($"Domain events to publish: {_eventsQueue.QueueCount()}");
                 
                     var publisherFactory = scope.ServiceProvider.GetRequiredService<KafkaPublisherFactory>();
-                    var eventRegistry = scope.ServiceProvider.GetRequiredService<DomainEventRegistry>();
+                    var eventRegistry = scope.ServiceProvider.GetRequiredService<IDomainEventRegistry>();
                     
                     Log.Information("Connecting to kafka...");
 

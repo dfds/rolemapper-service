@@ -24,7 +24,7 @@ namespace K8sJanitor.WebApi.Tests.Controllers.EventsController
 
 
                 var client = builder
-                    .WithService<DomainEventRegistry>(eventRegistry)
+                    .WithService<IDomainEventRegistry>(eventRegistry)
 
                     .Build();
 

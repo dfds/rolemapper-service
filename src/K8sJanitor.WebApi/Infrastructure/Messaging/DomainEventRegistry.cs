@@ -6,7 +6,7 @@ using K8sJanitor.WebApi.EventHandlers;
 
 namespace K8sJanitor.WebApi.Infrastructure.Messaging
 {
-    public class DomainEventRegistry
+    public class DomainEventRegistry : IDomainEventRegistry
     {
         private readonly List<DomainEventRegistration> _registrations = new List<DomainEventRegistration>();
         private readonly Dictionary<Type, List<object>> _eventHandlers = new Dictionary<Type, List<object>>();

@@ -98,15 +98,8 @@ namespace K8sJanitor.WebApi.EventHandlers
                 Label.CreateSafely("context-name", domainEvent.Payload.ContextName)
             };
 
-            try
-            {
-                await _namespaceRepository.CreateNamespaceAsync(namespaceName, labels);
-            }
-            catch (NamespaceAlreadyExistException)
-            {
-                // TODO Should we assert labels exist?
-                _logger.LogInformation($"Not creating namespace {namespaceName} as it already exist in kubernetes");
-            }
+<<<<<<< HEAD
+            await _namespaceRepository.CreateNamespaceAsync(namespaceName, labels);
             await _namespaceRepository.AddAnnotations(namespaceName, new Dictionary<string, string>
             {
                 {
@@ -114,6 +107,17 @@ namespace K8sJanitor.WebApi.EventHandlers
                     IAM.ConstructRoleArn(domainEvent.Payload.AccountId, "*")
                 }
             });
+=======
+            try
+            {
+                await _namespaceRepository.CreateNamespaceAsync(namespaceName, labels);
+            }
+            catch (NamespaceAlreadyExistException e)
+            {
+                // TODO Should we assert labels exist?
+                _logger.LogInformation($"Not creating namespace {namespaceName} as it already exist in kubernetes");
+            }
+>>>>>>> Added idempotency and reworked DI + tests
         }
 
         public async Task ConnectAwsArnToNameSpace(NamespaceName namespaceName, string roleArn)

@@ -127,7 +127,7 @@ namespace K8sJanitor.WebApi
         {
             services.AddTransient<IK8sApplicationService, K8sApplicationService>();
             var eventRegistry = new DomainEventRegistry();
-            services.AddSingleton(eventRegistry);
+            services.AddSingleton<IDomainEventRegistry>(eventRegistry);
             services.AddTransient<IEventHandler<ContextAccountCreatedDomainEvent>, ContextAccountCreatedDomainEventHandler>();
             services.AddTransient<IEventHandler<CapabilityRegisteredDomainEvent>, CapabilityRegisteredEventHandler>();
             services.AddTransient<IEventHandler<K8sNamespaceCreatedAndAwsArnConnectedEvent>, K8sNamespaceCreatedAndAwsArnConnectedEventHandler>();
@@ -138,7 +138,7 @@ namespace K8sJanitor.WebApi
 
             // Event publishing
             var publishingEventsQueue = new PublishingEventsQueue();
-            services.AddSingleton(publishingEventsQueue);
+            services.AddSingleton<IPublishingEventsQueue>(publishingEventsQueue);
             services.AddHostedService<PublishingService>();
 
             var serviceProvider = services.BuildServiceProvider();
