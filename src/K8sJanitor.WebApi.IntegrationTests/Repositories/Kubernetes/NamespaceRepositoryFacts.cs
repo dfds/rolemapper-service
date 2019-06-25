@@ -146,7 +146,7 @@ namespace K8sJanitor.WebApi.IntegrationTests.Repositories.Kubernetes
         {
             // Arrange
             var namespaceName = "namespace-from-test";
-            var awsRoleName = "awsRoleName";
+            var awsRoleName = "arn:aws:iam::528563840976:role/eks-donald-servicebroker";
             var config = KubernetesClientConfiguration.BuildConfigFromConfigFile();
             var client = new k8s.Kubernetes(config);
 

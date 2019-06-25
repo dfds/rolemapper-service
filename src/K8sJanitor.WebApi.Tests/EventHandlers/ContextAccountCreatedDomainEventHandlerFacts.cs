@@ -59,10 +59,13 @@ namespace K8sJanitor.WebApi.Tests.EventHandlers
             Assert.NotEmpty(configMapServiceSpy.Roles.Single().Key);
             Assert.NotEmpty(configMapServiceSpy.Roles.Single().Value);
 
-            var namespaceName = namespaceRepositorySpy.Namespaces.Single().NamespaceName;
+            var @namespace = namespaceRepositorySpy.Namespaces.Single();
+            var namespaceName = @namespace.NamespaceName;
+            
             Assert.NotNull(namespaceName);
             
             Assert.Equal(contextAccountCreatedDomainEventData.CapabilityRootId, namespaceName);
+            Assert.Equal(roleArn, @namespace.Annotations["iam.amazonaws.com/permitted"]);
 
             Assert.Equal(namespaceName,roleRepositorySpy.Namespaces.Single());
 
@@ -70,6 +73,7 @@ namespace K8sJanitor.WebApi.Tests.EventHandlers
             Assert.Equal(namespaceName + "-full-access-role",
                 roleBindingRepositorySpy.NamespaceRoleToGroupBindings.Single().Item2);
             Assert.Equal(namespaceName, roleBindingRepositorySpy.NamespaceRoleToGroupBindings.Single().Item3);
+            
         }
     }
 }
