@@ -130,7 +130,7 @@ namespace K8sJanitor.WebApi.IntegrationTests.Repositories.Kubernetes
                 };
 
                 // Act / Assert
-           Assert.ThrowsAsync<Exception>(async () => await sut.AddAnnotations(namespaceName, annotationsRoundTwo));
+                await Assert.ThrowsAsync<Exception>(async () => await sut.AddAnnotations(namespaceName, annotationsRoundTwo));
             }
             finally
             {
