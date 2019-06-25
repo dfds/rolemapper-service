@@ -71,7 +71,7 @@ namespace K8sJanitor.WebApi.EventHandlers
                 roleName: roleName,
                 roleArn: roleArn
             );
-            var annotations = new Dictionary<string, string> {{"iam.amazonaws.com/permitted", roleName}};
+            var annotations = new Dictionary<string, string> {{"iam.amazonaws.com/permitted", roleArn}};
             await _namespaceRepository.AddAnnotations(namespaceName, annotations);
         } 
     }
