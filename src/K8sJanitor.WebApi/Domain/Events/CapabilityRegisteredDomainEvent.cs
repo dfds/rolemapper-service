@@ -1,5 +1,6 @@
 using System;
 using Newtonsoft.Json.Linq;
+using Serilog;
 
 namespace K8sJanitor.WebApi.Domain.Events
 {
@@ -18,7 +19,7 @@ namespace K8sJanitor.WebApi.Domain.Events
             XCorrelationId = domainEvent.XCorrelationId;
             XSender = domainEvent.XSender;
             Payload = (domainEvent.Payload as JObject)?.ToObject<CapabilityRegisteredDomainEventData>();
-     
+            Log.Warning("Instantiating deprecated {Type} with data {Data} ", this.GetType().FullName, Payload);
         }
     }
 
