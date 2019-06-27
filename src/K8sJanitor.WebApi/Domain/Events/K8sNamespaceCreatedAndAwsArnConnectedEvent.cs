@@ -14,6 +14,16 @@ namespace K8sJanitor.WebApi.Domain.Events
             NamespaceName = namespaceName;
             ContextId = contextId;
         }
+
+        public K8sNamespaceCreatedAndAwsArnConnectedEvent()
+        {
+            
+        }
+
+        public K8sNamespaceCreatedAndAwsArnConnectedEvent(GeneralDomainEvent domainEvent)
+        {
+            
+        }
     }
 
     public class K8sNamespaceCreatedAndAwsArnConnectEventData
