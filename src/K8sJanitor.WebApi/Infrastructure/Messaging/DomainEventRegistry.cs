@@ -67,7 +67,7 @@ namespace K8sJanitor.WebApi.Infrastructure.Messaging
             return registration.EventInstanceType;
         }
 
-        public string GetTypeNameFor(IDomainEvent<object> domainEvent)
+        public string GetTypeNameFor(IEvent domainEvent)
         {
             var registration = _registrations.SingleOrDefault(x => x.EventInstanceType == domainEvent.GetType());
 
