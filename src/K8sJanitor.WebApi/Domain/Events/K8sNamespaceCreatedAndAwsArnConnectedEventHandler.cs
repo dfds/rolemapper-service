@@ -25,10 +25,9 @@ namespace K8sJanitor.WebApi.Domain.Events
             _configMapService = configMapService;
         }
         
-        public Task HandleAsync(K8sNamespaceCreatedAndAwsArnConnectedEvent domainEvent)
+        public async Task HandleAsync(K8sNamespaceCreatedAndAwsArnConnectedEvent domainEvent)
         {
-            
-            throw new System.NotImplementedException();
+            // TODO
         }
     }
 }

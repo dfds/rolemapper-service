@@ -135,17 +135,6 @@ namespace K8sJanitor.WebApi
 
             // Event publishing
             services.AddTransient<K8sApplicationService>();
-            
-            /*
-            services.AddTransient<IK8sApplicationService>(_serviceProvider => new K8sTransactionalDecorator(
-                inner: new K8sOutboxEnabledDecorator(
-                    inner: _serviceProvider.GetRequiredService<K8sApplicationService>(),
-                    dbContext: _serviceProvider.GetRequiredService<K8sServiceDbContext>(),
-                    outbox: _serviceProvider.GetRequiredService<Outbox>()
-                ), 
-                dbContext: _serviceProvider.GetRequiredService<K8sServiceDbContext>()
-                ));
-            */
 
             services.AddTransient<KafkaConsumerFactory.KafkaConfiguration>();
             services.AddTransient<KafkaPublisherFactory>();
@@ -167,6 +156,7 @@ namespace K8sJanitor.WebApi
                 eventHandler: serviceProvider.GetRequiredService<IEventHandler<CapabilityRegisteredDomainEvent>>() );
             
             // Published events
+            
             eventRegistry.Register(
                 eventTypeName: "k8s_namespace_created_and_aws_arn_connected",
                 topicName: topic,
