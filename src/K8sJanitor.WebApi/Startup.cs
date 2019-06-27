@@ -127,19 +127,19 @@ namespace K8sJanitor.WebApi
 
         private static void ConfigureDomainEvents(IServiceCollection services)
         {
+            services.AddTransient<IK8sApplicationService, K8sApplicationService>();
             var eventRegistry = new DomainEventRegistry();
             services.AddSingleton(eventRegistry);
             services.AddTransient<IEventHandler<ContextAccountCreatedDomainEvent>, ContextAccountCreatedDomainEventHandler>();
             services.AddTransient<IEventHandler<CapabilityRegisteredDomainEvent>, CapabilityRegisteredEventHandler>();
             services.AddTransient<IEventHandler<K8sNamespaceCreatedAndAwsArnConnectedEvent>, K8sNamespaceCreatedAndAwsArnConnectedEventHandler>(); // Determine whether this is necessary, probably not.
 
-            // Event publishing
-            services.AddTransient<K8sApplicationService>();
 
             services.AddTransient<KafkaConsumerFactory.KafkaConfiguration>();
             services.AddTransient<KafkaPublisherFactory>();
             services.AddTransient<KafkaConsumerFactory>();
 
+            // Event publishing
             var publishingEventsQueue = new PublishingEventsQueue();
             services.AddSingleton(publishingEventsQueue);
             services.AddHostedService<PublishingService>();
