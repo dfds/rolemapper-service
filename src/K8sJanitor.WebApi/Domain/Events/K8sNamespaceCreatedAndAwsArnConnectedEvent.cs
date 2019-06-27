@@ -3,7 +3,7 @@ using Newtonsoft.Json.Linq;
 
 namespace K8sJanitor.WebApi.Domain.Events
 {
-    public class K8sNamespaceCreatedAndAwsArnConnectedEvent : IDomainEvent<object>
+    public class K8sNamespaceCreatedAndAwsArnConnectedEvent : IEvent
     {
         
         public string NamespaceName { get; }
@@ -14,12 +14,6 @@ namespace K8sJanitor.WebApi.Domain.Events
             NamespaceName = namespaceName;
             ContextId = contextId;
         }
-
-        public string Version { get; }
-        public string EventName { get; }
-        public Guid XCorrelationId { get; }
-        public string XSender { get; }
-        public object Payload { get; }
     }
 
     public class K8sNamespaceCreatedAndAwsArnConnectEventData

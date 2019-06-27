@@ -68,7 +68,6 @@ namespace K8sJanitor.WebApi.Infrastructure.Messaging
             var evtGeneral = new GeneralDomainEvent("1", "x", Guid.Empty, "", new K8sNamespaceCreatedAndAwsArnConnectEventData("An event to test if everything is configured properly"));
             Log.Information($"evtGeneral payload: {evtGeneral.Payload}");
             var evtPre = new K8sNamespaceCreatedAndAwsArnConnectedEvent("onprem-43581", Guid.Empty);
-            Log.Information($"evtPre payload: {evtPre.Payload}");
 
             // AggregateId missing due to IAggregateDomainEvents not being used.
             var evt = new DomainEventEnvelope
