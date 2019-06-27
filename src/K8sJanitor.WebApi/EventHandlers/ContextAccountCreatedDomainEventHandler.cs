@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using K8sJanitor.WebApi.Application;
 using K8sJanitor.WebApi.Domain.Events;
 using K8sJanitor.WebApi.Models;
 using K8sJanitor.WebApi.Repositories.Kubernetes;
 using K8sJanitor.WebApi.Services;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace K8sJanitor.WebApi.EventHandlers
 {
@@ -14,18 +16,21 @@ namespace K8sJanitor.WebApi.EventHandlers
         private readonly INamespaceRepository _namespaceRepository;
         private readonly IRoleRepository _roleRepository;
         private readonly IRoleBindingRepository _roleBindingRepository;
+        private readonly IK8sApplicationService _k8sApplicationService;
 
         public ContextAccountCreatedDomainEventHandler(
             IConfigMapService configMapService,
             INamespaceRepository namespaceRepository,
             IRoleRepository roleRepository,
-            IRoleBindingRepository roleBindingRepository
+            IRoleBindingRepository roleBindingRepository,
+            IK8sApplicationService k8sApplicationService
         )
         {
             _configMapService = configMapService;
             _namespaceRepository = namespaceRepository;
             _roleRepository = roleRepository;
             _roleBindingRepository = roleBindingRepository;
+            _k8sApplicationService = k8sApplicationService;
         }
 
 
@@ -47,6 +52,8 @@ namespace K8sJanitor.WebApi.EventHandlers
                 role: namespaceRoleName,
                 group: namespaceName
             );
+
+            await _k8sApplicationService.FireEventK8sNamespaceCreatedAndAwsArnConnected(namespaceName, domainEvent.Payload.ContextId);
         }
 
         public async Task CreateNameSpace(
