@@ -21,7 +21,6 @@ using K8sJanitor.WebApi.Domain.Events;
 using K8sJanitor.WebApi.EventHandlers;
 using K8sJanitor.WebApi.HealthChecks;
 using K8sJanitor.WebApi.Infrastructure.Messaging;
-using K8sJanitor.WebApi.Infrastructure.Persistence;
 using K8sJanitor.WebApi.Repositories;
 using K8sJanitor.WebApi.Repositories.Kubernetes;
 using K8sJanitor.WebApi.Services;
@@ -100,14 +99,6 @@ namespace K8sJanitor.WebApi
                     new KubernetesWrapper(null));
             }
             
-            var connectionString = Configuration["K8SJANITOR_SERVICE_DATABASE_CONNECTIONSTRING"];
-
-            services
-                .AddEntityFrameworkNpgsql()
-                .AddDbContext<K8sServiceDbContext>((serviceProvider, options) =>
-                    {
-                        options.UseNpgsql(connectionString);
-                    });
 
             services = AddPersistenceRepository(services);
 
@@ -140,14 +131,12 @@ namespace K8sJanitor.WebApi
             services.AddSingleton(eventRegistry);
             services.AddTransient<IEventHandler<ContextAccountCreatedDomainEvent>, ContextAccountCreatedDomainEventHandler>();
             services.AddTransient<IEventHandler<CapabilityRegisteredDomainEvent>, CapabilityRegisteredEventHandler>();
-            services.AddTransient<IEventHandler<K8sNamespaceCreatedAndAwsArnConnectedEvent>, K8sNamespaceCreatedAndAwsArnConnectedEventHandler>();
+            services.AddTransient<IEventHandler<K8sNamespaceCreatedAndAwsArnConnectedEvent>, K8sNamespaceCreatedAndAwsArnConnectedEventHandler>(); // Determine whether this is necessary, probably not.
 
             // Event publishing
-            services.AddTransient<Outbox>(); // To be removed
-            services.AddTransient<DomainEventEnvelopeRepository>();
             services.AddTransient<K8sApplicationService>();
-            services.AddTransient<K8sOutboxEnabledDecorator>(); // To be removed
             
+            /*
             services.AddTransient<IK8sApplicationService>(_serviceProvider => new K8sTransactionalDecorator(
                 inner: new K8sOutboxEnabledDecorator(
                     inner: _serviceProvider.GetRequiredService<K8sApplicationService>(),
@@ -156,6 +145,7 @@ namespace K8sJanitor.WebApi
                 ), 
                 dbContext: _serviceProvider.GetRequiredService<K8sServiceDbContext>()
                 ));
+            */
 
             services.AddTransient<KafkaConsumerFactory.KafkaConfiguration>();
             services.AddTransient<KafkaPublisherFactory>();

@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using K8sJanitor.WebApi.Domain.Events;
-using K8sJanitor.WebApi.Infrastructure.Persistence;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -91,13 +90,6 @@ namespace K8sJanitor.WebApi.Infrastructure.Messaging
         {
             using (var scope = _serviceProvider.CreateScope())
             {
-                var dbContext = scope.ServiceProvider.GetRequiredService<K8sServiceDbContext>();
-                var domainEventsToPublish = await dbContext
-                    .DomainEvents
-                    .Where(x => x.Sent == null)
-                    .ToListAsync(stoppingToken);
-                
-                
                 // Entirely for learning purposes. 
                 // REMOVE BEFORE MERGING TO MASTER.
                 Log.Information("Check if there's any events to publish");
