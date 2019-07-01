@@ -27,7 +27,7 @@ namespace K8sJanitor.WebApi.Domain.Events
         
         public async Task HandleAsync(K8sNamespaceCreatedAndAwsArnConnectedEvent domainEvent)
         {
-            // TODO
+            // If event "k8s_namespace_created_and_aws_arn_connected" needs to be handled it can be done here.
         }
     }
 }

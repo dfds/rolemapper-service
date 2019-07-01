@@ -26,7 +26,6 @@ using K8sJanitor.WebApi.Repositories.Kubernetes;
 using K8sJanitor.WebApi.Services;
 using K8sJanitor.WebApi.Validators;
 using K8sJanitor.WebApi.Wrappers;
-using Microsoft.EntityFrameworkCore;
 using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
 
 namespace K8sJanitor.WebApi
@@ -123,7 +122,6 @@ namespace K8sJanitor.WebApi
 
             services.AddHostedService<KafkaConsumerHostedService>();
         }
-
 
         private static void ConfigureDomainEvents(IServiceCollection services)
         {

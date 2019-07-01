@@ -34,8 +34,6 @@ namespace K8sJanitor.WebApi.EventHandlers
         }
 
 
-        // k8s_namespace_created_and_aws_arn_connected Event should be emitted at some point
-        // doing this method.
         public async Task HandleAsync(ContextAccountCreatedDomainEvent domainEvent)
         {
             var namespaceName = NamespaceName.Create(domainEvent.Payload.CapabilityRootId);
@@ -53,7 +51,7 @@ namespace K8sJanitor.WebApi.EventHandlers
                 group: namespaceName
             );
 
-            await _k8sApplicationService.FireEventK8sNamespaceCreatedAndAwsArnConnected(namespaceName, domainEvent.Payload.ContextId);
+            await _k8sApplicationService.FireEventK8sNamespaceCreatedAndAwsArnConnected(namespaceName, domainEvent.Payload.ContextId); // Emit Kafka event "k8s_namespace_created_and_aws_arn_connected"
         }
 
         public async Task CreateNameSpace(
