@@ -8,7 +8,6 @@
 
   <ItemGroup>
     <Folder Include="Domain\Models" />
-    <Folder Include="Infrastructure\Persistence" />
     <Folder Include="wwwroot\" />
   </ItemGroup>
 

@@ -1,7 +1,6 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using K8sJanitor.WebApi.Application;
 using K8sJanitor.WebApi.Domain.Events;
 using K8sJanitor.WebApi.EventHandlers;
 using K8sJanitor.WebApi.Tests.TestDoubles;
@@ -20,7 +19,7 @@ namespace K8sJanitor.WebApi.Tests.EventHandlers
             var namespaceRepositorySpy = new NamespaceRepositorySpy();
             var roleRepositorySpy = new RoleRepositorySpy();
             var roleBindingRepositorySpy = new RoleBindingRepositorySpy();
-            var k8sApplicationService = new StubK8sApplicationService(); // Don't create a K8sApplicationService here. Instead create a stub
+            var k8sApplicationService = new StubK8sApplicationService();
             var sut = new ContextAccountCreatedDomainEventHandler(
                 configMapServiceSpy,
                 namespaceRepositorySpy,
