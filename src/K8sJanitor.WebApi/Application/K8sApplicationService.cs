@@ -38,10 +38,5 @@ namespace K8sJanitor.WebApi.Application
             
             eventsQueue.AddEventToQueue(evt);
         }
-        
-        public Task TestCreated(string description)
-        {
-            throw new System.NotImplementedException();
-        }
     }
 }

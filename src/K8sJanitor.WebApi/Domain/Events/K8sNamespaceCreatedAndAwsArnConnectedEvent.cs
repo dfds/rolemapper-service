@@ -25,14 +25,4 @@ namespace K8sJanitor.WebApi.Domain.Events
             
         }
     }
-
-    public class K8sNamespaceCreatedAndAwsArnConnectEventData
-    {
-        public string Description { get;  }
-        
-        public K8sNamespaceCreatedAndAwsArnConnectEventData(string description)
-        {
-            Description = description;
-        }
-    }
 }

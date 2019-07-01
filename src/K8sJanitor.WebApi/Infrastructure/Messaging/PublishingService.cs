@@ -27,10 +27,6 @@ namespace K8sJanitor.WebApi.Infrastructure.Messaging
             {
                 try
                 {
-                    // Used for learning purposes. REMOVE BEFORE MERGING TO MASTER
-                    var k8sapp = _serviceProvider.GetRequiredService<IK8sApplicationService>();
-                    await k8sapp.FireEventK8sNamespaceCreatedAndAwsArnConnected("onprem-43581", Guid.NewGuid());
-                    // Stops here
                     await DoWork(stoppingToken);
                 }
                 catch (Exception err)
