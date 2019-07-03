@@ -2,15 +2,22 @@
 apiVersion: v1
 kind: Service
 metadata:
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "8080"
   labels:
     app: k8s-janitor
+    scrape-service-metrics: "true"
   name: k8s-janitor
   namespace: $(kubernetes-namespace)
 spec:
   ports:
-    - name: external
-      port: 80
-      targetPort: web
+  - name: external
+    port: 80
+    targetPort: web
+  - name: metrics
+    port: 8080
+    targetPort: 8080
   selector:
     app: k8s-janitor
   type: ClusterIP
