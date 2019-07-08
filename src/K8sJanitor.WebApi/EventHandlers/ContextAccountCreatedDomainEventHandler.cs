@@ -51,7 +51,7 @@ namespace K8sJanitor.WebApi.EventHandlers
                 group: namespaceName
             );
 
-            await _k8sApplicationService.FireEventK8sNamespaceCreatedAndAwsArnConnected(namespaceName, domainEvent.Payload.ContextId); // Emit Kafka event "k8s_namespace_created_and_aws_arn_connected"
+            await _k8sApplicationService.FireEventK8sNamespaceCreatedAndAwsArnConnected(namespaceName, domainEvent.Payload.ContextId, domainEvent.Payload.CapabilityId); // Emit Kafka event "k8s_namespace_created_and_aws_arn_connected"
         }
 
         public async Task CreateNameSpace(

@@ -6,7 +6,7 @@ namespace K8sJanitor.WebApi.Tests.EventHandlers
 {
     public class StubK8sApplicationService : IK8sApplicationService
     {
-        public Task FireEventK8sNamespaceCreatedAndAwsArnConnected(string namespaceName, Guid contextId)
+        public Task FireEventK8sNamespaceCreatedAndAwsArnConnected(string namespaceName, Guid contextId, Guid capabilityId)
         {
             return Task.CompletedTask;
         }
@@ -21,7 +21,7 @@ namespace K8sJanitor.WebApi.Tests.EventHandlers
             _exceptionToThrow = exceptionToThrow;
         }
         
-        public Task FireEventK8sNamespaceCreatedAndAwsArnConnected(string namespaceName, Guid contextId)
+        public Task FireEventK8sNamespaceCreatedAndAwsArnConnected(string namespaceName, Guid contextId, Guid capabilityId)
         {
             throw _exceptionToThrow;
         }
