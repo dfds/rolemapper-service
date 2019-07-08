@@ -18,14 +18,14 @@ namespace K8sJanitor.WebApi.Application
             _serviceProvider = serviceProvider;
         }
 
-        public async Task FireEventK8sNamespaceCreatedAndAwsArnConnected(string namespaceName, Guid contextId)
+        public async Task FireEventK8sNamespaceCreatedAndAwsArnConnected(string namespaceName, Guid contextId, Guid capabilityId)
         {
             try
             {
                 var eventRegistry = _serviceProvider.GetRequiredService<DomainEventRegistry>();
                 var eventsQueue = _serviceProvider.GetRequiredService<PublishingEventsQueue>();
 
-                var evtPre = new K8sNamespaceCreatedAndAwsArnConnectedEvent(namespaceName, contextId);
+                var evtPre = new K8sNamespaceCreatedAndAwsArnConnectedEvent(namespaceName, contextId, capabilityId);
             
                 var evt = new DomainEventEnvelope
                 {
