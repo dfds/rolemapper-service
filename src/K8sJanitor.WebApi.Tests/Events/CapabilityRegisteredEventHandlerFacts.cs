@@ -33,7 +33,7 @@ namespace K8sJanitor.WebApi.Tests.Events
             var g = new GeneralDomainEvent(
                 "1",
                 "capability_registered",
-                Guid.NewGuid(),
+                Guid.NewGuid().ToString(),
                 "sender",
                 JObject.FromObject(data)
             );

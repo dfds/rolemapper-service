@@ -17,7 +17,7 @@ namespace K8sJanitor.WebApi.Domain.Events
 
         public string Version { get; }
         public string EventName { get; }
-        public Guid XCorrelationId { get; }
+        public string XCorrelationId { get; }
         public string XSender { get; }
         public ContextAccountCreatedDomainEventData Payload { get; }
         
