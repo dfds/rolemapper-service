@@ -43,7 +43,7 @@ namespace K8sJanitor.WebApi.Tests.EventHandlers
                 new GeneralDomainEvent(
                     "1",
                     "eventName",
-                    Guid.NewGuid(),
+                    Guid.NewGuid().ToString(),
                     string.Empty,
                     JObject.FromObject(contextAccountCreatedDomainEventData)
                 );
