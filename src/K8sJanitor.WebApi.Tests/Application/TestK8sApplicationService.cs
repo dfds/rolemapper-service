@@ -31,7 +31,7 @@ namespace K8sJanitor.WebApi.Tests.Application
             });
             
             Assert.Equal(
-                expected: $"{{\"namespaceName\":\"onprem-b6fdd382\",\"contextId\":\"b6fdd382-8723-410d-a7af-5c0a1eeb0a23\",\"capabilityId\"\"8dbbe1a3-55e8-4ac9-ae7d-01c54fdd0147\"}}",
+                expected: $"{{\"namespaceName\":\"onprem-b6fdd382\",\"contextId\":\"b6fdd382-8723-410d-a7af-5c0a1eeb0a23\",\"capabilityId\":\"8dbbe1a3-55e8-4ac9-ae7d-01c54fdd0147\"}}",
                 actual: data
             );
         }
