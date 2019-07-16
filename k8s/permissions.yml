@@ -45,6 +45,30 @@ roleRef:
 ---
 
 apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: read-namespaces
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - namespaces
+  verbs:
+  - get
+  - list
+  - watch
+
+# Workaround to allow K9s to list pods at all
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  verbs:
+  - list
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: iamrole-to-clusterrole-binding
@@ -54,5 +78,5 @@ subjects:
     apiGroup: rbac.authorization.k8s.io
 roleRef:
   kind: ClusterRole
-  name: view
+  name: read-namespaces
   apiGroup: rbac.authorization.k8s.io
