@@ -1,7 +1,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using K8sJanitor.WebApi.Application;
+using Confluent.Kafka;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
@@ -65,19 +65,23 @@ namespace K8sJanitor.WebApi.Infrastructure.Messaging
                             var topicName = eventRegistry.GetTopicFor(evt.Type);
                             var message = MessagingHelper.CreateMessageFrom(evt);
 
-                            var result = await producer.ProduceAsync(
-                                topic: topicName,
-                                key: evt.AggregateId,
-                                val: message
-                            );
-
-                            if (!result.Error.HasError)
+                            try
                             {
+                                var result = await producer.ProduceAsync(
+                                    topic: topicName,
+                                    message: new Message<string, string>
+                                    {
+                                        Key = evt.AggregateId,
+                                        Value = message
+                                    }
+                                );
                                 Log.Information($"Domain event \"{evt.Type}>{evt.EventId}\" has been published!");
+
                             }
-                            else
+                            catch (Exception)
                             {
                                 throw new Exception($"Could not publish domain event \"{evt.Type}>{evt.EventId}\"!!!");
+
                             }
                         }
                     }

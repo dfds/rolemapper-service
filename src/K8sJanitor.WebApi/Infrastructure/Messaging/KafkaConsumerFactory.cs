@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Confluent.Kafka;
-using Confluent.Kafka.Serialization;
 using Microsoft.Extensions.Configuration;
 
 namespace K8sJanitor.WebApi.Infrastructure.Messaging
@@ -17,15 +16,20 @@ namespace K8sJanitor.WebApi.Infrastructure.Messaging
             _configuration = configuration;
         }
 
-        public Consumer<string, string> Create()
+        public IConsumer<string, string> Create()
         {
-            var config = _configuration.AsEnumerable().ToArray();
-            
-            return new Consumer<string, string>(
-                config: config,
-                keyDeserializer: new StringDeserializer(Encoding.UTF8),
-                valueDeserializer: new StringDeserializer(Encoding.UTF8)
-            );
+            var config = new ConsumerConfig(_configuration.GetConsumerConfiguration());
+            var builder = new ConsumerBuilder<string, string>(config);
+            builder.SetErrorHandler(OnKafkaError);
+            return builder.Build();
+        }
+        
+        private void OnKafkaError(IConsumer<string, string> producer, Error error)
+        {
+            if (error.IsFatal)
+                Environment.FailFast($"Fatal error in Kafka producer: {error.Reason}. Shutting down...");
+            else
+                throw new Exception(error.Reason);
         }
 
         public class KafkaConfiguration
@@ -52,7 +56,18 @@ namespace K8sJanitor.WebApi.Infrastructure.Messaging
                 return Tuple.Create<string, string>(key, value);
             }
 
-            public IEnumerable<KeyValuePair<string, object>> AsEnumerable()
+            public ConsumerConfig GetConsumerConfiguration()
+            {
+                return new ConsumerConfig(AsEnumerable());
+
+            }
+
+            public ProducerConfig GetProducerConfiguration()
+            {
+                return new ProducerConfig(AsEnumerable());
+            }
+
+            public IEnumerable<KeyValuePair<string, string>> AsEnumerable()
             {
                 var configurationKeys = new[]
                 {
@@ -71,10 +86,10 @@ namespace K8sJanitor.WebApi.Infrastructure.Messaging
                 var config = configurationKeys
                     .Select(key => GetConfiguration(key))
                     .Where(pair => pair != null)
-                    .Select(pair => new KeyValuePair<string, object>(pair.Item1, pair.Item2))
+                    .Select(pair => new KeyValuePair<string, string>(pair.Item1, pair.Item2))
                     .ToList();
                 
-                config.Add(new KeyValuePair<string, object>("request.timeout.ms", "3000"));
+                config.Add(new KeyValuePair<string, string>("request.timeout.ms", "3000"));
 
                 return config;
             }
