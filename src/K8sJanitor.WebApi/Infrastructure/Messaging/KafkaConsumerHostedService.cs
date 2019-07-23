@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Confluent.Kafka;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -39,14 +40,20 @@ namespace K8sJanitor.WebApi.Infrastructure.Messaging
                         _logger.LogInformation(
                             $"Event consumer started. Listening to topics: {string.Join(",", _topics)}");
                         consumer.Subscribe(_topics);
-                        consumer.OnPartitionsRevoked += (sender, topicPartitions) => consumer.Unassign();
-                        consumer.OnPartitionsAssigned += (sender, topicPartitions) => consumer.Assign(topicPartitions);
 
                         // consume loop
                         while (!_cancellationTokenSource.IsCancellationRequested)
                         {
-                            if (!consumer.Consume(out var msg, 1000))
-                            { continue; }
+                            ConsumeResult<string, string> msg;
+                            try
+                            {
+                                msg = consumer.Consume(cancellationToken);
+                            }
+                            catch (Exception ex)
+                            {
+                                _logger.LogError($"Consumption of event failed, reason: {ex}");
+                                continue;
+                            }
 
                             using (var scope = _serviceProvider.CreateScope())
                             {
@@ -57,12 +64,12 @@ namespace K8sJanitor.WebApi.Infrastructure.Messaging
                                 {
                                     var eventDispatcher = scope.ServiceProvider.GetRequiredService<IEventDispatcher>();
                                     await eventDispatcher.Send(msg.Value);
-                                    await consumer.CommitAsync(msg);
+                                    await Task.Run(() => consumer.Commit(msg));
                                 }
                                 catch (Exception ex) when (ex is EventTypeNotFoundException || ex is EventHandlerNotFoundException )
                                 {
                                     _logger.LogWarning($"Message skipped. Exception message: {ex.Message}", ex);
-                                    await consumer.CommitAsync(msg);
+                                    await Task.Run(() => consumer.Commit(msg));
                                 }
                                 catch (Exception ex)
                                 {
