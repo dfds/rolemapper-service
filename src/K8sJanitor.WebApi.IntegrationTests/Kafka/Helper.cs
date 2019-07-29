@@ -9,6 +9,11 @@ using Confluent.Kafka;
 using K8sJanitor.WebApi.Domain.Events;
 using K8sJanitor.WebApi.EventHandlers;
 using K8sJanitor.WebApi.Infrastructure.Messaging;
+using K8sJanitor.WebApi.Repositories;
+using K8sJanitor.WebApi.Repositories.Kubernetes;
+using K8sJanitor.WebApi.Services;
+using K8sJanitor.WebApi.Validators;
+using K8sJanitor.WebApi.Wrappers;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -46,7 +51,7 @@ namespace K8sJanitor.WebApi.IntegrationTests.Kafka
             return consumer;
         }
         
-        public static IServiceProvider SetupServiceProviderWithConsumerAndProducer()
+        public static IServiceProvider SetupServiceProviderWithConsumerAndProducer(bool useManualEvents = false)
         {
             Helper.SetEnvVars();
             var eventRegistry = new DomainEventRegistry();
@@ -57,18 +62,33 @@ namespace K8sJanitor.WebApi.IntegrationTests.Kafka
 
             var httpClient = new HttpClient();
 
-            var serviceProvider = new ServiceCollection()
+            var serviceProviderBuilder = new ServiceCollection()
                 .AddLogging()
                 .AddSingleton<IConfiguration>(configuration)
                 .AddSingleton(httpClient)
+//                .AddTransient<IConfigMapService, ConfigMapService>()
+//                .AddTransient<IAwsAuthConfigMapRepository, AwsAuthConfigMapRepository>()
+//                .AddTransient<IAddRoleRequestValidator, AddRoleRequestValidator>()
+//                .AddTransient<IAddNamespaceRequestValidator, AddNamespaceRequestValidator>()
+//                .AddTransient<IKubernetesWrapper>(k => new KubernetesWrapper(null))
+//                .AddTransient<IPersistenceRepository, PersistenceRepositoryStub>()
+//                .AddTransient<INamespaceRepository, NamespaceRepository>()
+//                .AddTransient<IRoleRepository, RoleRepository>()
+//                .AddTransient<IRoleBindingRepository, RoleBindingRepository>()
                 .AddTransient<IEventHandler<K8sNamespaceCreatedAndAwsArnConnectedEvent>, GenericEventHandler<K8sNamespaceCreatedAndAwsArnConnectedEvent>>()
                 .AddSingleton(eventRegistry)
                 .AddSingleton(publishingEventsQueue)
                 .AddTransient<KafkaConsumerFactory.KafkaConfiguration>()
                 .AddTransient<KafkaPublisherFactory>()
                 .AddTransient<KafkaConsumerFactory>()
-                .AddTransient<IEventDispatcher, EventDispatcher>()
-                .BuildServiceProvider();
+                .AddTransient<IEventDispatcher, EventDispatcher>();
+
+            if (useManualEvents)
+            {
+                ManualEvents.AddEventsToServiceProvider(serviceProviderBuilder);
+            }
+            
+            var serviceProvider = serviceProviderBuilder.BuildServiceProvider();
 
             serviceProvider
                 .GetService<ILoggerFactory>()
@@ -85,6 +105,11 @@ namespace K8sJanitor.WebApi.IntegrationTests.Kafka
             return new JsonSerializer().Deserialize<FakeServerResponse>(content);
         }
 
+        public static async Task ResetFakeServer(IServiceScope scope)
+        {
+            await CallFakeServer("/api-calls-reset", scope);
+        }
+ 
         public static async Task<List<Type>> GetAllEventTypes()
         {
             var listOfIEvents = AppDomain.CurrentDomain.GetAssemblies().SelectMany(x => x.GetTypes())
@@ -113,6 +138,13 @@ namespace K8sJanitor.WebApi.IntegrationTests.Kafka
             allEvents.AddRange(listOfIEvents);
             allEvents.AddRange(listOfDomainEvents);
             return allEvents;
+        }
+
+        public static async Task<List<object>> GetPrefilledEvents()
+        {
+            var payload = new List<object>();
+
+            return payload;
         }
 
         public static async Task RunManualPublishingServiceOnce(IServiceScope scope)

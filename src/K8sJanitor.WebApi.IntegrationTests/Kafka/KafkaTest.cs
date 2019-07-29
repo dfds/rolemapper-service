@@ -25,6 +25,7 @@ namespace K8sJanitor.WebApi.IntegrationTests.Kafka
         public async Task ProduceEventAndCheckExternallyThatItHasBeenReceived()
         {
             var serviceProvider = Helper.SetupServiceProviderWithConsumerAndProducer();
+            await Helper.ResetFakeServer(serviceProvider.CreateScope());
             var eventRegistry = serviceProvider.GetRequiredService<DomainEventRegistry>();
 
             const string topic = "build.capabilities";
@@ -106,6 +107,44 @@ namespace K8sJanitor.WebApi.IntegrationTests.Kafka
 
             Assert.True(eventsExists);
             Assert.Equal(events.Count, expectedEvents.Count);
+        }
+
+        // Must be manually updated to support a new Event, as well as when removing an Event.
+        // That means that this test is SUPPOSED TO FAIL if one has added, removed or changed an Event.
+        // TODO: Potentially use reflection to instead of doing the manual steps.
+        // Take a look at ManualEvents.cs for more info.
+        [Fact]
+        public async Task ProduceExistingEvents()
+        {
+            var events = await Helper.GetAllEventTypes();
+            
+            var serviceProvider = Helper.SetupServiceProviderWithConsumerAndProducer(useManualEvents: true);
+            await Helper.ResetFakeServer(serviceProvider.CreateScope());
+            var eventRegistry = serviceProvider.GetRequiredService<DomainEventRegistry>();
+
+            const string topic = "build.capabilities";
+
+            using (var scope = serviceProvider.CreateScope())
+            {
+                ManualEvents.RegisterEvents(eventRegistry, topic, scope);
+            }
+            
+
+            var apiCallsReceived = await Helper.CallFakeServer("/api-calls-received", serviceProvider.CreateScope());
+            Assert.Equal(1, apiCallsReceived.ApiCallsReceived);
+
+            using (var scope = serviceProvider.CreateScope())
+            {
+                await ManualEvents.AddEventsToPublishingQueue(scope);
+                await Helper.RunManualPublishingServiceOnce(scope);
+            }
+            
+            Thread.Sleep(3000);
+            
+            var res = Helper.CallFakeServer("/api-calls-received", serviceProvider.CreateScope()).Result;
+            Assert.Equal(res.ApiCallsReceived, apiCallsReceived.ApiCallsReceived + 1);
+            Assert.Equal(events.Count, res.KafkaMessageReceived);
+            await Helper.CallFakeServer("/api-calls-reset", serviceProvider.CreateScope());
         }
     }
 }
