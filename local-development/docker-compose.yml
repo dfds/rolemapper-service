@@ -66,5 +66,6 @@ services:
   integration-test-api-server:
     build:
       context: ./integration-test-api-server
-    ports:
-      - "50901:3000"
+    network_mode: "host"
+    depends_on:
+      - broker

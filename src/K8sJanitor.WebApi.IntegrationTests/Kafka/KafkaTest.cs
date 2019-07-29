@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading;
@@ -20,7 +22,7 @@ namespace K8sJanitor.WebApi.IntegrationTests.Kafka
     public class KafkaTest
     {
         [Fact]
-        public async Task ProduceEvent()
+        public async Task ProduceEventAndCheckExternallyThatItHasBeenReceived()
         {
             var serviceProvider = Helper.SetupServiceProviderWithConsumerAndProducer();
             var eventRegistry = serviceProvider.GetRequiredService<DomainEventRegistry>();
@@ -69,10 +71,41 @@ namespace K8sJanitor.WebApi.IntegrationTests.Kafka
             Assert.Equal(
                 expected: "{\"version\":\"1\",\"eventName\":\"k8s_namespace_created_and_aws_arn_connected\",\"x-correlationId\":\"\",\"x-sender\":\"K8sJanitor.WebApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null\",\"payload\":{\"namespaceName\":\"kafkaTest\",\"contextId\":\"f8bbe9e1-cdda-41fb-9781-bf43dbc18a47\",\"capabilityId\":\"2a70d5ac-5e1f-4e1d-8d81-4c4cbda7b9d9\"}}", 
                 actual: consumerTask.Result.Value);
-            
-            Assert.Equal(Helper.CallFakeServer("/api-calls-received", serviceProvider.CreateScope()).Result.ApiCallsReceived, apiCallsReceived.ApiCallsReceived + 1);
+
+            var res = Helper.CallFakeServer("/api-calls-received", serviceProvider.CreateScope()).Result;
+            Assert.Equal(res.ApiCallsReceived, apiCallsReceived.ApiCallsReceived + 1);
+            Assert.Equal(1, res.KafkaMessageReceived);
 
             await Helper.CallFakeServer("/api-calls-reset", serviceProvider.CreateScope());
+        }
+
+        // Checks if there is any changes in events, either removed or added. This is mostly a check to make sure that
+        // the removal or addition of an Event is intended. Assuming it is, one just has to update the list below in order for the test
+        // to go through.
+        [Fact]
+        public async Task CheckExpectedEventsExists()
+        {
+            var events = await Helper.GetAllEventTypes(); // Looks for classes that implements IEvent or IDomainEvent.
+
+            // This list is to be updated when an Event is either added or removed.
+            var expectedEvents = new List<Type>
+            {
+                typeof(CapabilityRegisteredDomainEvent),
+                typeof(ContextAccountCreatedDomainEvent),
+                typeof(K8sNamespaceCreatedAndAwsArnConnectedEvent)
+            };
+
+            var eventsExists = true;
+            foreach (var evt in events)
+            {
+                if (!expectedEvents.Contains(evt))
+                {
+                    eventsExists = false;
+                }
+            }
+
+            Assert.True(eventsExists);
+            Assert.Equal(events.Count, expectedEvents.Count);
         }
     }
 }

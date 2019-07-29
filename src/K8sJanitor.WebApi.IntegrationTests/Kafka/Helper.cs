@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
@@ -82,7 +84,37 @@ namespace K8sJanitor.WebApi.IntegrationTests.Kafka
             var content = await response.Content.ReadAsStringAsync();
             return new JsonSerializer().Deserialize<FakeServerResponse>(content);
         }
-        
+
+        public static async Task<List<Type>> GetAllEventTypes()
+        {
+            var listOfIEvents = AppDomain.CurrentDomain.GetAssemblies().SelectMany(x => x.GetTypes())
+                .Where(x => ( typeof(IEvent).IsAssignableFrom(x) ) && !x.IsInterface && !x.IsAbstract)
+                .Select(x => x).ToList();
+            
+            var listOfDomainEvents = AppDomain.CurrentDomain.GetAssemblies().SelectMany(x => x.GetTypes())
+                .Where(x =>
+                {
+                    var interfaces = x.GetInterfaces();
+                    
+                    foreach (var interf in interfaces)
+                    {
+                        if (interf.Name.Contains("IDomainEvent") && interf.Namespace.Equals("K8sJanitor.WebApi.Domain.Events"))
+                        {
+                            return true;
+                        }
+                    }
+
+                    return false;
+                })
+                .Where(x => !x.Name.Equals("GeneralDomainEvent"))
+                .Select(x => x).ToList();
+
+            var allEvents = new List<Type>();
+            allEvents.AddRange(listOfIEvents);
+            allEvents.AddRange(listOfDomainEvents);
+            return allEvents;
+        }
+
         public static async Task RunManualPublishingServiceOnce(IServiceScope scope)
         {
             var eventsQueue = scope.ServiceProvider.GetRequiredService<PublishingEventsQueue>();
@@ -143,6 +175,7 @@ namespace K8sJanitor.WebApi.IntegrationTests.Kafka
     {
         public bool Success { get; set; }
         public int ApiCallsReceived { get; set; }
+        public int KafkaMessageReceived { get; set; }
     }
     
     public class JsonSerializer
