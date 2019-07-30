@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
@@ -109,6 +110,26 @@ namespace K8sJanitor.WebApi.IntegrationTests.Kafka
         {
             await CallFakeServer("/api-calls-reset", scope);
         }
+
+        public static async Task<FakeServerResponse> PostFakeServer(string endpoint, IServiceScope scope, HttpContent content)
+        {
+            var request = new HttpRequestMessage
+            {
+                Method = HttpMethod.Post,
+                RequestUri = new Uri($"http://localhost:50901{endpoint}"),
+                Headers =
+                {
+                    {HttpRequestHeader.ContentType.ToString(), "application/json"}
+                },
+                Content = content
+            };
+
+            var response = await scope.ServiceProvider.GetRequiredService<HttpClient>()
+                .SendAsync(request);
+            
+            var contentResp = await response.Content.ReadAsStringAsync();
+            return new JsonSerializer().Deserialize<FakeServerResponse>(contentResp);
+        }
  
         public static async Task<List<Type>> GetAllEventTypes()
         {
@@ -201,6 +222,13 @@ namespace K8sJanitor.WebApi.IntegrationTests.Kafka
         {
             Console.WriteLine("GenericEventHandler called");
         }
+    }
+
+    public class FakeServerPostRequest
+    {
+        public string NamespaceName { get; set; }
+        public string ContextId { get; set; }
+        public string CapabilityId { get; set; }
     }
 
     public class FakeServerResponse

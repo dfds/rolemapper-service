@@ -16,6 +16,18 @@ const deserialize = (text) => JSON.parse(text);
 var counter = 0;
 var kafkaMessageReceivedCounter = 0;
 
+const kafka = new Kafka({
+    clientId: 'integrationTestApiServer',
+    brokers: ['localhost:9092'],
+    connectionTimeout: 30000,
+    retry: {
+        retries: 30,
+        initialRetryTime: 3000,
+        maxRetryTime: 30000
+    }
+})
+
+
 app.get("/api-calls-received", (req, res) => {
     counter = counter + 1;
     return res.json({apiCallsReceived: counter, kafkaMessageReceived: kafkaMessageReceivedCounter, success: true});
@@ -27,19 +39,42 @@ app.get("/api-calls-reset", (req, res) => {
     return res.json({success: true});
 });
 
+app.post("/api-create-event", async (req, res) => {
+    const payload = req.body;
+
+    //(async () => {
+        const producer = kafka.producer({});
+        console.log("producer created");
+        await producer.connect();
+        console.log("producer connected");
+        await producer.send({
+            topic: 'build.capabilities',
+            messages: [{
+                value: JSON.stringify({
+                    "version": '1',
+                    "eventName": 'k8s_namespace_created_and_aws_arn_connected',
+                    "x-correlationId": '',
+                    "x-sender": "K8sJanitor.WebApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null",
+                    "payload": {
+                        "namespaceName": payload.namespaceName,
+                        "contextId": payload.contextId,
+                        "capabilityId": payload.capabilityId
+                    }
+                })
+            }]
+        });
+
+        console.log("producer sent");
+    
+        await producer.disconnect();
+    //});
+
+    return res.json({success: true});
+});
+
 
 (async () => {
     // new kafka code
-    const kafka = new Kafka({
-        clientId: 'integrationTestApiServer',
-        brokers: ['localhost:9092'],
-        connectionTimeout: 30000,
-        retry: {
-            retries: 30,
-            initialRetryTime: 3000,
-            maxRetryTime: 30000
-        }
-    })
 
     const consumer = kafka.consumer({ groupId: 'integrationTestApiServer'});
     await consumer.connect();

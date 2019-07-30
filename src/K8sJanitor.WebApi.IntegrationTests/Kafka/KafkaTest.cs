@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Confluent.Kafka;
@@ -201,6 +202,49 @@ namespace K8sJanitor.WebApi.IntegrationTests.Kafka
             var resExternal = Helper.CallFakeServer("/api-calls-received", serviceProvider.CreateScope()).Result;
             Assert.Equal(resExternal.ApiCallsReceived, apiCallsReceived.ApiCallsReceived + 1);
             Assert.Equal(events.Count, resExternal.KafkaMessageReceived);
+        }
+
+        [Fact]
+        public async Task QueryRestApiConsumeEvent()
+        {
+            var serviceProvider = Helper.SetupServiceProviderWithConsumerAndProducer(useManualEvents: true);
+            await Helper.ResetFakeServer(serviceProvider.CreateScope());
+            var eventRegistry = serviceProvider.GetRequiredService<DomainEventRegistry>();
+            
+            const string topic = "build.capabilities";
+            
+
+            using (var scope = serviceProvider.CreateScope())
+            {
+                ManualEvents.RegisterEvents(eventRegistry, topic, scope);
+            }
+            
+            var consumer = Helper.SetupKafkaConsumption(serviceProvider.CreateScope());
+
+            var consumerTask = Task.Run(() =>
+            {
+                var msg = consumer.Consume();
+                consumer.Close();
+                return msg;
+            });
+            
+            // Wait for Consume() to initialise prior services
+            Thread.Sleep(3000);
+
+            var payload = new K8sNamespaceCreatedAndAwsArnConnectedEvent("kafkaTest", Guid.Parse("f8bbe9e1-cdda-41fb-9781-bf43dbc18a47"), Guid.Parse("2a70d5ac-5e1f-4e1d-8d81-4c4cbda7b9d9"));
+            var payloadAsJsonString = JsonConvert.SerializeObject(payload, new JsonSerializerSettings
+            {
+                ContractResolver = new CamelCasePropertyNamesContractResolver()
+            });
+            var resp = await Helper.PostFakeServer("/api-create-event", serviceProvider.CreateScope(), new StringContent(payloadAsJsonString, Encoding.UTF8, "application/json"));
+
+            var consumeResult = consumerTask.Result;
+            
+            await Helper.ResetFakeServer(serviceProvider.CreateScope());
+
+            Assert.Equal(
+                expected: "{\"version\":\"1\",\"eventName\":\"k8s_namespace_created_and_aws_arn_connected\",\"x-correlationId\":\"\",\"x-sender\":\"K8sJanitor.WebApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null\",\"payload\":{\"namespaceName\":\"kafkaTest\",\"contextId\":\"f8bbe9e1-cdda-41fb-9781-bf43dbc18a47\",\"capabilityId\":\"2a70d5ac-5e1f-4e1d-8d81-4c4cbda7b9d9\"}}", 
+                actual: consumeResult.Value);
         }
     }
 }
