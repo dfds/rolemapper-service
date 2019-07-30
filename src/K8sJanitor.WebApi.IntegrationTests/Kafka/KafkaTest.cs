@@ -239,12 +239,16 @@ namespace K8sJanitor.WebApi.IntegrationTests.Kafka
             var resp = await Helper.PostFakeServer("/api-create-event", serviceProvider.CreateScope(), new StringContent(payloadAsJsonString, Encoding.UTF8, "application/json"));
 
             var consumeResult = consumerTask.Result;
+
+            var res = await Helper.CallFakeServer("/api-calls-received", serviceProvider.CreateScope());
             
             await Helper.ResetFakeServer(serviceProvider.CreateScope());
 
             Assert.Equal(
                 expected: "{\"version\":\"1\",\"eventName\":\"k8s_namespace_created_and_aws_arn_connected\",\"x-correlationId\":\"\",\"x-sender\":\"K8sJanitor.WebApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null\",\"payload\":{\"namespaceName\":\"kafkaTest\",\"contextId\":\"f8bbe9e1-cdda-41fb-9781-bf43dbc18a47\",\"capabilityId\":\"2a70d5ac-5e1f-4e1d-8d81-4c4cbda7b9d9\"}}", 
                 actual: consumeResult.Value);
+            
+            Assert.Equal(1, res.KafkaMessageReceived);
         }
     }
 }
