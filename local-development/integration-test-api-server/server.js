@@ -41,45 +41,39 @@ app.get("/api-calls-reset", (req, res) => {
 
 app.post("/api-create-event", async (req, res) => {
     const payload = req.body;
-
-    //(async () => {
-        const producer = kafka.producer({});
-        console.log("producer created");
-        await producer.connect();
-        console.log("producer connected");
-        await producer.send({
-            topic: 'build.capabilities',
-            messages: [{
-                value: JSON.stringify({
-                    "version": '1',
-                    "eventName": 'k8s_namespace_created_and_aws_arn_connected',
-                    "x-correlationId": '',
-                    "x-sender": "K8sJanitor.WebApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null",
-                    "payload": {
-                        "namespaceName": payload.namespaceName,
-                        "contextId": payload.contextId,
-                        "capabilityId": payload.capabilityId
-                    }
-                })
-            }]
-        });
-
-        console.log("producer sent");
     
-        await producer.disconnect();
-    //});
-
+    const producer = kafka.producer({});
+    await producer.connect();
+    await producer.send({
+        topic: 'build.capabilities',
+        messages: [{
+            value: JSON.stringify({
+                "version": '1',
+                "eventName": 'k8s_namespace_created_and_aws_arn_connected',
+                "x-correlationId": '',
+                "x-sender": "K8sJanitor.WebApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null",
+                "payload": {
+                    "namespaceName": payload.namespaceName,
+                    "contextId": payload.contextId,
+                    "capabilityId": payload.capabilityId
+                }
+            })
+        }]
+    });
+    
+    await producer.disconnect();
+    
     return res.json({success: true});
 });
 
 
 (async () => {
     // new kafka code
-
+    
     const consumer = kafka.consumer({ groupId: 'integrationTestApiServer'});
     await consumer.connect();
     await consumer.subscribe({topic: 'build.capabilities'});
-
+    
     consumer.run({
         eachMessage: async ({ topic, partition, message}) => {
             console.log({
