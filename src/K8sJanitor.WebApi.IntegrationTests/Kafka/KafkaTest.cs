@@ -19,6 +19,7 @@ using Xunit;
 
 namespace K8sJanitor.WebApi.IntegrationTests.Kafka
 {
+    // If a test seems to be stuck, ensure that all manual steps in ManualEvents.cs has been taken.
     public class KafkaTest
     {
         [Fact]
@@ -43,9 +44,11 @@ namespace K8sJanitor.WebApi.IntegrationTests.Kafka
             var consumerTask = Task.Run(() =>
             {
                 var msg = consumer.Consume();
+                consumer.Close();
                 return msg;
             });
             
+            // Wait for Consume() to initialise prior services
             Thread.Sleep(5000);
 
             using (var scope = serviceProvider.CreateScope())
@@ -139,12 +142,65 @@ namespace K8sJanitor.WebApi.IntegrationTests.Kafka
                 await Helper.RunManualPublishingServiceOnce(scope);
             }
             
+            // Wait for "FakeServer" to consume all events.
             Thread.Sleep(3000);
             
             var res = Helper.CallFakeServer("/api-calls-received", serviceProvider.CreateScope()).Result;
             Assert.Equal(res.ApiCallsReceived, apiCallsReceived.ApiCallsReceived + 1);
             Assert.Equal(events.Count, res.KafkaMessageReceived);
             await Helper.CallFakeServer("/api-calls-reset", serviceProvider.CreateScope());
+        }
+
+        [Fact]
+        public async Task ConsumeExistingEvents()
+        {
+            var events = await Helper.GetAllEventTypes();
+
+            var serviceProvider = Helper.SetupServiceProviderWithConsumerAndProducer(useManualEvents: true);
+            await Helper.ResetFakeServer(serviceProvider.CreateScope());
+            var eventRegistry = serviceProvider.GetRequiredService<DomainEventRegistry>();
+
+            const string topic = "build.capabilities";
+
+            using (var scope = serviceProvider.CreateScope())
+            {
+                ManualEvents.RegisterEvents(eventRegistry, topic, scope);
+            }
+            
+            
+            var consumer = Helper.SetupKafkaConsumption(serviceProvider.CreateScope());
+            var expectedAmountOfEventsToConsume = events.Count();
+            var consumerTask = Task.Run(() =>
+            {
+                var messages = new List<ConsumeResult<string, string>>();
+                while (expectedAmountOfEventsToConsume != 0)
+                {
+                    var msg = consumer.Consume();
+                    messages.Add(msg);
+                    expectedAmountOfEventsToConsume = expectedAmountOfEventsToConsume - 1;
+                }
+                
+                consumer.Close();
+                return messages;
+            });
+            
+            var apiCallsReceived = await Helper.CallFakeServer("/api-calls-received", serviceProvider.CreateScope());
+            Assert.Equal(1, apiCallsReceived.ApiCallsReceived);
+            
+            // Wait for Consume() to initialise prior services
+            Thread.Sleep(3000);
+            
+            using (var scope = serviceProvider.CreateScope())
+            {
+                await ManualEvents.AddEventsToPublishingQueue(scope);
+                await Helper.RunManualPublishingServiceOnce(scope);
+            }
+
+            var res = consumerTask.Result;
+            Assert.Equal(events.Count, res.Count);
+            var resExternal = Helper.CallFakeServer("/api-calls-received", serviceProvider.CreateScope()).Result;
+            Assert.Equal(resExternal.ApiCallsReceived, apiCallsReceived.ApiCallsReceived + 1);
+            Assert.Equal(events.Count, resExternal.KafkaMessageReceived);
         }
     }
 }
