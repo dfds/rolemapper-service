@@ -40,7 +40,7 @@ namespace K8sJanitor.WebApi
 
             await _namespaceRepository.CreateNamespaceAsync(
                 namespaceName: namespaceName,
-                roleName: configmapRoleName
+                accountId: configmapRoleName
             );
 
             var namespaceRoleName = await _roleRepository

@@ -146,7 +146,8 @@ namespace K8sJanitor.WebApi.IntegrationTests.Repositories.Kubernetes
         {
             // Arrange
             var namespaceName = "namespace-from-test";
-            var awsRoleName = "arn:aws:iam::528563840976:role/eks-donald-servicebroker";
+            var accountId = "528563840976";
+            var kiamRole = "arn:aws:iam::528563840976:role/*";
             var config = KubernetesClientConfiguration.BuildConfigFromConfigFile();
             var client = new k8s.Kubernetes(config);
 
@@ -155,7 +156,7 @@ namespace K8sJanitor.WebApi.IntegrationTests.Repositories.Kubernetes
             try
             {
                 // act
-                await sut.CreateNamespaceAsync(namespaceName, awsRoleName);
+                await sut.CreateNamespaceAsync(namespaceName, accountId);
 
 
                 // Assert
@@ -165,7 +166,7 @@ namespace K8sJanitor.WebApi.IntegrationTests.Repositories.Kubernetes
 
                 var annotationValue = @namespace.Metadata.Annotations["iam.amazonaws.com/permitted"];
 
-                Assert.Equal(awsRoleName, annotationValue);
+                Assert.Equal(kiamRole, annotationValue);
             }
             finally
             {

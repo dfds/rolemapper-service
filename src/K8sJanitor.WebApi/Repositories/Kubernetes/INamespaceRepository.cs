@@ -6,7 +6,7 @@ namespace K8sJanitor.WebApi.Repositories.Kubernetes
 {
     public interface INamespaceRepository
     {
-        Task CreateNamespaceAsync(string namespaceName, string roleName);
+        Task CreateNamespaceAsync(string namespaceName, string accountId);
 
         Task CreateNamespaceAsync(
             NamespaceName namespaceName,

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using k8s.Models;
+using K8sJanitor.WebApi.Infrastructure.AWS;
 using K8sJanitor.WebApi.Models;
 using K8sJanitor.WebApi.Wrappers;
 using Microsoft.AspNetCore.JsonPatch;
@@ -44,7 +45,7 @@ namespace K8sJanitor.WebApi.Repositories.Kubernetes
                 Metadata = new V1ObjectMeta
                 {
                     Name = namespaceName,
-                    Labels = labels.ToDictionary(l => l.Key, l => l.Value)
+                    Labels = labels.ToDictionary(l => l.Key, l => l.Value),
                 }
             };
 
@@ -84,14 +85,14 @@ namespace K8sJanitor.WebApi.Repositories.Kubernetes
             await _client.PatchNamespaceWithHttpMessagesAsync(new V1Patch(patch), namespaceName);
         }
         
-        public async Task CreateNamespaceAsync(string namespaceName, string roleName)
+        public async Task CreateNamespaceAsync(string namespaceName, string accountId)
         {
             var ns = new V1Namespace
             {
                 Metadata = new V1ObjectMeta
                 {
                     Name = namespaceName,
-                    Annotations = new Dictionary<string, string> {{"iam.amazonaws.com/permitted", roleName}}
+                    Annotations = new Dictionary<string,string>{{"iam.amazonaws.com/permitted", IAM.ConstructRoleArn(accountId, "*")}}
                 }
             };
 
