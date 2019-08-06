@@ -1,6 +1,6 @@
 # k8s-janitor Service
 
-[![Build Status](https://dfds.visualstudio.com/DevelopmentExcellence/_apis/build/status/k8s-janitorservice-ci)](https://dfds.visualstudio.com/DevelopmentExcellence/_build/latest?definitionId=967)
+[![Build Status](https://dev.azure.com/dfds/DevelopmentExcellence/_apis/build/status/self-service/K8s-Janitor-CI?branchName=master)](https://dev.azure.com/dfds/DevelopmentExcellence/_build/latest?definitionId=967&branchName=master)
 
 Service managing k8s cluster with our business logics.
 
