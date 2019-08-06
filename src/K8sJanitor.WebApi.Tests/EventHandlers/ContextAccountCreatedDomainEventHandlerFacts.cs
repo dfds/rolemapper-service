@@ -67,7 +67,7 @@ namespace K8sJanitor.WebApi.Tests.EventHandlers
             Assert.NotNull(namespaceName);
             
             Assert.Equal(contextAccountCreatedDomainEventData.CapabilityRootId, namespaceName);
-            Assert.Equal(roleArn, @namespace.Annotations["iam.amazonaws.com/permitted"]);
+            Assert.Equal($"arn:aws:iam::{contextAccountCreatedDomainEventData.AccountId}:role/*", @namespace.Annotations["iam.amazonaws.com/permitted"]);
 
             Assert.Equal(namespaceName,roleRepositorySpy.Namespaces.Single());
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using K8sJanitor.WebApi.Application;
 using K8sJanitor.WebApi.Domain.Events;
+using K8sJanitor.WebApi.Infrastructure.AWS;
 using K8sJanitor.WebApi.Models;
 using K8sJanitor.WebApi.Repositories.Kubernetes;
 using K8sJanitor.WebApi.Services;
@@ -68,6 +69,13 @@ namespace K8sJanitor.WebApi.EventHandlers
             };
 
             await _namespaceRepository.CreateNamespaceAsync(namespaceName, labels);
+            await _namespaceRepository.AddAnnotations(namespaceName, new Dictionary<string, string>
+            {
+                {
+                    "iam.amazonaws.com/permitted",
+                    IAM.ConstructRoleArn(domainEvent.Payload.AccountId, "*")
+                }
+            });
         }
 
         public async Task ConnectAwsArnToNameSpace(NamespaceName namespaceName, string roleArn)
@@ -78,7 +86,7 @@ namespace K8sJanitor.WebApi.EventHandlers
                 roleName: roleName,
                 roleArn: roleArn
             );
-            var annotations = new Dictionary<string, string> {{"iam.amazonaws.com/permitted", roleArn}};
+            var annotations = new Dictionary<string, string>();
             await _namespaceRepository.AddAnnotations(namespaceName, annotations);
         } 
     }

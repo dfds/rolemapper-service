@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using K8sJanitor.WebApi.Domain.Events;
 using K8sJanitor.WebApi.Tests.TestDoubles;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using Xunit;
 
@@ -19,11 +20,13 @@ namespace K8sJanitor.WebApi.Tests.Events
             var namespaceRepositorySpy = new NamespaceRepositorySpy();
             var roleRepositorySpy = new RoleRepositorySpy();
             var roleBindingRepositorySpy = new RoleBindingRepositorySpy();
+            var logger = new LoggerFactory().CreateLogger<CapabilityRegisteredEventHandler>();
             var sut = new CapabilityRegisteredEventHandler(
                 configMapServiceSpy,
                 namespaceRepositorySpy,
                 roleRepositorySpy,
-                roleBindingRepositorySpy
+                roleBindingRepositorySpy,
+                logger
             );
 
             var capabilityName = "capabilityName".ToLower();

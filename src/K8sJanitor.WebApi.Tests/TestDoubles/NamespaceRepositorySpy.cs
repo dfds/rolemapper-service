@@ -16,12 +16,12 @@ namespace K8sJanitor.WebApi.Tests.TestDoubles
             Namespaces = new List<Namespace>();
         }
 
-        public Task CreateNamespaceAsync(string namespaceName, string roleName)
+        public Task CreateNamespaceAsync(string namespaceName, string accountId)
         {
             var @namespace = new Namespace
             {
                 NamespaceName = NamespaceName.Create(namespaceName),
-                RoleName = roleName
+                AccountId = accountId
             };
 
             Namespaces.Add(@namespace);
@@ -73,7 +73,7 @@ namespace K8sJanitor.WebApi.Tests.TestDoubles
         public class Namespace
         {
             public NamespaceName NamespaceName { get; set; }
-            public string RoleName { get; set; }
+            public string AccountId { get; set; }
             public IDictionary<string, string> Annotations { get; set; }
             public IEnumerable<Label> Labels { get; set; }
         }
