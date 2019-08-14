@@ -25,10 +25,6 @@ namespace K8sJanitor.WebApi.Tests.Controllers.EventsController
 
                 var client = builder
                     .WithService<IDomainEventRegistry>(eventRegistry)
-<<<<<<< HEAD
-
-=======
->>>>>>> Stupid typo fixed. Made the test run with real DomainEventRegistry
                     .Build();
 
                 var input = @"{
