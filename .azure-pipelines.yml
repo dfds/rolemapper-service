@@ -1,7 +1,9 @@
 ---
 name: $(Build.BuildId)
 pool:
-  vmImage: 'ubuntu-16.04'
+  name: Docker-pool
+#pool:
+#  vmImage: 'ubuntu-16.04'
 trigger:
   - master
 steps:
