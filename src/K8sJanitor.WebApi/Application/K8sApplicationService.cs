@@ -11,27 +11,27 @@ namespace K8sJanitor.WebApi.Application
 {
     public class K8sApplicationService : IK8sApplicationService
     {
-        private readonly IServiceProvider _serviceProvider;
+        private readonly IDomainEventRegistry _domainEventRegistry;
+        private readonly IPublishingEventsQueue _publishingEventsQueue;
 
-        public K8sApplicationService(IServiceProvider serviceProvider)
+
+        public K8sApplicationService(IDomainEventRegistry domainEventRegistry, IPublishingEventsQueue publishingEventsQueue)
         {
-            _serviceProvider = serviceProvider;
+            _domainEventRegistry = domainEventRegistry;
+            _publishingEventsQueue = publishingEventsQueue;
         }
 
         public async Task FireEventK8sNamespaceCreatedAndAwsArnConnected(string namespaceName, Guid contextId, Guid capabilityId)
         {
             try
             {
-                var eventRegistry = _serviceProvider.GetRequiredService<DomainEventRegistry>();
-                var eventsQueue = _serviceProvider.GetRequiredService<PublishingEventsQueue>();
-
                 var evtPre = new K8sNamespaceCreatedAndAwsArnConnectedEvent(namespaceName, contextId, capabilityId);
             
                 var evt = new DomainEventEnvelope
                 {
                     EventId = Guid.NewGuid(),
                     Created = DateTime.UtcNow,
-                    Type = eventRegistry.GetTypeNameFor(evtPre),
+                    Type = _domainEventRegistry.GetTypeNameFor(evtPre),
                     Format = "application/json",
                     Data = JsonConvert.SerializeObject(evtPre, new JsonSerializerSettings
                     {
@@ -39,7 +39,8 @@ namespace K8sJanitor.WebApi.Application
                     })
                 };
             
-                eventsQueue.AddEventToQueue(evt);
+                // TODO JFHEI : Need to make this async
+                _publishingEventsQueue.AddEventToQueue(evt);
             }
             catch (Exception ex)
             {

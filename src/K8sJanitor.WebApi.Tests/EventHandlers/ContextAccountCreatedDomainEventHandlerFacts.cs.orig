@@ -3,7 +3,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using K8sJanitor.WebApi.Domain.Events;
 using K8sJanitor.WebApi.EventHandlers;
-using K8sJanitor.WebApi.Infrastructure.AWS;
 using K8sJanitor.WebApi.Repositories.Kubernetes;
 using K8sJanitor.WebApi.Tests.TestDoubles;
 using Microsoft.Extensions.Logging;
@@ -50,7 +49,7 @@ namespace K8sJanitor.WebApi.Tests.EventHandlers
             Assert.NotNull(namespaceName);
             
             Assert.Equal(@event.Payload.CapabilityRootId, namespaceName);
-            Assert.Equal(IAM.ConstructRoleArn(@event.Payload.AccountId, "*"), @namespace.Annotations["iam.amazonaws.com/permitted"]);
+            Assert.Equal(@event.Payload.RoleArn, @namespace.Annotations["iam.amazonaws.com/permitted"]);
 
             Assert.Equal(namespaceName,roleRepositorySpy.Namespaces.Single());
 
@@ -145,6 +144,7 @@ namespace K8sJanitor.WebApi.Tests.EventHandlers
         public async Task HandleAsync_Will_Act_Idempotent_When_RoleBinding_Already_Exist()
         {
             // Arrange
+            var roleName = "new-role-to-be-created";
             var configMapServiceSpy = new ConfigMapServiceSpy();
             var namespaceRepositorySpy = new NamespaceRepositorySpy();
             var roleRepositorySpy = new RoleRepositorySpy();
@@ -197,6 +197,18 @@ namespace K8sJanitor.WebApi.Tests.EventHandlers
                 );
 
             
+<<<<<<< HEAD
+            Assert.Equal(contextAccountCreatedDomainEventData.CapabilityRootId, namespaceName);
+            Assert.Equal($"arn:aws:iam::{contextAccountCreatedDomainEventData.AccountId}:role/*", @namespace.Annotations["iam.amazonaws.com/permitted"]);
+
+            Assert.Equal(namespaceName,roleRepositorySpy.Namespaces.Single());
+
+            Assert.Equal(namespaceName, roleBindingRepositorySpy.NamespaceRoleToGroupBindings.Single().Item1);
+            Assert.Equal(namespaceName + "-full-access-role",
+                roleBindingRepositorySpy.NamespaceRoleToGroupBindings.Single().Item2);
+            Assert.Equal(namespaceName, roleBindingRepositorySpy.NamespaceRoleToGroupBindings.Single().Item3);
+=======
+>>>>>>> Added idempotency and reworked DI + tests
             
             return new ContextAccountCreatedDomainEvent(generalDomainEvent);
         }

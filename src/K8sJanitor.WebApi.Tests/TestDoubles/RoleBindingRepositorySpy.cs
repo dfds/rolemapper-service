@@ -13,10 +13,11 @@ namespace K8sJanitor.WebApi.Tests.TestDoubles
         {
             NamespaceRoleToGroupBindings = new List<Tuple<string, string, string>>();
         }
+
         public Task BindNamespaceRoleToGroup(string namespaceName, string role, string @group)
         {
             NamespaceRoleToGroupBindings.Add(new Tuple<string, string, string>(namespaceName, role, @group));
-            
+
             return Task.CompletedTask;
         }
     }

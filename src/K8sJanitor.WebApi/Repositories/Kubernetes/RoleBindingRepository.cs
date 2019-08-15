@@ -1,8 +1,12 @@
+using System;
 using System.Collections.Generic;
-    using System.Threading.Tasks;
+using System.Net;
+using System.Threading.Tasks;
 using k8s;
 using k8s.Models;
 using K8sJanitor.WebApi.Wrappers;
+using Microsoft.Rest;
+using Serilog;
 
 namespace K8sJanitor.WebApi.Repositories.Kubernetes
 {
@@ -17,11 +21,12 @@ namespace K8sJanitor.WebApi.Repositories.Kubernetes
 
         public async Task BindNamespaceRoleToGroup(string namespaceName, string role, string group)
         {
+            var roleBindingName = $"{role}-to-{@group}";
             var roleBinding = new V1RoleBinding
             {
                 Metadata = new V1ObjectMeta
                 {
-                    Name = $"{role}-to-{group}",
+                    Name = roleBindingName,
                     NamespaceProperty = namespaceName
                 },
                 Subjects = new List<V1Subject>{new V1Subject
@@ -38,7 +43,15 @@ namespace K8sJanitor.WebApi.Repositories.Kubernetes
                 }
             };
 
-            await _client.CreateNamespacedRoleBindingAsync(roleBinding, namespaceName);
+            try
+            {
+                await _client.CreateNamespacedRoleBindingAsync(roleBinding, namespaceName);
+            }
+            catch (HttpOperationException ex) when (ex.Response.StatusCode == HttpStatusCode.Conflict)
+            {
+                Log.Warning($"RoleBinding {roleBindingName} already exist for namespace {namespaceName}");
+                throw new RoleBindingAlreadyExistInNamespaceException($"RoleBinding {roleBindingName} already exist for namespace {namespaceName}", roleBindingName, namespaceName);
+            }
         }
     }
 }

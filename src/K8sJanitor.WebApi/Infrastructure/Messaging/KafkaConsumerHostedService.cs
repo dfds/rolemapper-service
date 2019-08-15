@@ -25,7 +25,7 @@ namespace K8sJanitor.WebApi.Infrastructure.Messaging
             _logger = logger;
             _serviceProvider = serviceProvider;
 
-            var eventRegistry = _serviceProvider.GetRequiredService<DomainEventRegistry>();
+            var eventRegistry = _serviceProvider.GetRequiredService<IDomainEventRegistry>();
             _topics = eventRegistry.GetAllTopics();
         }
 

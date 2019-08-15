@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace K8sJanitor.WebApi.Infrastructure.Messaging
 {
-    public class PublishingEventsQueue
+    public class PublishingEventsQueue : IPublishingEventsQueue
     {
         private Queue<DomainEventEnvelope> _events;
 

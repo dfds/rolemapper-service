@@ -8,6 +8,7 @@ using K8sJanitor.WebApi.Models;
 using K8sJanitor.WebApi.Repositories.Kubernetes;
 using K8sJanitor.WebApi.Services;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace K8sJanitor.WebApi.EventHandlers
 {
@@ -18,13 +19,15 @@ namespace K8sJanitor.WebApi.EventHandlers
         private readonly IRoleRepository _roleRepository;
         private readonly IRoleBindingRepository _roleBindingRepository;
         private readonly IK8sApplicationService _k8sApplicationService;
+        private readonly ILogger<ContextAccountCreatedDomainEventHandler> _logger;
 
         public ContextAccountCreatedDomainEventHandler(
             IConfigMapService configMapService,
             INamespaceRepository namespaceRepository,
             IRoleRepository roleRepository,
             IRoleBindingRepository roleBindingRepository,
-            IK8sApplicationService k8sApplicationService
+            IK8sApplicationService k8sApplicationService,
+            ILogger<ContextAccountCreatedDomainEventHandler> logger
         )
         {
             _configMapService = configMapService;
@@ -32,6 +35,7 @@ namespace K8sJanitor.WebApi.EventHandlers
             _roleRepository = roleRepository;
             _roleBindingRepository = roleBindingRepository;
             _k8sApplicationService = k8sApplicationService;
+            _logger = logger;
         }
 
 
@@ -43,19 +47,45 @@ namespace K8sJanitor.WebApi.EventHandlers
 
             await ConnectAwsArnToNameSpace(namespaceName, domainEvent.Payload.RoleArn);
 
-            var namespaceRoleName = await _roleRepository
-                .CreateNamespaceFullAccessRole(namespaceName);
+            var namespaceRoleName = await CreateRoleForNamespace(namespaceName);
 
-            await _roleBindingRepository.BindNamespaceRoleToGroup(
-                namespaceName: namespaceName,
-                role: namespaceRoleName,
-                group: namespaceName
-            );
+            await BindNamespacedRoleToGroup(namespaceName, namespaceRoleName);
 
             await _k8sApplicationService.FireEventK8sNamespaceCreatedAndAwsArnConnected(namespaceName, domainEvent.Payload.ContextId, domainEvent.Payload.CapabilityId); // Emit Kafka event "k8s_namespace_created_and_aws_arn_connected"
         }
 
-        public async Task CreateNameSpace(
+        private async Task BindNamespacedRoleToGroup(NamespaceName namespaceName, string namespaceRoleName)
+        {
+            try
+            {
+                await _roleBindingRepository.BindNamespaceRoleToGroup(
+                    namespaceName: namespaceName,
+                    role: namespaceRoleName,
+                    @group: namespaceName
+                );
+            }
+            catch (RoleBindingAlreadyExistInNamespaceException e)
+            {
+                _logger.LogInformation($"Not creating rolebinding {e.RoleBinding} as it already exist in kubernetes");
+            }
+        }
+
+        private async Task<string> CreateRoleForNamespace(NamespaceName namespaceName)
+        {
+            try
+            {
+                var namespaceRoleName = await _roleRepository
+                    .CreateNamespaceFullAccessRole(namespaceName);
+                return namespaceRoleName;
+            }
+            catch (RoleAlreadyExistException e)
+            {
+                _logger.LogInformation($"Not creating role {e.RoleName} as it already exist in kubernetes");
+                return e.RoleName;
+            }
+        }
+
+        private async Task CreateNameSpace(
             NamespaceName namespaceName,
             ContextAccountCreatedDomainEvent domainEvent
         )
@@ -68,7 +98,15 @@ namespace K8sJanitor.WebApi.EventHandlers
                 Label.CreateSafely("context-name", domainEvent.Payload.ContextName)
             };
 
-            await _namespaceRepository.CreateNamespaceAsync(namespaceName, labels);
+            try
+            {
+                await _namespaceRepository.CreateNamespaceAsync(namespaceName, labels);
+            }
+            catch (NamespaceAlreadyExistException)
+            {
+                // TODO Should we assert labels exist?
+                _logger.LogInformation($"Not creating namespace {namespaceName} as it already exist in kubernetes");
+            }
             await _namespaceRepository.AddAnnotations(namespaceName, new Dictionary<string, string>
             {
                 {
