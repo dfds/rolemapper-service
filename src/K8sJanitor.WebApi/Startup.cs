@@ -143,7 +143,7 @@ namespace K8sJanitor.WebApi
 
             var serviceProvider = services.BuildServiceProvider();
 
-            var topic = "build.capabilities";
+            var topic = "build.selfservice.events.capabilities";
             eventRegistry.Register<ContextAccountCreatedDomainEvent>(
                 eventTypeName: "aws_context_account_created",
                 topicName: topic,
