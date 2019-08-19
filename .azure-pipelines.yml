@@ -4,6 +4,7 @@ pool:
   vmImage: 'ubuntu-16.04'
 trigger:
   - master
+pr: none
 steps:
   - bash: |
       set -eu -o pipefail
