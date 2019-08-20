@@ -34,51 +34,56 @@ namespace K8sJanitor.WebApi.Tests.Repositories.Kubernetes
 
             Moq.Mock.Get(k8s).Verify(s => s.CreateNamespacedRoleAsync(It.Is<V1Role>(r =>
                     r.Metadata.NamespaceProperty == @namespace &&
-                    r.Rules.Count == 4 &&
+                    r.Rules.Count > 0 &&
                     r.Rules.Count(rule => rule.Resources.Any(res => res.Contains("namespace"))) == 1),
                 It.Is<string>(n => n == @namespace), It.IsAny<string>(), It.IsAny<CancellationToken>()));
-
         }
 
 
         [Fact]
         public async Task CreateExistingRoleThrowsSayingRole_WhenConflictStatusCodeIsReturned()
         {
-            
+
             var k8s = Dummy.Of<IKubernetesWrapper>();
             var sut = new RoleRepository(k8s);
 
             Mock.Get(k8s).Setup(k => k.CreateNamespacedRoleAsync(It.IsAny<V1Role>(),
                     It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
-                .Throws(new HttpOperationException{ Response = 
-                    new HttpResponseMessageWrapper(new HttpResponseMessage{StatusCode = HttpStatusCode.Conflict},"")});
-               
+                .Throws(new HttpOperationException
+                {
+                    Response =
+                    new HttpResponseMessageWrapper(new HttpResponseMessage { StatusCode = HttpStatusCode.Conflict }, "")
+                });
+
             var @namespace = "fancyNamespace";
 
             await Assert.ThrowsAsync<RoleAlreadyExistException>(() => sut.CreateNamespaceFullAccessRole(@namespace));
 
         }
-        
-        
+
+
         [Fact]
         public async Task EnsureGenericExceptionIsThrownWhenErrorIsUnknown()
         {
-            
+
             var k8s = Dummy.Of<IKubernetesWrapper>();
             var sut = new RoleRepository(k8s);
 
             Mock.Get(k8s).Setup(k => k.CreateNamespacedRoleAsync(It.IsAny<V1Role>(),
                     It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
-                .Throws(new HttpOperationException{ Response = 
-                    new HttpResponseMessageWrapper(new HttpResponseMessage{StatusCode = HttpStatusCode.BadGateway},"Unable to communicate")});
-               
+                .Throws(new HttpOperationException
+                {
+                    Response =
+                    new HttpResponseMessageWrapper(new HttpResponseMessage { StatusCode = HttpStatusCode.BadGateway }, "Unable to communicate")
+                });
+
             var @namespace = "fancyNamespace";
 
             await Assert.ThrowsAsync<Exception>(() => sut.CreateNamespaceFullAccessRole(@namespace));
 
         }
 
-}
-    
-    
+    }
+
+
 }
