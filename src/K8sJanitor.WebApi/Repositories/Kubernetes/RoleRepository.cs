@@ -65,6 +65,22 @@ namespace K8sJanitor.WebApi.Repositories.Kubernetes
                     {
                         ApiGroups = new List<string>
                         {
+                            "rbac.authorization.k8s.io"
+                        },
+                        Resources = new List<string>
+                        {
+                            "rolebindings",
+                            "roles"
+                        },
+                        Verbs = new List<string>
+                        {
+                            "*"
+                        }
+                    },
+                    new V1PolicyRule
+                    {
+                        ApiGroups = new List<string>
+                        {
                             ""
                         },
                         Resources = new List<string>
