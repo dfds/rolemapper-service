@@ -1,0 +1,16 @@
+{
+    "version": "1",
+    "eventName": "aws_context_account_created",
+    "x-correlationId": "",
+    "x-sender": "KafkaIntegrationTest",
+    "payload": {
+        "contextId": "f8bbe9e1-cdda-41fb-9781-bf43dbc18a47",
+        "contextName": "HelloPelleContext",
+        "capabilityId": "2a70d5ac-5e1f-4e1d-8d81-4c4cbda7b9d9",
+        "capabilityName": "HelloPelle",
+        "capabilityRootId": "hellopelle-x8ta2",
+        "accountId": "",
+        "roleArn": "",
+        "roleEmail": ""
+    }
+}

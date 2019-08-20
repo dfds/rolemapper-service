@@ -23,11 +23,21 @@ namespace K8sJanitor.WebApi.IntegrationTests.Kafka
     // If a test seems to be stuck, ensure that all manual steps in ManualEvents.cs has been taken.
     public class KafkaTest
     {
+
+        [Fact]
+        public async Task ProduceEventAndCheckExternallyThatItHasBeenReceivedV2()
+        {
+            var services = Helper.SetupV2();
+            var conf = Helper.GetConfiguration();
+            await Helper.ResetFakeServer(services);
+        }
+        
         [Fact]
         public async Task ProduceEventAndCheckExternallyThatItHasBeenReceived()
         {
             var serviceProvider = Helper.SetupServiceProviderWithConsumerAndProducer();
-            await Helper.ResetFakeServer(serviceProvider.CreateScope());
+            var services = Helper.SetupV2();
+            await Helper.ResetFakeServer(services);
             var eventRegistry = serviceProvider.GetRequiredService<DomainEventRegistry>();
 
             const string topic = "build.capabilities";
@@ -39,7 +49,7 @@ namespace K8sJanitor.WebApi.IntegrationTests.Kafka
 
             var consumer = Helper.SetupKafkaConsumption(serviceProvider.CreateScope());
             
-            var apiCallsReceived = await Helper.CallFakeServer("/api-calls-received", serviceProvider.CreateScope());
+            var apiCallsReceived = await Helper.CallFakeServer("/api-calls-received", services);
             Assert.Equal(1, apiCallsReceived.ApiCallsReceived);
 
             var consumerTask = Task.Run(() =>
@@ -76,12 +86,13 @@ namespace K8sJanitor.WebApi.IntegrationTests.Kafka
             Assert.Equal(
                 expected: "{\"version\":\"1\",\"eventName\":\"k8s_namespace_created_and_aws_arn_connected\",\"x-correlationId\":\"\",\"x-sender\":\"K8sJanitor.WebApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null\",\"payload\":{\"namespaceName\":\"kafkaTest\",\"contextId\":\"f8bbe9e1-cdda-41fb-9781-bf43dbc18a47\",\"capabilityId\":\"2a70d5ac-5e1f-4e1d-8d81-4c4cbda7b9d9\"}}", 
                 actual: consumerTask.Result.Value);
+            // k8s_namespace_created_and_aws_arn_connect.json
 
-            var res = Helper.CallFakeServer("/api-calls-received", serviceProvider.CreateScope()).Result;
+            var res = Helper.CallFakeServer("/api-calls-received", services).Result;
             Assert.Equal(res.ApiCallsReceived, apiCallsReceived.ApiCallsReceived + 1);
             Assert.Equal(1, res.KafkaMessageReceived);
 
-            await Helper.CallFakeServer("/api-calls-reset", serviceProvider.CreateScope());
+            await Helper.CallFakeServer("/api-calls-reset", services);
         }
 
         // Checks if there is any changes in events, either removed or added. This is mostly a check to make sure that
@@ -121,9 +132,10 @@ namespace K8sJanitor.WebApi.IntegrationTests.Kafka
         public async Task ProduceExistingEvents()
         {
             var events = await Helper.GetAllEventTypes();
+            var services = Helper.SetupV2();
             
             var serviceProvider = Helper.SetupServiceProviderWithConsumerAndProducer(useManualEvents: true);
-            await Helper.ResetFakeServer(serviceProvider.CreateScope());
+            await Helper.ResetFakeServer(services);
             var eventRegistry = serviceProvider.GetRequiredService<DomainEventRegistry>();
 
             const string topic = "build.capabilities";
@@ -134,7 +146,7 @@ namespace K8sJanitor.WebApi.IntegrationTests.Kafka
             }
             
 
-            var apiCallsReceived = await Helper.CallFakeServer("/api-calls-received", serviceProvider.CreateScope());
+            var apiCallsReceived = await Helper.CallFakeServer("/api-calls-received", services);
             Assert.Equal(1, apiCallsReceived.ApiCallsReceived);
 
             using (var scope = serviceProvider.CreateScope())
@@ -146,19 +158,20 @@ namespace K8sJanitor.WebApi.IntegrationTests.Kafka
             // Wait for "FakeServer" to consume all events.
             Thread.Sleep(3000);
             
-            var res = Helper.CallFakeServer("/api-calls-received", serviceProvider.CreateScope()).Result;
+            var res = Helper.CallFakeServer("/api-calls-received", services).Result;
             Assert.Equal(res.ApiCallsReceived, apiCallsReceived.ApiCallsReceived + 1);
             Assert.Equal(events.Count, res.KafkaMessageReceived);
-            await Helper.CallFakeServer("/api-calls-reset", serviceProvider.CreateScope());
+            await Helper.CallFakeServer("/api-calls-reset", services);
         }
 
         [Fact]
         public async Task ConsumeExistingEvents()
         {
             var events = await Helper.GetAllEventTypes();
+            var services = Helper.SetupV2();
 
             var serviceProvider = Helper.SetupServiceProviderWithConsumerAndProducer(useManualEvents: true);
-            await Helper.ResetFakeServer(serviceProvider.CreateScope());
+            await Helper.ResetFakeServer(services);
             var eventRegistry = serviceProvider.GetRequiredService<DomainEventRegistry>();
 
             const string topic = "build.capabilities";
@@ -185,7 +198,7 @@ namespace K8sJanitor.WebApi.IntegrationTests.Kafka
                 return messages;
             });
             
-            var apiCallsReceived = await Helper.CallFakeServer("/api-calls-received", serviceProvider.CreateScope());
+            var apiCallsReceived = await Helper.CallFakeServer("/api-calls-received", services);
             Assert.Equal(1, apiCallsReceived.ApiCallsReceived);
             
             // Wait for Consume() to initialise prior services
@@ -199,7 +212,7 @@ namespace K8sJanitor.WebApi.IntegrationTests.Kafka
 
             var res = consumerTask.Result;
             Assert.Equal(events.Count, res.Count);
-            var resExternal = Helper.CallFakeServer("/api-calls-received", serviceProvider.CreateScope()).Result;
+            var resExternal = Helper.CallFakeServer("/api-calls-received", services).Result;
             Assert.Equal(resExternal.ApiCallsReceived, apiCallsReceived.ApiCallsReceived + 1);
             Assert.Equal(events.Count, resExternal.KafkaMessageReceived);
         }
@@ -208,7 +221,8 @@ namespace K8sJanitor.WebApi.IntegrationTests.Kafka
         public async Task QueryRestApiConsumeEvent()
         {
             var serviceProvider = Helper.SetupServiceProviderWithConsumerAndProducer(useManualEvents: true);
-            await Helper.ResetFakeServer(serviceProvider.CreateScope());
+            var services = Helper.SetupV2();
+            await Helper.ResetFakeServer(services);
             var eventRegistry = serviceProvider.GetRequiredService<DomainEventRegistry>();
             
             const string topic = "build.capabilities";
@@ -240,13 +254,14 @@ namespace K8sJanitor.WebApi.IntegrationTests.Kafka
 
             var consumeResult = consumerTask.Result;
 
-            var res = await Helper.CallFakeServer("/api-calls-received", serviceProvider.CreateScope());
+            var res = await Helper.CallFakeServer("/api-calls-received", services);
             
-            await Helper.ResetFakeServer(serviceProvider.CreateScope());
+            await Helper.ResetFakeServer(services);
 
             Assert.Equal(
                 expected: "{\"version\":\"1\",\"eventName\":\"k8s_namespace_created_and_aws_arn_connected\",\"x-correlationId\":\"\",\"x-sender\":\"K8sJanitor.WebApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null\",\"payload\":{\"namespaceName\":\"kafkaTest\",\"contextId\":\"f8bbe9e1-cdda-41fb-9781-bf43dbc18a47\",\"capabilityId\":\"2a70d5ac-5e1f-4e1d-8d81-4c4cbda7b9d9\"}}", 
                 actual: consumeResult.Value);
+            // k8s_namespace_created_and_aws_arn_connect.json
             
             Assert.Equal(1, res.KafkaMessageReceived);
         }

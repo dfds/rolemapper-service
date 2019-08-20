@@ -1,0 +1,10 @@
+{
+    "version": "1",
+    "eventName": "aws_context_account_created",
+    "x-correlationId": "",
+    "x-sender": "KafkaIntegrationTest",
+    "payload": {
+        "capabilityName": "HelloPelle",
+        "roleArn": "arn:aws:iam::69012571601:role/*"
+    }
+}

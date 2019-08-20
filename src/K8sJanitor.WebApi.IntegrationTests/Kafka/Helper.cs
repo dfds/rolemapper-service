@@ -51,6 +51,11 @@ namespace K8sJanitor.WebApi.IntegrationTests.Kafka
 
             return consumer;
         }
+
+        public static Services SetupV2()
+        {
+            return new Services();
+        }
         
         public static IServiceProvider SetupServiceProviderWithConsumerAndProducer(bool useManualEvents = false)
         {
@@ -98,17 +103,17 @@ namespace K8sJanitor.WebApi.IntegrationTests.Kafka
             return serviceProvider;
         }
 
-        public static async Task<FakeServerResponse> CallFakeServer(string endpoint, IServiceScope scope)
+        public static async Task<FakeServerResponse> CallFakeServer(string endpoint, Services services)
         {
-            var response = await scope.ServiceProvider.GetRequiredService<HttpClient>()
+            var response = await services.HttpClient
                 .GetAsync($"http://localhost:50901{endpoint}");
             var content = await response.Content.ReadAsStringAsync();
             return new JsonSerializer().Deserialize<FakeServerResponse>(content);
         }
 
-        public static async Task ResetFakeServer(IServiceScope scope)
+        public static async Task ResetFakeServer(Services services)
         {
-            await CallFakeServer("/api-calls-reset", scope);
+            await CallFakeServer("/api-calls-reset", services);
         }
 
         public static async Task<FakeServerResponse> PostFakeServer(string endpoint, IServiceScope scope, HttpContent content)
@@ -159,6 +164,57 @@ namespace K8sJanitor.WebApi.IntegrationTests.Kafka
             allEvents.AddRange(listOfIEvents);
             allEvents.AddRange(listOfDomainEvents);
             return allEvents;
+        }
+
+        public static Configuration GetConfiguration()
+        {
+            var test = new ConfigurationTest();
+            test.InitViaEnvVars();
+            var kafka = new ConfigurationKafka();
+            kafka.InitViaEnvVars();
+
+            return new Configuration(test, kafka);
+        }
+
+        public static IConsumer<string, string> CreateKafkaConsumer()
+        {
+            var config = new ConsumerConfig();
+            var builder = new ConsumerBuilder<string, string>(config);
+            builder.SetErrorHandler(OnKafkaError);
+            return builder.Build();
+        }
+
+        private static void CreateKafkaConf()
+        {
+            const string KEY_PREFIX = "KUBERNETES_SERVICE_KAFKA_";
+            
+            var configurationKeys = new[]
+            {
+                "group.id",
+                "enable.auto.commit",
+                "bootstrap.servers",
+                "broker.version.fallback",
+                "api.version.fallback.ms",
+                "ssl.ca.location",
+                "sasl.username",
+                "sasl.password",
+                "sasl.mechanisms",
+                "security.protocol",
+            };
+
+            var config = configurationKeys
+                .Select(key =>
+                {
+                    var val = Environment.GetEnvironmentVariable(key);
+                });
+        }
+        
+        private static void OnKafkaError(IConsumer<string, string> producer, Error error)
+        {
+            if (error.IsFatal)
+                Environment.FailFast($"Fatal error in Kafka producer: {error.Reason}. Shutting down...");
+            else
+                throw new Exception(error.Reason);
         }
 
         public static async Task<List<object>> GetPrefilledEvents()
@@ -284,6 +340,80 @@ namespace K8sJanitor.WebApi.IntegrationTests.Kafka
             var token = json.SelectToken(path);
 
             return token.ToObject<T>();
+        }
+    }
+
+    public class Services
+    {
+        public HttpClient HttpClient { get; private set; }
+
+        public Services()
+        {
+            HttpClient = new HttpClient();
+        }
+    }
+
+    public class Configuration
+    {
+        public ConfigurationTest Test { get; private set; }
+        public ConfigurationKafka Kafka { get; private set; }
+
+        public Configuration(ConfigurationTest test, ConfigurationKafka kafka)
+        {
+            Test = test;
+            Kafka = kafka;
+        }
+    }
+
+    public interface IConfigurationFunctionality
+    {
+        void InitViaEnvVars();
+    }
+
+    public class ConfigurationTest : IConfigurationFunctionality
+    {
+        public bool Run { get; set; }
+        public string Topic { get; set; }
+        public string FakeServerHost { get; set; }
+        public string PayloadDir { get; set; }
+        
+        public void InitViaEnvVars()
+        {
+            const string PREFIX = "INTEGRATION_TEST_KAFKA";
+            
+            Run = Environment.GetEnvironmentVariable($"{PREFIX}_RUN") != null 
+                ? Boolean.Parse(Environment.GetEnvironmentVariable($"{PREFIX}_RUN") ?? throw new NullReferenceException("Unable to convert ENV VAR to bool")) 
+                : true;
+            Topic = Environment.GetEnvironmentVariable($"{PREFIX}_TOPIC") != null
+                ? Environment.GetEnvironmentVariable($"{PREFIX}_TOPIC")
+                : "build.capabilities";
+            FakeServerHost = Environment.GetEnvironmentVariable($"{PREFIX}_FAKE-SERVER_HOST") != null
+                ? Environment.GetEnvironmentVariable($"{PREFIX}_FAKE-SERVER_HOST")
+                : "localhost:50901";
+            PayloadDir = Environment.GetEnvironmentVariable($"{PREFIX}_PAYLOAD_DIR") != null
+                ? Environment.GetEnvironmentVariable($"{PREFIX}_PAYLOAD_DIR")
+                : "TODO";
+        }
+    }
+
+    public class ConfigurationKafka : IConfigurationFunctionality
+    {
+        public string BootstrapServers { get; set; }
+        public string GroupId { get; set; }
+        public bool EnableAutoCommit { get; set; }
+        public void InitViaEnvVars()
+        {
+            const string PREFIX = "KUBERNETES_SERVICE_KAFKA";
+
+            BootstrapServers = Environment.GetEnvironmentVariable($"{PREFIX}_BOOTSTRAP_SERVERS") != null
+                ? Environment.GetEnvironmentVariable($"{PREFIX}_BOOTSTRAP_SERVERS")
+                : "localhost:9092";
+            GroupId = Environment.GetEnvironmentVariable($"{PREFIX}_GROUP_ID") != null
+                ? Environment.GetEnvironmentVariable($"{PREFIX}_GROUP_ID")
+                : "kubernetes-consumer";
+            EnableAutoCommit = Environment.GetEnvironmentVariable($"{PREFIX}_ENABLE_AUTO_COMMIT") != null
+                ? Boolean.Parse(Environment.GetEnvironmentVariable($"{PREFIX}_ENABLE_AUTO_COMMIT") ?? throw new NullReferenceException("Unable to convert ENV VAR to bool"))
+                : false;
         }
     }
 }
