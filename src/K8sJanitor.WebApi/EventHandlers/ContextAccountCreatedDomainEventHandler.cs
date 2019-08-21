@@ -42,7 +42,7 @@ namespace K8sJanitor.WebApi.EventHandlers
         public async Task HandleAsync(ContextAccountCreatedDomainEvent domainEvent)
         {
             var namespaceName = NamespaceName.Create(domainEvent.Payload.CapabilityRootId);
-            
+
             await CreateNameSpace(namespaceName, domainEvent);
 
             await ConnectAwsArnToNameSpace(namespaceName, domainEvent.Payload.RoleArn);
@@ -111,7 +111,7 @@ namespace K8sJanitor.WebApi.EventHandlers
             {
                 {
                     "iam.amazonaws.com/permitted",
-                    IAM.ConstructRoleArn(domainEvent.Payload.AccountId, "*")
+                    IAM.ConstructRoleArn(domainEvent.Payload.AccountId, ".*")
                 }
             });
         }

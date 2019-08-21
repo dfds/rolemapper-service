@@ -49,11 +49,16 @@ namespace K8sJanitor.WebApi.Tests.Repositories.Kubernetes
 
             Mock.Get(k8s).Setup(k => k.CreateNamespacedRoleAsync(It.IsAny<V1Role>(),
                     It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+<<<<<<< HEAD
                 .Throws(new HttpOperationException
                 {
                     Response =
                     new HttpResponseMessageWrapper(new HttpResponseMessage { StatusCode = HttpStatusCode.Conflict }, "")
                 });
+=======
+                .Throws(new HttpOperationException{ Response =
+                    new HttpResponseMessageWrapper(new HttpResponseMessage{StatusCode = HttpStatusCode.Conflict},"")});
+>>>>>>> Altering tests to match changes
 
             var @namespace = "fancyNamespace";
 
@@ -71,11 +76,16 @@ namespace K8sJanitor.WebApi.Tests.Repositories.Kubernetes
 
             Mock.Get(k8s).Setup(k => k.CreateNamespacedRoleAsync(It.IsAny<V1Role>(),
                     It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+<<<<<<< HEAD
                 .Throws(new HttpOperationException
                 {
                     Response =
                     new HttpResponseMessageWrapper(new HttpResponseMessage { StatusCode = HttpStatusCode.BadGateway }, "Unable to communicate")
                 });
+=======
+                .Throws(new HttpOperationException{ Response =
+                    new HttpResponseMessageWrapper(new HttpResponseMessage{StatusCode = HttpStatusCode.BadGateway},"Unable to communicate")});
+>>>>>>> Altering tests to match changes
 
             var @namespace = "fancyNamespace";
 
@@ -83,7 +93,11 @@ namespace K8sJanitor.WebApi.Tests.Repositories.Kubernetes
 
         }
 
+<<<<<<< HEAD
     }
+=======
+}
+>>>>>>> Altering tests to match changes
 
 
 }

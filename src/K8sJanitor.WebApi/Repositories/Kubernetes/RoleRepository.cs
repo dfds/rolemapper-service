@@ -61,6 +61,7 @@ namespace K8sJanitor.WebApi.Repositories.Kubernetes
                             "*"
                         }
                     },
+                    new V1PolicyRule
                     {
                         ApiGroups = new List<string>
                         {
@@ -75,7 +76,7 @@ namespace K8sJanitor.WebApi.Repositories.Kubernetes
                         {
                             "*"
                         }
-                    },                    
+                    },
                     new V1PolicyRule
                     {
                         ApiGroups = new List<string>
@@ -166,7 +167,7 @@ namespace K8sJanitor.WebApi.Repositories.Kubernetes
 
                 return result?.Metadata?.Name;
             }
-            catch (HttpOperationException e) when(e.Response.StatusCode == HttpStatusCode.Conflict)
+            catch (HttpOperationException e) when (e.Response.StatusCode == HttpStatusCode.Conflict)
             {
                 throw new RoleAlreadyExistException($"Role with name {roleName} already exist in kubernetes. Not creating.", roleName);
             }
