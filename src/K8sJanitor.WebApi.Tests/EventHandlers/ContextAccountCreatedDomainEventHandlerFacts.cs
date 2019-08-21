@@ -35,7 +35,7 @@ namespace K8sJanitor.WebApi.Tests.EventHandlers
 
             var @event = new ContextAccountCreatedDomainEventBuilder().Build();
 
-          
+
             // Act
             await sut.HandleAsync(@event);
 
@@ -46,22 +46,22 @@ namespace K8sJanitor.WebApi.Tests.EventHandlers
 
             var @namespace = namespaceRepositorySpy.Namespaces.Single();
             var namespaceName = @namespace.NamespaceName;
-            
-            Assert.NotNull(namespaceName);
-            
-            Assert.Equal(@event.Payload.CapabilityRootId, namespaceName);
-            Assert.Equal(IAM.ConstructRoleArn(@event.Payload.AccountId, "*"), @namespace.Annotations["iam.amazonaws.com/permitted"]);
 
-            Assert.Equal(namespaceName,roleRepositorySpy.Namespaces.Single());
+            Assert.NotNull(namespaceName);
+
+            Assert.Equal(@event.Payload.CapabilityRootId, namespaceName);
+            Assert.Equal(IAM.ConstructRoleArn(@event.Payload.AccountId, ".*"), @namespace.Annotations["iam.amazonaws.com/permitted"]);
+
+            Assert.Equal(namespaceName, roleRepositorySpy.Namespaces.Single());
 
             Assert.Equal(namespaceName, roleBindingRepositorySpy.NamespaceRoleToGroupBindings.Single().Item1);
             Assert.Equal(namespaceName + "-full-access-role",
                 roleBindingRepositorySpy.NamespaceRoleToGroupBindings.Single().Item2);
             Assert.Equal(namespaceName, roleBindingRepositorySpy.NamespaceRoleToGroupBindings.Single().Item3);
-            
+
         }
-        
-        
+
+
         [Fact]
         public async Task HandleAsync_Will_Act_Idempotent_When_Namespace_Already_Exist()
         {
@@ -92,8 +92,8 @@ namespace K8sJanitor.WebApi.Tests.EventHandlers
             var namespaceName = configMapServiceSpy.Roles.Single().Key;
 
             //Assert.Equal(@event.Payload.RoleArn, @namespace.Annotations["iam.amazonaws.com/permitted"]);
-//
-            Assert.Equal(namespaceName,roleRepositorySpy.Namespaces.Single());
+            //
+            Assert.Equal(namespaceName, roleRepositorySpy.Namespaces.Single());
             Assert.Equal(namespaceName, roleBindingRepositorySpy.NamespaceRoleToGroupBindings.Single().Item1);
             Assert.Equal(namespaceName + "-full-access-role",
               roleBindingRepositorySpy.NamespaceRoleToGroupBindings.Single().Item2);
@@ -101,10 +101,10 @@ namespace K8sJanitor.WebApi.Tests.EventHandlers
             Assert.Equal(namespaceName, k8sAppService.Payload_Namespace);
             Assert.Equal(@event.Payload.ContextId, k8sAppService.Payload_ContextId);
             Assert.Equal(@event.Payload.CapabilityId, k8sAppService.Payload_CapabilityId);
-            
+
         }
-        
-         [Fact]
+
+        [Fact]
         public async Task HandleAsync_Will_Act_Idempotent_When_Role_Already_Exist()
         {
             // Arrange
@@ -133,14 +133,14 @@ namespace K8sJanitor.WebApi.Tests.EventHandlers
             var namespaceName = configMapServiceSpy.Roles.Single().Key;
 
             Assert.Equal(namespaceName, roleBindingRepositorySpy.NamespaceRoleToGroupBindings.Single().Item1);
-            Assert.Equal(roleName,roleBindingRepositorySpy.NamespaceRoleToGroupBindings.Single().Item2);
+            Assert.Equal(roleName, roleBindingRepositorySpy.NamespaceRoleToGroupBindings.Single().Item2);
             Assert.Equal(namespaceName, roleBindingRepositorySpy.NamespaceRoleToGroupBindings.Single().Item3);
             Assert.Equal(namespaceName, k8sAppService.Payload_Namespace);
             Assert.Equal(@event.Payload.ContextId, k8sAppService.Payload_ContextId);
             Assert.Equal(@event.Payload.CapabilityId, k8sAppService.Payload_CapabilityId);
-            
+
         }
-        
+
         [Fact]
         public async Task HandleAsync_Will_Act_Idempotent_When_RoleBinding_Already_Exist()
         {
@@ -148,7 +148,7 @@ namespace K8sJanitor.WebApi.Tests.EventHandlers
             var configMapServiceSpy = new ConfigMapServiceSpy();
             var namespaceRepositorySpy = new NamespaceRepositorySpy();
             var roleRepositorySpy = new RoleRepositorySpy();
-            var roleBindingRepositorySpy = new ErrornousRoleBindingRepository(new RoleBindingAlreadyExistInNamespaceException("RoleBinding exists","",""));
+            var roleBindingRepositorySpy = new ErrornousRoleBindingRepository(new RoleBindingAlreadyExistInNamespaceException("RoleBinding exists", "", ""));
             var k8sAppService = new K8sApplicationServiceSpy();
             var logger = new LoggerFactory().CreateLogger<ContextAccountCreatedDomainEventHandler>();
             var sut = new ContextAccountCreatedDomainEventHandler(
@@ -166,9 +166,9 @@ namespace K8sJanitor.WebApi.Tests.EventHandlers
             await sut.HandleAsync(@event);
         }
     }
-    
-    
-    
+
+
+
 
     public class ContextAccountCreatedDomainEventBuilder
     {
@@ -196,11 +196,11 @@ namespace K8sJanitor.WebApi.Tests.EventHandlers
                     JObject.FromObject(contextAccountCreatedDomainEventData)
                 );
 
-            
-            
+
+
             return new ContextAccountCreatedDomainEvent(generalDomainEvent);
         }
-        
-        
+
+
     }
 }

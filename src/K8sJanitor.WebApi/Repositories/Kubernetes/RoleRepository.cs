@@ -81,6 +81,22 @@ namespace K8sJanitor.WebApi.Repositories.Kubernetes
                     {
                         ApiGroups = new List<string>
                         {
+                            "rbac.authorization.k8s.io"
+                        },
+                        Resources = new List<string>
+                        {
+                            "rolebindings",
+                            "roles"
+                        },
+                        Verbs = new List<string>
+                        {
+                            "*"
+                        }
+                    },
+                    new V1PolicyRule
+                    {
+                        ApiGroups = new List<string>
+                        {
                             ""
                         },
                         Resources = new List<string>
@@ -151,7 +167,7 @@ namespace K8sJanitor.WebApi.Repositories.Kubernetes
 
                 return result?.Metadata?.Name;
             }
-            catch (HttpOperationException e) when(e.Response.StatusCode == HttpStatusCode.Conflict)
+            catch (HttpOperationException e) when (e.Response.StatusCode == HttpStatusCode.Conflict)
             {
                 throw new RoleAlreadyExistException($"Role with name {roleName} already exist in kubernetes. Not creating.", roleName);
             }
