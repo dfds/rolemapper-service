@@ -1,30 +1,18 @@
-using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Confluent.Kafka;
-using K8sJanitor.WebApi.Domain.Events;
-using K8sJanitor.WebApi.EventHandlers;
-using K8sJanitor.WebApi.Infrastructure.Messaging;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 using Xunit;
 
 namespace K8sJanitor.WebApi.IntegrationTests.Kafka
 {
-    // If a test seems to be stuck, ensure that all manual steps in ManualEvents.cs has been taken.
     public class KafkaTest
     {
-
-        [Fact]
+        [FactRunsWithKafka]
         public async Task ProduceEventAndCheckExternallyThatItHasBeenReceived()
         {
             var services = Helper.SetupV2();
@@ -68,7 +56,7 @@ namespace K8sJanitor.WebApi.IntegrationTests.Kafka
             await Helper.CallFakeServer("/api-calls-reset", services);
         }
 
-        [Fact]
+        [FactRunsWithKafka]
         public async Task ProduceExistingEvents()
         {
             var services = Helper.SetupV2();
@@ -101,7 +89,7 @@ namespace K8sJanitor.WebApi.IntegrationTests.Kafka
             await Helper.CallFakeServer("/api-calls-reset", services);
         }
 
-        [Fact]
+        [FactRunsWithKafka]
         public async Task ConsumeExistingEvents()
         {
             var services = Helper.SetupV2();
@@ -156,23 +144,16 @@ namespace K8sJanitor.WebApi.IntegrationTests.Kafka
             Assert.Equal(payloads.Count(), resExternal.KafkaMessageReceived);
         }
 
-        [Fact]
+        [FactRunsWithKafka]
         public async Task QueryRestApiConsumeEvent()
         {
             var serviceProvider = Helper.SetupServiceProviderWithConsumerAndProducer(useManualEvents: true);
             var services = Helper.SetupV2();
+            var conf = Helper.GetConfiguration();
             await Helper.ResetFakeServer(services);
-            var eventRegistry = serviceProvider.GetRequiredService<DomainEventRegistry>();
-            
-            const string topic = "build.capabilities";
-            
 
-            using (var scope = serviceProvider.CreateScope())
-            {
-                ManualEvents.RegisterEvents(eventRegistry, topic, scope);
-            }
-            
-            var consumer = Helper.SetupKafkaConsumption(serviceProvider.CreateScope());
+            var consumer = Helper.CreateKafkaConsumer();
+            consumer.Subscribe(conf.Test.Topic);
 
             var consumerTask = Task.Run(() =>
             {
@@ -184,12 +165,8 @@ namespace K8sJanitor.WebApi.IntegrationTests.Kafka
             // Wait for Consume() to initialise prior services
             Thread.Sleep(3000);
 
-            var payload = new K8sNamespaceCreatedAndAwsArnConnectedEvent("kafkaTest", Guid.Parse("f8bbe9e1-cdda-41fb-9781-bf43dbc18a47"), Guid.Parse("2a70d5ac-5e1f-4e1d-8d81-4c4cbda7b9d9"));
-            var payloadAsJsonString = JsonConvert.SerializeObject(payload, new JsonSerializerSettings
-            {
-                ContractResolver = new CamelCasePropertyNamesContractResolver()
-            });
-            var resp = await Helper.PostFakeServer("/api-create-event", serviceProvider.CreateScope(), new StringContent(payloadAsJsonString, Encoding.UTF8, "application/json"));
+            var payload = Helper.GetRawPayload("k8s_namespace_created_and_aws_arn_connect.json");
+            var resp = await Helper.PostFakeServer("/api-create-event", serviceProvider.CreateScope(), new StringContent(payload, Encoding.UTF8, "application/json"));
 
             var consumeResult = consumerTask.Result;
 

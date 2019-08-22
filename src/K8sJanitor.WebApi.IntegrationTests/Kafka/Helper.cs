@@ -11,18 +11,12 @@ using Confluent.Kafka;
 using K8sJanitor.WebApi.Domain.Events;
 using K8sJanitor.WebApi.EventHandlers;
 using K8sJanitor.WebApi.Infrastructure.Messaging;
-using K8sJanitor.WebApi.Repositories;
-using K8sJanitor.WebApi.Repositories.Kubernetes;
-using K8sJanitor.WebApi.Services;
-using K8sJanitor.WebApi.Validators;
-using K8sJanitor.WebApi.Wrappers;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
-using Serilog.Debugging;
 
 namespace K8sJanitor.WebApi.IntegrationTests.Kafka
 {
@@ -468,7 +462,7 @@ namespace K8sJanitor.WebApi.IntegrationTests.Kafka
 
             Run = GetBool("RUN", prefix, true);
             Topic = GetString("TOPIC", prefix, "build.capabilities");
-            FakeServerHost = GetString("FAKE-SERVER_HOST", prefix, "localhost:50901");
+            FakeServerHost = GetString("FAKE_SERVER_HOST", prefix, "localhost:50901");
             PayloadDir = GetString("PAYLOAD_DIR", prefix, "../../../Kafka/payloads");
         }
     }

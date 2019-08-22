@@ -40,7 +40,7 @@ app.get("/api-calls-reset", (req, res) => {
 });
 
 app.post("/api-create-event", async (req, res) => {
-    const payload = req.body;
+    const raw_req = req.body;
     
     const producer = kafka.producer({});
     await producer.connect();
@@ -53,9 +53,9 @@ app.post("/api-create-event", async (req, res) => {
                 "x-correlationId": '',
                 "x-sender": "K8sJanitor.WebApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null",
                 "payload": {
-                    "namespaceName": payload.namespaceName,
-                    "contextId": payload.contextId,
-                    "capabilityId": payload.capabilityId
+                    "namespaceName": raw_req.payload.namespaceName,
+                    "contextId": raw_req.payload.contextId,
+                    "capabilityId": raw_req.payload.capabilityId
                 }
             })
         }]
