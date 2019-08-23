@@ -8,12 +8,8 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using Confluent.Kafka;
-using K8sJanitor.WebApi.Domain.Events;
 using K8sJanitor.WebApi.EventHandlers;
-using K8sJanitor.WebApi.Infrastructure.Messaging;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
@@ -22,13 +18,6 @@ namespace K8sJanitor.WebApi.IntegrationTests.Kafka
 {
     public class Helper
     {
-        public static void SetEnvVars()
-        {
-            SetEnvVar("KUBERNETES_SERVICE_KAFKA_BOOTSTRAP_SERVERS", "localhost:9092");
-            SetEnvVar("KUBERNETES_SERVICE_KAFKA_GROUP_ID", "kubernetes-consumer");
-            SetEnvVar("KUBERNETES_SERVICE_KAFKA_ENABLE_AUTO_COMMIT", "false");
-        }
-
         public static void SetEnvVar(string key, string val)
         {
             if (Environment.GetEnvironmentVariable(key) == null)
@@ -36,67 +25,10 @@ namespace K8sJanitor.WebApi.IntegrationTests.Kafka
                 Environment.SetEnvironmentVariable(key, val);
             }
         }
-        
-        public static IConsumer<string, string> SetupKafkaConsumption(IServiceScope scope)
-        {
-            var consumerFactory = scope.ServiceProvider.GetRequiredService<KafkaConsumerFactory>();
-            var eventRegistry = scope.ServiceProvider.GetRequiredService<DomainEventRegistry>();
-            var topics = eventRegistry.GetAllTopics();
-            var consumer = consumerFactory.Create();
-            consumer.Subscribe(topics);
-
-            return consumer;
-        }
 
         public static Services SetupV2()
         {
             return new Services();
-        }
-        
-        public static IServiceProvider SetupServiceProviderWithConsumerAndProducer(bool useManualEvents = false)
-        {
-            Helper.SetEnvVars();
-            var eventRegistry = new DomainEventRegistry();
-            var configuration = new ConfigurationBuilder()
-                .AddEnvironmentVariables()
-                .Build();
-            var publishingEventsQueue = new PublishingEventsQueue();
-
-            var httpClient = new HttpClient();
-
-            var serviceProviderBuilder = new ServiceCollection()
-                .AddLogging()
-                .AddSingleton<IConfiguration>(configuration)
-                .AddSingleton(httpClient)
-//                .AddTransient<IConfigMapService, ConfigMapService>()
-//                .AddTransient<IAwsAuthConfigMapRepository, AwsAuthConfigMapRepository>()
-//                .AddTransient<IAddRoleRequestValidator, AddRoleRequestValidator>()
-//                .AddTransient<IAddNamespaceRequestValidator, AddNamespaceRequestValidator>()
-//                .AddTransient<IKubernetesWrapper>(k => new KubernetesWrapper(null))
-//                .AddTransient<IPersistenceRepository, PersistenceRepositoryStub>()
-//                .AddTransient<INamespaceRepository, NamespaceRepository>()
-//                .AddTransient<IRoleRepository, RoleRepository>()
-//                .AddTransient<IRoleBindingRepository, RoleBindingRepository>()
-                .AddTransient<IEventHandler<K8sNamespaceCreatedAndAwsArnConnectedEvent>, GenericEventHandler<K8sNamespaceCreatedAndAwsArnConnectedEvent>>()
-                .AddSingleton(eventRegistry)
-                .AddSingleton(publishingEventsQueue)
-                .AddTransient<KafkaConsumerFactory.KafkaConfiguration>()
-                .AddTransient<KafkaPublisherFactory>()
-                .AddTransient<KafkaConsumerFactory>()
-                .AddTransient<IEventDispatcher, EventDispatcher>();
-
-            if (useManualEvents)
-            {
-                ManualEvents.AddEventsToServiceProvider(serviceProviderBuilder);
-            }
-            
-            var serviceProvider = serviceProviderBuilder.BuildServiceProvider();
-
-            serviceProvider
-                .GetService<ILoggerFactory>()
-                .AddConsole();
-
-            return serviceProvider;
         }
 
         public static async Task<FakeServerResponse> CallFakeServer(string endpoint, Services services)
@@ -112,7 +44,7 @@ namespace K8sJanitor.WebApi.IntegrationTests.Kafka
             await CallFakeServer("/api-calls-reset", services);
         }
 
-        public static async Task<FakeServerResponse> PostFakeServer(string endpoint, IServiceScope scope, HttpContent content)
+        public static async Task<FakeServerResponse> PostFakeServer(string endpoint, Services services, HttpContent content)
         {
             var request = new HttpRequestMessage
             {
@@ -125,43 +57,13 @@ namespace K8sJanitor.WebApi.IntegrationTests.Kafka
                 Content = content
             };
 
-            var response = await scope.ServiceProvider.GetRequiredService<HttpClient>()
+            var response = await services.HttpClient
                 .SendAsync(request);
             
             var contentResp = await response.Content.ReadAsStringAsync();
             return new JsonSerializer().Deserialize<FakeServerResponse>(contentResp);
         }
- 
-        public static async Task<List<Type>> GetAllEventTypes()
-        {
-            var listOfIEvents = AppDomain.CurrentDomain.GetAssemblies().SelectMany(x => x.GetTypes())
-                .Where(x => ( typeof(IEvent).IsAssignableFrom(x) ) && !x.IsInterface && !x.IsAbstract)
-                .Select(x => x).ToList();
-            
-            var listOfDomainEvents = AppDomain.CurrentDomain.GetAssemblies().SelectMany(x => x.GetTypes())
-                .Where(x =>
-                {
-                    var interfaces = x.GetInterfaces();
-                    
-                    foreach (var interf in interfaces)
-                    {
-                        if (interf.Name.Contains("IDomainEvent") && interf.Namespace.Equals("K8sJanitor.WebApi.Domain.Events"))
-                        {
-                            return true;
-                        }
-                    }
-
-                    return false;
-                })
-                .Where(x => !x.Name.Equals("GeneralDomainEvent"))
-                .Select(x => x).ToList();
-
-            var allEvents = new List<Type>();
-            allEvents.AddRange(listOfIEvents);
-            allEvents.AddRange(listOfDomainEvents);
-            return allEvents;
-        }
-
+        
         public static Configuration GetConfiguration()
         {
             var test = new ConfigurationTest();
@@ -279,60 +181,6 @@ namespace K8sJanitor.WebApi.IntegrationTests.Kafka
             }
 
             return Tuple.Create<string, string>(key, value);
-        }
-
-        public static async Task<List<object>> GetPrefilledEvents()
-        {
-            var payload = new List<object>();
-
-            return payload;
-        }
-
-        public static async Task RunManualPublishingServiceOnce(IServiceScope scope)
-        {
-            var eventsQueue = scope.ServiceProvider.GetRequiredService<PublishingEventsQueue>();
-            if (eventsQueue.AnyEventInQueue() == false)
-            {
-                return;
-            }
-                
-            Console.WriteLine($"Domain events to publish: {eventsQueue.QueueCount()}");
-                
-            var publisherFactory = scope.ServiceProvider.GetRequiredService<KafkaPublisherFactory>();
-            var eventRegistry = scope.ServiceProvider.GetRequiredService<DomainEventRegistry>();
-                    
-            Console.WriteLine("Connecting to kafka...");
-
-            using (var producer = publisherFactory.Create())
-            {
-                Console.WriteLine("Connected!");
-
-                while (eventsQueue.AnyEventInQueue())
-                {
-                    var evt = eventsQueue.Dequeue();
-                    var topicName = eventRegistry.GetTopicFor(evt.Type);
-                    var message = MessagingHelper.CreateMessageFrom(evt);
-
-                    try
-                    {
-                        var result = await producer.ProduceAsync(
-                            topic: topicName,
-                            message: new Message<string, string>
-                            {
-                                Key = evt.AggregateId,
-                                Value = message
-                            }
-                        );
-                        Console.WriteLine($"Domain event \"{evt.Type}>{evt.EventId}\" has been published!");
-
-                    }
-                    catch (Exception)
-                    {
-                        throw new Exception($"Could not publish domain event \"{evt.Type}>{evt.EventId}\"!!!");
-
-                    }
-                }
-            }
         }
     }
 

@@ -147,7 +147,6 @@ namespace K8sJanitor.WebApi.IntegrationTests.Kafka
         [FactRunsWithKafka]
         public async Task QueryRestApiConsumeEvent()
         {
-            var serviceProvider = Helper.SetupServiceProviderWithConsumerAndProducer(useManualEvents: true);
             var services = Helper.SetupV2();
             var conf = Helper.GetConfiguration();
             await Helper.ResetFakeServer(services);
@@ -166,7 +165,7 @@ namespace K8sJanitor.WebApi.IntegrationTests.Kafka
             Thread.Sleep(3000);
 
             var payload = Helper.GetRawPayload("k8s_namespace_created_and_aws_arn_connect.json");
-            var resp = await Helper.PostFakeServer("/api-create-event", serviceProvider.CreateScope(), new StringContent(payload, Encoding.UTF8, "application/json"));
+            var resp = await Helper.PostFakeServer("/api-create-event", services, new StringContent(payload, Encoding.UTF8, "application/json"));
 
             var consumeResult = consumerTask.Result;
 
