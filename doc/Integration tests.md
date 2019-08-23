@@ -11,10 +11,10 @@ The integration tests for K8sJanitor expects certain environment variables in or
 #### Toggling tests:
 * *EXECUTE_AGAINST_KAFKA* when set to **true** will run integration tests for Kafka. If **false**, tests for Kafka will be skipped.
     
-    **Default**: true
+    **Default**: false
 * *EXECUTE_AGAINST_K8S* when set to **true** will run integration tests for Kubernetes. If **false**, tests for Kubernetes will be skipped.
     
-    **Default**: true
+    **Default**: false
 
 #### Kafka settings:
 * *INTEGRATION_TEST_KAFKA_TOPIC* is used to set the topic that the tests uses for consuming and publishing Kafka messages.
@@ -25,7 +25,7 @@ The integration tests for K8sJanitor expects certain environment variables in or
     **Default**: 'localhost:50901'
 * *INTEGRATION_TEST_KAFKA_PAYLOAD_DIR* path to directory where .json event payloads used in tests can be found.
     
-    **Default**: '../../../Kafka/payloads'
+    **Default**: 'PROJECT_ROOT_DIR/src/K8sJanitor.WebApi.IntegrationTests/Kafka/payloads'
 * *KUBERNETES_SERVICE_KAFKA_BOOTSTRAP_SERVERS* Kafka bootstrap server host.
     
     **Default**: 'localhost:9092'
