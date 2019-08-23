@@ -299,7 +299,6 @@ namespace K8sJanitor.WebApi.IntegrationTests.Kafka
 
     public class ConfigurationTest : BaseConfiguration
     {
-        public bool Run { get; set; }
         public string Topic { get; set; }
         public string FakeServerHost { get; set; }
         public string PayloadDir { get; set; }
@@ -308,7 +307,6 @@ namespace K8sJanitor.WebApi.IntegrationTests.Kafka
         {
             const string prefix = "INTEGRATION_TEST_KAFKA";
 
-            Run = GetBool("RUN", prefix, true);
             Topic = GetString("TOPIC", prefix, "build.capabilities");
             FakeServerHost = GetString("FAKE_SERVER_HOST", prefix, "localhost:50901");
             PayloadDir = GetString("PAYLOAD_DIR", prefix, "../../../Kafka/payloads");
