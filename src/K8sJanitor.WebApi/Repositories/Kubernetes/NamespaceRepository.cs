@@ -91,7 +91,7 @@ namespace K8sJanitor.WebApi.Repositories.Kubernetes
                 Metadata = new V1ObjectMeta
                 {
                     Name = namespaceName,
-                    Annotations = new Dictionary<string,string>{{"iam.amazonaws.com/permitted", IAM.ConstructRoleArn(accountId, "*")}}
+                    Annotations = new Dictionary<string,string>{{"iam.amazonaws.com/permitted", IAM.ConstructRoleArn(accountId, ".*")}}
                 }
             };
 
