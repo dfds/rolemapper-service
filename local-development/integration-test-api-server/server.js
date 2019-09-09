@@ -15,6 +15,7 @@ const deserialize = (text) => JSON.parse(text);
 
 var counter = 0;
 var kafkaMessageReceivedCounter = 0;
+var kafkaMessagesStore = [];
 
 const kafka = new Kafka({
     clientId: 'integrationTestApiServer',
@@ -33,9 +34,14 @@ app.get("/api-calls-received", (req, res) => {
     return res.json({apiCallsReceived: counter, kafkaMessageReceived: kafkaMessageReceivedCounter, success: true});
 });
 
+app.get("/api-messages-received", (req, res) => {
+    return res.json({items: kafkaMessagesStore, success: true});
+});
+
 app.get("/api-calls-reset", (req, res) => {
     counter = 0;
     kafkaMessageReceivedCounter = 0;
+    kafkaMessagesStore = [];
     return res.json({success: true});
 });
 
@@ -80,6 +86,7 @@ app.post("/api-create-event", async (req, res) => {
                 value: message.value.toString(),
             })
             kafkaMessageReceivedCounter = kafkaMessageReceivedCounter + 1;
+            kafkaMessagesStore.push(message.value.toString())
         }
     });
 })();
