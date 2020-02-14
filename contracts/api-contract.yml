@@ -35,6 +35,12 @@ paths:
         500:
           description: An error occured trying fetch config map.
   /namespaces:
+    get:
+      summary: Get all capability namespaces
+      responses:
+        200:
+          schema:
+            $ref: "#/definitions/CapabilityNamespaces"
     post:
       summary: Creates a new namespace
       parameters:
@@ -65,4 +71,19 @@ definitions:
         type: string
       accountId:
         type: string
+  CapabilityNamespaces:
+    type: object
+    properties:
+      items:
+        type: array
+        items:
+          $ref: "#/definitions/Namespace"
+  Namespace:
+    type: object
+    properties:
+      name:
+        type: string
+      capabilityId:
+        type: string
+
 
