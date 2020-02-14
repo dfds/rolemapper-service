@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using k8s.Models;
 using K8sJanitor.WebApi.Models;
 
 namespace K8sJanitor.WebApi.Repositories.Kubernetes
@@ -15,6 +16,8 @@ namespace K8sJanitor.WebApi.Repositories.Kubernetes
         Task CreateNamespaceAsync(NamespaceName namespaceName);
 
         Task AddAnnotations(NamespaceName namespaceName, Dictionary<string, string> annotations);
+
+        Task<IEnumerable<V1Namespace>> GetAllCapabilityNamespacesAsync();
 
     }
 }

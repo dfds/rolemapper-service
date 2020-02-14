@@ -22,3 +22,6 @@ curl -X POST -H "Content-Type: application/vnd.kafka.json.v2+json" \
         }
     }' \
 "http://localhost:5000/api/events"
+###
+
+curl -X GET "http://localhost:5000/api/namespaces"

@@ -50,5 +50,8 @@ namespace K8sJanitor.WebApi.Wrappers
             string pretty = null,
             CancellationToken cancellationToken = default(CancellationToken)
         );
+
+        Task<IEnumerable<V1Namespace>> GetAllCapabilityNamespacesAsync(
+        );
     }
 }

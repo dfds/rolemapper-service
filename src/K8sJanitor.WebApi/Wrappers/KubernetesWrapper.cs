@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using k8s;
@@ -110,6 +111,20 @@ namespace K8sJanitor.WebApi.Wrappers
                 pretty,
                 cancellationToken
             );
+        }
+
+        public async Task<IEnumerable<V1Namespace>> GetAllCapabilityNamespacesAsync()
+        {
+            var namespaces = await _kubernetes.ListNamespaceAsync();
+
+            var capabilityNamespaces = namespaces.Items
+                .Where(i => 
+                    i.Metadata?.Labels?
+                        .Any(l => 
+                            l.Key == "capability-id"
+                        ) == true
+                );
+            return capabilityNamespaces;
         }
     }
 }

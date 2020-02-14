@@ -118,5 +118,11 @@ namespace K8sJanitor.WebApi.Repositories.Kubernetes
                 );
             }
         }
+
+        public async Task<IEnumerable<V1Namespace>> GetAllCapabilityNamespacesAsync()
+        {
+            return await _client.GetAllCapabilityNamespacesAsync();
+            
+        }
     }
 }

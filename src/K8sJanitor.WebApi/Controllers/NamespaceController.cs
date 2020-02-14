@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
+using K8sJanitor.WebApi.Infrastructure.Api.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using K8sJanitor.WebApi.Models;
@@ -20,15 +22,14 @@ namespace K8sJanitor.WebApi.Controllers
         public NamespaceController(
             IAddNamespaceRequestValidator addNamespaceRequestValidator,
             INamespaceRepository namespaceRepository,
-            IRoleRepository roleRepository 
+            IRoleRepository roleRepository
         )
         {
-            
             _addNamespaceRequestValidator = addNamespaceRequestValidator;
             _namespaceRepository = namespaceRepository;
             _roleRepository = roleRepository;
         }
-        
+
         [HttpPost("")]
         public async Task<ActionResult> AddNamespace([FromBody] AddNamespaceRequest addNamespaceRequest)
         {
@@ -46,7 +47,7 @@ namespace K8sJanitor.WebApi.Controllers
                     addNamespaceRequest.AccountId
                 );
 
-               await _roleRepository
+                await _roleRepository
                     .CreateNamespaceFullAccessRole(addNamespaceRequest.NamespaceName);
 
                 return Ok();
@@ -57,6 +58,21 @@ namespace K8sJanitor.WebApi.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError,
                     $"An error occured trying to create the namespace: {ex.Message}");
             }
+        }
+
+        [HttpGet("")]
+        public async Task<ActionResult> GetAllCapabilityNamespaces()
+        {
+            var v1Namespaces = await _namespaceRepository.GetAllCapabilityNamespacesAsync();
+
+            var namespaces = v1Namespaces.Select(n => new Namespace
+            {
+                Name = n.Metadata.Name,
+                CapabilityId = Guid.Parse(n.Metadata.Labels.Single(l => l.Key == "capability-id").Value)
+            });
+            
+            return Ok(namespaces);
+            
         }
     }
 }
