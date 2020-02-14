@@ -1,7 +1,9 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Castle.Core.Internal;
+using k8s.Models;
 using K8sJanitor.WebApi.Models;
 using K8sJanitor.WebApi.Repositories.Kubernetes;
 
@@ -68,6 +70,26 @@ namespace K8sJanitor.WebApi.Tests.TestDoubles
             @namespace.Annotations = resultAnnotations;
             
             return Task.CompletedTask;
+        }
+
+        public Task<IEnumerable<Models.Namespace>> GetAllCapabilityNamespacesAsync()
+        {
+            var namespaces = Namespaces
+                .Where(n => 
+                    n.Labels?
+                        .Any(l => 
+                            l.Key == "capability-id"
+                        ) == true
+                )
+                .Select(n => new Models.Namespace
+                    {
+                        Name = n.NamespaceName,
+                        CapabilityId = Guid.Parse(n.Labels
+                            .Single(l => l.Key == "capability-id").Value)
+                    });
+
+
+            return Task.FromResult(namespaces);
         }
 
         public class Namespace

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using k8s.Models;
@@ -52,6 +53,11 @@ namespace K8sJanitor.WebApi.Tests.TestDoubles
             CancellationToken cancellationToken = default(CancellationToken))
         {
             return Task.FromResult(new V1RoleBinding());
+        }
+
+        public Task<IEnumerable<V1Namespace>> GetAllCapabilityNamespacesAsync()
+        {
+            return Task.FromResult(Enumerable.Empty<V1Namespace>());
         }
     }
 }

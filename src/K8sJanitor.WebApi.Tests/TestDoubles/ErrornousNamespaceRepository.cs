@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using k8s.Models;
 using K8sJanitor.WebApi.Models;
 using K8sJanitor.WebApi.Repositories.Kubernetes;
 
@@ -39,6 +40,11 @@ namespace K8sJanitor.WebApi.Tests.TestDoubles
                 throw _annotationException;
 
             return Task.CompletedTask;
+        }
+
+        public Task<IEnumerable<Namespace>> GetAllCapabilityNamespacesAsync()
+        {
+            throw _exceptionToThrow;
         }
     }
 }

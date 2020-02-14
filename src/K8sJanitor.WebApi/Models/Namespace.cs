@@ -1,6 +1,6 @@
 using System;
 
-namespace K8sJanitor.WebApi.Infrastructure.Api.Models
+namespace K8sJanitor.WebApi.Models
 {
     public class Namespace
     {

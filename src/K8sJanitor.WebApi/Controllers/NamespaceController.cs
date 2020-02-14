@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
-using K8sJanitor.WebApi.Infrastructure.Api.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using K8sJanitor.WebApi.Models;
@@ -63,13 +62,7 @@ namespace K8sJanitor.WebApi.Controllers
         [HttpGet("")]
         public async Task<ActionResult> GetAllCapabilityNamespaces()
         {
-            var v1Namespaces = await _namespaceRepository.GetAllCapabilityNamespacesAsync();
-
-            var namespaces = v1Namespaces.Select(n => new Namespace
-            {
-                Name = n.Metadata.Name,
-                CapabilityId = Guid.Parse(n.Metadata.Labels.Single(l => l.Key == "capability-id").Value)
-            });
+            var namespaces = await _namespaceRepository.GetAllCapabilityNamespacesAsync();
 
             return Ok(new {Items = namespaces});
         }

@@ -17,7 +17,6 @@ namespace K8sJanitor.WebApi.Repositories.Kubernetes
 
         Task AddAnnotations(NamespaceName namespaceName, Dictionary<string, string> annotations);
 
-        Task<IEnumerable<V1Namespace>> GetAllCapabilityNamespacesAsync();
-
+        Task<IEnumerable<Namespace>> GetAllCapabilityNamespacesAsync();
     }
 }

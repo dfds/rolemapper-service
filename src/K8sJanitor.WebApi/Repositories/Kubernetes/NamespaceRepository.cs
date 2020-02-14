@@ -20,7 +20,7 @@ namespace K8sJanitor.WebApi.Repositories.Kubernetes
             _client = client;
         }
 
-        
+
         public async Task CreateNamespaceAsync(NamespaceName namespaceName)
         {
             var ns = new V1Namespace
@@ -34,9 +34,9 @@ namespace K8sJanitor.WebApi.Repositories.Kubernetes
             await CreateNamespaceAsync(ns);
         }
 
-        
+
         public async Task CreateNamespaceAsync(
-            NamespaceName namespaceName, 
+            NamespaceName namespaceName,
             IEnumerable<Label> labels
         )
         {
@@ -51,28 +51,32 @@ namespace K8sJanitor.WebApi.Repositories.Kubernetes
 
             await CreateNamespaceAsync(ns);
         }
-        
+
         public async Task AddAnnotations(NamespaceName namespaceName, Dictionary<string, string> annotations)
         {
             var @namespace = await _client.ReadNamespaceAsync(namespaceName);
 
             var annotationsToStore = @namespace.Metadata.Annotations ?? new Dictionary<string, string>();
-            
+
             annotations.ToList().ForEach(a =>
             {
                 var annotationAdded =
-                annotationsToStore.TryAdd(a.Key, a.Value);
+                    annotationsToStore.TryAdd(a.Key, a.Value);
 
-                if (annotationAdded) {return;}
-                
+                if (annotationAdded)
+                {
+                    return;
+                }
+
                 var annotationToStoreValue = annotationsToStore[a.Key];
                 if (annotationToStoreValue != a.Value)
                 {
                     // TODO Change the exception type to AnnotationAlreadyExistWithDifferentValue
-                    throw new Exception($"The annotation \"{a.Key}\" already exist with the value \"{annotationToStoreValue}\" you are trying to add the value \"{a.Value}\"");
+                    throw new Exception(
+                        $"The annotation \"{a.Key}\" already exist with the value \"{annotationToStoreValue}\" you are trying to add the value \"{a.Value}\"");
                 }
             });
-            
+
             var metadata = new V1ObjectMeta
             {
                 Name = namespaceName,
@@ -83,7 +87,7 @@ namespace K8sJanitor.WebApi.Repositories.Kubernetes
             patch.Replace(n => n.Metadata, metadata);
             await _client.PatchNamespaceWithHttpMessagesAsync(new V1Patch(patch), namespaceName);
         }
-        
+
         public async Task CreateNamespaceAsync(string namespaceName, string accountId)
         {
             var ns = new V1Namespace
@@ -91,7 +95,8 @@ namespace K8sJanitor.WebApi.Repositories.Kubernetes
                 Metadata = new V1ObjectMeta
                 {
                     Name = namespaceName,
-                    Annotations = new Dictionary<string,string>{{"iam.amazonaws.com/permitted", IAM.ConstructRoleArn(accountId, ".*")}}
+                    Annotations = new Dictionary<string, string>
+                        {{"iam.amazonaws.com/permitted", IAM.ConstructRoleArn(accountId, ".*")}}
                 }
             };
 
@@ -119,10 +124,18 @@ namespace K8sJanitor.WebApi.Repositories.Kubernetes
             }
         }
 
-        public async Task<IEnumerable<V1Namespace>> GetAllCapabilityNamespacesAsync()
+        public async Task<IEnumerable<Namespace>> GetAllCapabilityNamespacesAsync()
         {
-            return await _client.GetAllCapabilityNamespacesAsync();
-            
+            var v1Namespaces = await _client.GetAllCapabilityNamespacesAsync();
+
+            var namespaces = v1Namespaces.Select(n => new Namespace
+            {
+                Name = n.Metadata.Name,
+                CapabilityId = Guid.Parse(n.Metadata.Labels
+                    .Single(l => l.Key == "capability-id").Value)
+            });
+
+            return namespaces;
         }
     }
 }
