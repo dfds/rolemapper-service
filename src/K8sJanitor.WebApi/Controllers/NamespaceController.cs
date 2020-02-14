@@ -70,9 +70,8 @@ namespace K8sJanitor.WebApi.Controllers
                 Name = n.Metadata.Name,
                 CapabilityId = Guid.Parse(n.Metadata.Labels.Single(l => l.Key == "capability-id").Value)
             });
-            
-            return Ok(namespaces);
-            
+
+            return Ok(new {Items = namespaces});
         }
     }
 }
