@@ -16,9 +16,9 @@ namespace K8sJanitor.WebApi.Controllers
         }
 
         [HttpPost("")]
-        public async Task AddEvent([FromBody] Newtonsoft.Json.Linq.JObject jObject)
+        public async Task AddEvent([FromBody] dynamic jObject)
         {
-            var eventJson = jObject.ToString(Newtonsoft.Json.Formatting.None);
+            var eventJson = jObject.ToString();
             Log.Warning("Deprecated call to /api/events with contents {eventJson}", eventJson);
             await _eventDispatcher.Send(eventJson);
         }

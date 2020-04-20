@@ -1,12 +1,17 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
-using Amazon;
+﻿using Amazon;
 using Amazon.S3;
 using Amazon.S3.Transfer;
 using k8s;
-using k8s.Exceptions;
 using K8sJanitor.WebApi.Application;
+using K8sJanitor.WebApi.Domain.Events;
+using K8sJanitor.WebApi.EventHandlers;
+using K8sJanitor.WebApi.HealthChecks;
+using K8sJanitor.WebApi.Infrastructure.Messaging;
+using K8sJanitor.WebApi.Repositories;
+using K8sJanitor.WebApi.Repositories.Kubernetes;
+using K8sJanitor.WebApi.Services;
+using K8sJanitor.WebApi.Validators;
+using K8sJanitor.WebApi.Wrappers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
@@ -17,24 +22,17 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 using Prometheus;
-using K8sJanitor.WebApi.Domain.Events;
-using K8sJanitor.WebApi.EventHandlers;
-using K8sJanitor.WebApi.HealthChecks;
-using K8sJanitor.WebApi.Infrastructure.Messaging;
-using K8sJanitor.WebApi.Repositories;
-using K8sJanitor.WebApi.Repositories.Kubernetes;
-using K8sJanitor.WebApi.Services;
-using K8sJanitor.WebApi.Validators;
-using K8sJanitor.WebApi.Wrappers;
-using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace K8sJanitor.WebApi
 {
     public class Startup
     {
-        private readonly IHostingEnvironment _hostingEnvironment;
+        private readonly IWebHostEnvironment _hostingEnvironment;
 
-        public Startup(IConfiguration configuration, IHostingEnvironment hostingEnvironment)
+        public Startup(IConfiguration configuration, IWebHostEnvironment hostingEnvironment)
         {
             Configuration = configuration;
             _hostingEnvironment = hostingEnvironment;
@@ -76,9 +74,8 @@ namespace K8sJanitor.WebApi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
-
-
+            services.AddMvc((options) => options.EnableEndpointRouting = false).SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
+            
             if (
                 string.IsNullOrWhiteSpace(Configuration["KUBERNETES_SERVICE_HOST"]) == false &&
                 string.IsNullOrWhiteSpace(Configuration["KUBERNETES_SERVICE_PORT"]) == false
@@ -166,7 +163,7 @@ namespace K8sJanitor.WebApi
 
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {

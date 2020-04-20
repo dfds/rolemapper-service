@@ -1,12 +1,10 @@
-using System;
-using System.Threading.Tasks;
 using K8sJanitor.WebApi.Application;
 using K8sJanitor.WebApi.Domain.Events;
-using K8sJanitor.WebApi.Infrastructure.Messaging;
-using K8sJanitor.WebApi.Tests.EventHandlers;
 using K8sJanitor.WebApi.Tests.TestDoubles;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
+using System;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace K8sJanitor.WebApi.Tests.Application

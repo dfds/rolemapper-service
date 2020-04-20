@@ -1,9 +1,6 @@
-using System;
 using System.Collections.Generic;
-using Xunit;
-using K8sJanitor.WebApi.Services;
 using System.Linq;
-using Microsoft.AspNetCore.Razor.Language;
+using Xunit;
 
 namespace K8sJanitor.WebApi.Tests
 {
