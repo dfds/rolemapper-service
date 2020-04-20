@@ -36,7 +36,9 @@ namespace K8sJanitor.WebApi.Tests.Controllers.EventsController
                                     }
                                 }";
 
-                var response = await client.PostAsync("/api/events", new JsonContent(input));
+                var content = new JsonContent(input);
+
+                var response = await client.PostAsync("/api/events", content);
 
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
                 Assert.True(teamCreatedEventHandlerStub.HandleAsyncGotCalled);
