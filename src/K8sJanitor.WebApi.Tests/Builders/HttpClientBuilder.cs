@@ -1,12 +1,11 @@
+using Microsoft.AspNetCore;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.TestHost;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using Moq;
 
 namespace K8sJanitor.WebApi.Tests.Builders
 {
@@ -30,15 +29,9 @@ namespace K8sJanitor.WebApi.Tests.Builders
 
         private IWebHostBuilder CreateWebHostBuilder()
         {
-            return new WebHostBuilder()
-                .UseStartup<Startup>()
-                .ConfigureTestServices(services =>
-                {
-                    _serviceDescriptors
-                        .Values
-                        .ToList()
-                        .ForEach(serviceOverride => services.Replace(serviceOverride));
-                });
+            return WebHost.CreateDefaultBuilder()
+                          .UseStartup<FakeStartup>()
+                          .UseSetting(WebHostDefaults.ApplicationKey, typeof(Program).Assembly.FullName);
         }
 
         private List<Action<HttpClient>> CreateCustomizations()
@@ -69,9 +62,19 @@ namespace K8sJanitor.WebApi.Tests.Builders
 
         public void Dispose()
         {
-            foreach (var instance in _disposables.Reverse())
+            Dispose(true);
+
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
             {
-                instance.Dispose();
+                foreach (var instance in _disposables.Reverse())
+                {
+                    instance.Dispose();
+                }
             }
         }
     }

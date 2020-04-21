@@ -72,7 +72,7 @@ namespace K8sJanitor.WebApi
         }
 
         // This method gets called by the runtime. Use this method to add services to the container.
-        public void ConfigureServices(IServiceCollection services)
+        public virtual void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc((options) => options.EnableEndpointRouting = false).SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
             
@@ -95,7 +95,6 @@ namespace K8sJanitor.WebApi
                     new KubernetesWrapper(null));
             }
             
-
             services = AddPersistenceRepository(services);
 
             services.AddTransient<IConfigMapService, ConfigMapService>();
@@ -108,16 +107,15 @@ namespace K8sJanitor.WebApi
 
             // Event handlers
 
-            services.AddHostedService<MetricHostedService>();
-
             services.AddHealthChecks()
                 .AddCheck("self", () => HealthCheckResult.Healthy())
                 .AddCheck<S3BucketHealthCheck>("S3 bucket");
 
-
             ConfigureDomainEvents(services);
 
             services.AddHostedService<KafkaConsumerHostedService>();
+
+            AddMetricServices(services);
         }
 
         private static void ConfigureDomainEvents(IServiceCollection services)
@@ -161,9 +159,13 @@ namespace K8sJanitor.WebApi
             services.AddTransient<IEventDispatcher, EventDispatcher>();
         }
 
+        protected virtual void AddMetricServices(IServiceCollection services)
+        {
+            services.AddHostedService<MetricHostedService>();
+        }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public virtual void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
