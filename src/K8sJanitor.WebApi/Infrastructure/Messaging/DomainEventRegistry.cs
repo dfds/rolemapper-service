@@ -1,51 +1,52 @@
+using K8sJanitor.WebApi.Domain.Events;
+using K8sJanitor.WebApi.EventHandlers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using K8sJanitor.WebApi.Domain.Events;
-using K8sJanitor.WebApi.EventHandlers;
 
 namespace K8sJanitor.WebApi.Infrastructure.Messaging
 {
     public class DomainEventRegistry : IDomainEventRegistry
     {
-        private readonly List<DomainEventRegistration> _registrations = new List<DomainEventRegistration>();
-        private readonly Dictionary<Type, List<object>> _eventHandlers = new Dictionary<Type, List<object>>();
+        private readonly List<DomainEventRegistration> _registrations;
+        private readonly Lazy<IEnumerable<IEventHandler>> _eventHandlers;
 
-        public DomainEventRegistry Register<TEvent>(string eventTypeName, string topicName, IEventHandler<TEvent> eventHandler)
+        protected IEnumerable<IEventHandler> EventHandlers
+        {
+            get
+            {
+                return _eventHandlers.Value;
+            }
+        }
+
+        public DomainEventRegistry(Lazy<IEnumerable<IEventHandler>> eventHandlers = default, IEnumerable<DomainEventRegistration> registrations = default) 
+        {
+            _eventHandlers = eventHandlers;
+            _registrations = registrations?.ToList() ?? new List<DomainEventRegistration>();
+        }
+
+        public IDomainEventRegistry Register<TEvent>(string eventTypeName, string topicName) where TEvent : IEvent
         {
             _registrations.Add(new DomainEventRegistration
             {
-                EventType = eventTypeName,
-                EventInstanceType = typeof(TEvent),
+                EventTypeName = eventTypeName,
+                EventType = typeof(TEvent),
                 Topic = topicName
             });
-
-            RegisterEventHandler(eventHandler);
 
             return this;
         }
 
-        private void RegisterEventHandler<TEvent>(IEventHandler<TEvent> eventHandler)
+        public string GetTopicFor(string eventTypeName)
         {
-            if (!_eventHandlers.ContainsKey(typeof(TEvent)))
-            {
-                _eventHandlers.Add(typeof(TEvent), new List<object>());
-            }
-
-            List<object> handlersList = _eventHandlers[typeof(TEvent)];
-            handlersList.Add(eventHandler);
-        }
-
-        public string GetTopicFor(string eventType)
-        {
-            var registration = _registrations.SingleOrDefault(x => x.EventType == eventType);
+            var registration = _registrations.SingleOrDefault(x => x.EventTypeName == eventTypeName);
 
             if (registration != null)
             {
                 return registration.Topic;
             }
 
-            return null;
+            return string.Empty;
         }
 
         public IEnumerable<string> GetAllTopics()
@@ -55,48 +56,51 @@ namespace K8sJanitor.WebApi.Infrastructure.Messaging
             return topics;
         }
 
-        public Type GetInstanceTypeFor(string eventType)
+        public Type GetTypeFor(string eventTypeName)
         {
-            var registration = _registrations.SingleOrDefault(x => x.EventType == eventType);
+            var registration = _registrations.SingleOrDefault(x => x.EventTypeName == eventTypeName);
 
             if (registration == null)
             {
-                throw new EventTypeNotFoundException($"Error! Could not determine \"event instance type\" due to no registration was found for type {eventType}!");
-            }
-
-            return registration.EventInstanceType;
-        }
-
-        public string GetTypeNameFor(IEvent domainEvent)
-        {
-            var registration = _registrations.SingleOrDefault(x => x.EventInstanceType == domainEvent.GetType());
-
-            if (registration == null)
-            {
-                throw new MessagingException($"Error! Could not determine \"event type name\" due to no registration was found for type {domainEvent.GetType().FullName}!");
+                throw new EventTypeNotFoundException($"Error! Could not determine \"event instance type\" due to no registration was found for type {eventTypeName}!");
             }
 
             return registration.EventType;
         }
 
-        public List<object> GetEventHandlersFor<TEvent>(TEvent domainEvent)
+        public string GetTypeNameFor(IEvent domainEvent)
         {
-            var registration = _eventHandlers.SingleOrDefault(eventhandler => eventhandler.Key == typeof(TEvent));
+            var domainEventType = domainEvent.GetType();
+            var registration = _registrations.SingleOrDefault(x => x.EventType == domainEventType);
 
-            if (registration.Equals(default(KeyValuePair<Type, List<object>>)))
+            if (registration == null)
             {
-                throw new EventHandlerNotFoundException($"Error! Could not determine \"event handlers\" due to no registration was found for type {domainEvent.GetType().FullName}!");
+                throw new MessagingException($"Error! Could not determine \"event type name\" due to no registration was found for type {domainEventType.FullName}!");
             }
 
-            return registration.Value;
+            return registration.EventTypeName;
         }
 
-        public class DomainEventRegistration
+        public IEnumerable<IEventHandler> GetEventHandlersFor(IEvent domainEvent)
         {
-            public string EventType { get; set; }
-            public Type EventInstanceType { get; set; }
-            public string Topic { get; set; }
+            var domainEventType = domainEvent.GetType();
+            var handlers = EventHandlers.Where(eventhandler => eventhandler.GetType().GetInterfaces().Any(i => i.GetGenericArguments().Contains(domainEventType)));
+
+            if (handlers == null)
+            {
+                throw new EventHandlerNotFoundException($"Error! Could not determine \"event handlers\" due to no registration was found for type {domainEventType.FullName}!");
+            }
+
+            return handlers;
         }
     }
 
+    public class DomainEventRegistration
+    {
+        public string EventTypeName { get; set; }
+
+        public Type EventType { get; set; }
+
+        public string Topic { get; set; }
+    }
 }

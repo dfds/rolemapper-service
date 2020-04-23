@@ -126,6 +126,6 @@ namespace K8sJanitor.WebApi.EventHandlers
             );
             var annotations = new Dictionary<string, string>();
             await _namespaceRepository.AddAnnotations(namespaceName, annotations);
-        } 
+        }
     }
 }

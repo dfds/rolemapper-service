@@ -31,7 +31,13 @@ namespace K8sJanitor.WebApi.Tests.Builders
         {
             return WebHost.CreateDefaultBuilder()
                           .UseStartup<FakeStartup>()
-                          .UseSetting(WebHostDefaults.ApplicationKey, typeof(Program).Assembly.FullName);
+                          .UseSetting(WebHostDefaults.ApplicationKey, typeof(Program).Assembly.FullName)
+                          .ConfigureServices(services => {
+                              foreach (var descriptor in _serviceDescriptors)
+                              {
+                                  services.Add(descriptor.Value);
+                              }
+                          });
         }
 
         private List<Action<HttpClient>> CreateCustomizations()
