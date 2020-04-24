@@ -1,4 +1,5 @@
-﻿using K8sJanitor.WebApi.Tests.TestDoubles;
+﻿using K8sJanitor.WebApi.Infrastructure.Messaging;
+using K8sJanitor.WebApi.Tests.TestDoubles;
 using K8sJanitor.WebApi.Wrappers;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -15,7 +16,7 @@ namespace K8sJanitor.WebApi.Tests
 
         protected override void AddEventRegistry(IServiceCollection services)
         {
-            //Do nothing to avoid overwriting fake registry used by test.
+            services.AddSingleton<IDomainEventRegistry, DomainEventRegistry>();
         }
 
         protected override void AddMetricServices(IServiceCollection services)

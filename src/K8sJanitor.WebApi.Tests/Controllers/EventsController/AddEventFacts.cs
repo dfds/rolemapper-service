@@ -21,13 +21,16 @@ namespace K8sJanitor.WebApi.Tests.Controllers.EventsController
             using var builder = new HttpClientBuilder();
 
             var teamCreatedEventHandlerStub = new TeamCreatedEventHandlerStub();
-            var handlers = new List<IEventHandler>() { teamCreatedEventHandlerStub };
-            var eventRegistry = new DomainEventRegistry(new Lazy<IEnumerable<IEventHandler>>(handlers));
-            
-            eventRegistry.Register<CapabilityRegisteredDomainEvent>(eventTypeName: "capability_registered", topicName: "foo");
+            var domEventRegistration = new DomainEventRegistration
+            {
+                EventTypeName = "capability_registered",
+                EventType = typeof(CapabilityRegisteredDomainEvent),
+                Topic = "foo"
+            };
 
             using var client = builder
-                .WithService<IDomainEventRegistry>(eventRegistry)
+                .WithService<IEventHandler>(teamCreatedEventHandlerStub)
+                .WithService(domEventRegistration)
                 .Build();
 
             //Act

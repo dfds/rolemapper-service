@@ -27,12 +27,15 @@ namespace K8sJanitor.WebApi.Infrastructure.Messaging
 
         public IDomainEventRegistry Register<TEvent>(string eventTypeName, string topicName) where TEvent : IEvent
         {
-            _registrations.Add(new DomainEventRegistration
-            {
-                EventTypeName = eventTypeName,
-                EventType = typeof(TEvent),
-                Topic = topicName
-            });
+            if(!_registrations.Any(r => r.EventTypeName == eventTypeName && r.Topic == topicName))
+            { 
+                _registrations.Add(new DomainEventRegistration
+                {
+                    EventTypeName = eventTypeName,
+                    EventType = typeof(TEvent),
+                    Topic = topicName
+                });
+            }
 
             return this;
         }
