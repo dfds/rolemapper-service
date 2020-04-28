@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration.Json;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
@@ -32,6 +34,29 @@ namespace K8sJanitor.WebApi.Tests.Builders
             return WebHost.CreateDefaultBuilder()
                           .UseStartup<FakeStartup>()
                           .UseSetting(WebHostDefaults.ApplicationKey, typeof(Program).Assembly.FullName)
+                          .ConfigureAppConfiguration((builderContext, config) =>
+                          {
+                              var sourcesToRemove = config.Sources
+                                  .Where(s => s.GetType() == typeof(JsonConfigurationSource))
+                                  .ToArray();
+
+                              foreach (var source in sourcesToRemove)
+                              {
+                                  config.Sources.Remove(source);
+                              }
+
+                              config
+                                  .AddJsonFile(
+                                      path: "appsettings.json",
+                                      optional: true,
+                                      reloadOnChange: false
+                                  )
+                                  .AddJsonFile(
+                                      path: "appsettings." + builderContext.HostingEnvironment.EnvironmentName + ".json",
+                                      optional: true,
+                                      reloadOnChange: false
+                                  );
+                          })
                           .ConfigureServices(services => {
                               foreach (var descriptor in _serviceDescriptors)
                               {
