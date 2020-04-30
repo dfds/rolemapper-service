@@ -9,12 +9,7 @@ namespace K8sJanitor.WebApi.Tests.TestDoubles
     public class DomainEventRegistrySpy : IDomainEventRegistry
     {
         private readonly string _defaultTypeName;
-
-        public DomainEventRegistry Register<TEvent>(string eventTypeName, string topicName, IEventHandler<TEvent> eventHandler)
-        {
-            throw new NotImplementedException();
-        }
-
+        
         public string GetTopicFor(string eventType)
         {
             throw new NotImplementedException();
@@ -25,17 +20,22 @@ namespace K8sJanitor.WebApi.Tests.TestDoubles
             throw new NotImplementedException();
         }
 
-        public Type GetInstanceTypeFor(string eventType)
-        {
-            throw new NotImplementedException();
-        }
-
         public string GetTypeNameFor(IEvent domainEvent)
         {
             return _defaultTypeName;
         }
 
-        public List<object> GetEventHandlersFor<TEvent>(TEvent domainEvent)
+        public IDomainEventRegistry Register<TEvent>(string eventTypeName, string topicName) where TEvent : IEvent
+        {
+            throw new NotImplementedException();
+        }
+
+        public Type GetTypeFor(string eventType)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IEnumerable<IEventHandler> GetEventHandlersFor(IEvent @event)
         {
             throw new NotImplementedException();
         }

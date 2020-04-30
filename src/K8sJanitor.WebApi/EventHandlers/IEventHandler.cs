@@ -1,9 +1,14 @@
+using K8sJanitor.WebApi.Domain.Events;
 using System.Threading.Tasks;
 
 namespace K8sJanitor.WebApi.EventHandlers
 {
-    public interface IEventHandler<in T>
+    public interface IEventHandler
     {
-        Task HandleAsync(T domainEvent);
+    }
+
+    public interface IEventHandler<in T> : IEventHandler where T : IEvent
+    {
+        Task HandleAsync(T @event);
     }
 }

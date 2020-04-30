@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration.Json;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Events;
@@ -47,6 +48,29 @@ namespace K8sJanitor.WebApi
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
+                .ConfigureAppConfiguration((builderContext, config) =>
+                {
+                    var sourcesToRemove = config.Sources
+                        .Where(s => s.GetType() == typeof(JsonConfigurationSource))
+                        .ToArray();
+
+                    foreach (var source in sourcesToRemove)
+                    {
+                        config.Sources.Remove(source);
+                    }
+
+                    config
+                        .AddJsonFile(
+                            path: "appsettings.json",
+                            optional: true,
+                            reloadOnChange: false
+                        )
+                        .AddJsonFile(
+                            path: "appsettings." + builderContext.HostingEnvironment.EnvironmentName + ".json",
+                            optional: true,
+                            reloadOnChange: false
+                        );
+                })
                 .UseStartup<Startup>()
                 .UseSerilog();
     }

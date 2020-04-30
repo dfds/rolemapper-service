@@ -5,6 +5,7 @@ using k8s;
 using K8sJanitor.WebApi.Application;
 using K8sJanitor.WebApi.Domain.Events;
 using K8sJanitor.WebApi.EventHandlers;
+using K8sJanitor.WebApi.Extensions;
 using K8sJanitor.WebApi.HealthChecks;
 using K8sJanitor.WebApi.Infrastructure.Messaging;
 using K8sJanitor.WebApi.Repositories;
@@ -39,131 +40,29 @@ namespace K8sJanitor.WebApi
         }
 
         public IConfiguration Configuration { get; }
-
-        public IServiceCollection AddPersistenceRepository(IServiceCollection services)
-        {
-            if (string.IsNullOrWhiteSpace(Configuration["AWS_S3_BUCKET_REGION"]) ||
-                string.IsNullOrWhiteSpace(Configuration["AWS_S3_BUCKET_NAME_CONFIG_MAP"]) ||
-                string.IsNullOrWhiteSpace(Configuration["CONFIG_MAP_FILE_NAME"]))
-            {
-                services.AddTransient<IPersistenceRepository, PersistenceRepositoryStub>();
-
-                return services;
-            }
-
-            var regionEndpoint = RegionEndpoint.GetBySystemName(Configuration["AWS_S3_BUCKET_REGION"]);
-            services.AddTransient<IAmazonS3>(serviceProvider => new AmazonS3Client(regionEndpoint));
-
-            services.AddTransient<ITransferUtility>(serviceProvider => new TransferUtility(
-                s3Client: serviceProvider.GetRequiredService<IAmazonS3>()
-            ));
-
-            services.AddTransient<IPersistenceRepository>(serviceProvider => new AwsS3PersistenceRepository(
-                transferUtility: serviceProvider.GetRequiredService<ITransferUtility>(),
-                bucketName: Configuration["AWS_S3_BUCKET_NAME_CONFIG_MAP"],
-                configMapFileName: Configuration["CONFIG_MAP_FILE_NAME"]
-            ));
-
-            services.AddTransient<S3BucketHealthCheck>(serviceProvider => new S3BucketHealthCheck(
-                amazonS3: serviceProvider.GetRequiredService<IAmazonS3>(),
-                bucketName: Configuration["AWS_S3_BUCKET_NAME_CONFIG_MAP"])
-            );
-            return services;
-        }
-
-        // This method gets called by the runtime. Use this method to add services to the container.
-        public void ConfigureServices(IServiceCollection services)
+        
+        public virtual void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc((options) => options.EnableEndpointRouting = false).SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
-            
-            if (
-                string.IsNullOrWhiteSpace(Configuration["KUBERNETES_SERVICE_HOST"]) == false &&
-                string.IsNullOrWhiteSpace(Configuration["KUBERNETES_SERVICE_PORT"]) == false
-            )
-            {
-                services.AddTransient<IKubernetesWrapper>(k =>
-                    new KubernetesWrapper(new Kubernetes(KubernetesClientConfiguration.InClusterConfig())));
-            }
-            else if(ExecuteAgainstK8s.Allowed)
-            {  
-                services.AddTransient<IKubernetesWrapper>(k =>
-                    new KubernetesWrapper(new Kubernetes(KubernetesClientConfiguration.BuildConfigFromConfigFile())));
-            }
-            else
-            {
-                services.AddTransient<IKubernetesWrapper>(k =>
-                    new KubernetesWrapper(null));
-            }
-            
-
-            services = AddPersistenceRepository(services);
-
-            services.AddTransient<IConfigMapService, ConfigMapService>();
-            services.AddTransient<IAwsAuthConfigMapRepository, AwsAuthConfigMapRepository>();
-            services.AddTransient<IAddRoleRequestValidator, AddRoleRequestValidator>();
-            services.AddTransient<IAddNamespaceRequestValidator, AddNamespaceRequestValidator>();
-            services.AddTransient<INamespaceRepository, NamespaceRepository>();
-            services.AddTransient<IRoleRepository, RoleRepository>();
-            services.AddTransient<IRoleBindingRepository, RoleBindingRepository>();
-
-            // Event handlers
-
-            services.AddHostedService<MetricHostedService>();
 
             services.AddHealthChecks()
                 .AddCheck("self", () => HealthCheckResult.Healthy())
                 .AddCheck<S3BucketHealthCheck>("S3 bucket");
 
+            services.AddLazyResolution();
 
-            ConfigureDomainEvents(services);
+            AddAwsResources(services);
+            AddK8sServices(services);
+            AddMetricServices(services);
+            AddKafkaServices(services);
+            AddEventRegistry(services);
+            AddEventDispatcher(services);
+            AddEventHandlers(services);
 
-            services.AddHostedService<KafkaConsumerHostedService>();
+            ConfigureDomainServices(services);
         }
 
-        private static void ConfigureDomainEvents(IServiceCollection services)
-        {
-            services.AddTransient<IK8sApplicationService, K8sApplicationService>();
-            var eventRegistry = new DomainEventRegistry();
-            services.AddSingleton<IDomainEventRegistry>(eventRegistry);
-            services.AddTransient<IEventHandler<ContextAccountCreatedDomainEvent>, ContextAccountCreatedDomainEventHandler>();
-            services.AddTransient<IEventHandler<CapabilityRegisteredDomainEvent>, CapabilityRegisteredEventHandler>();
-            services.AddTransient<IEventHandler<K8sNamespaceCreatedAndAwsArnConnectedEvent>, K8sNamespaceCreatedAndAwsArnConnectedEventHandler>();
-
-            services.AddTransient<KafkaConsumerFactory.KafkaConfiguration>();
-            services.AddTransient<KafkaPublisherFactory>();
-            services.AddTransient<KafkaConsumerFactory>();
-
-            // Event publishing
-            var publishingEventsQueue = new PublishingEventsQueue();
-            services.AddSingleton<IPublishingEventsQueue>(publishingEventsQueue);
-            services.AddHostedService<PublishingService>();
-
-            var serviceProvider = services.BuildServiceProvider();
-
-            var topic = "build.selfservice.events.capabilities";
-            eventRegistry.Register<ContextAccountCreatedDomainEvent>(
-                eventTypeName: "aws_context_account_created",
-                topicName: topic,
-                eventHandler: serviceProvider.GetRequiredService<IEventHandler<ContextAccountCreatedDomainEvent>>() );
-
-            eventRegistry.Register(
-                eventTypeName: "capability_registered",
-                topicName: topic,
-                eventHandler: serviceProvider.GetRequiredService<IEventHandler<CapabilityRegisteredDomainEvent>>() );
-            
-            // Published events
-            eventRegistry.Register(
-                eventTypeName: "k8s_namespace_created_and_aws_arn_connected",
-                topicName: topic,
-                eventHandler: serviceProvider.GetRequiredService<IEventHandler<K8sNamespaceCreatedAndAwsArnConnectedEvent>>()
-            );
-
-            services.AddTransient<IEventDispatcher, EventDispatcher>();
-        }
-
-
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public virtual void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
@@ -180,6 +79,132 @@ namespace K8sJanitor.WebApi
             });
 
             app.UseMvc();
+        }
+
+        protected virtual void ConfigureDomainServices(IServiceCollection services)
+        {
+            //Services
+            services.AddTransient<IK8sApplicationService, K8sApplicationService>();
+            services.AddTransient<IConfigMapService, ConfigMapService>();
+
+            //Repositories
+            services.AddTransient<IAwsAuthConfigMapRepository, AwsAuthConfigMapRepository>();
+            services.AddTransient<INamespaceRepository, NamespaceRepository>();
+            services.AddTransient<IRoleRepository, RoleRepository>();
+            services.AddTransient<IRoleBindingRepository, RoleBindingRepository>();
+
+            //Validators
+            services.AddTransient<IAddRoleRequestValidator, AddRoleRequestValidator>();
+            services.AddTransient<IAddNamespaceRequestValidator, AddNamespaceRequestValidator>();
+        }
+
+        protected virtual void AddAwsResources(IServiceCollection services)
+        {
+            if (string.IsNullOrWhiteSpace(Configuration["AWS_S3_BUCKET_REGION"]) ||
+                string.IsNullOrWhiteSpace(Configuration["AWS_S3_BUCKET_NAME_CONFIG_MAP"]) ||
+                string.IsNullOrWhiteSpace(Configuration["CONFIG_MAP_FILE_NAME"]))
+            {
+                services.AddTransient<IPersistenceRepository, PersistenceRepositoryStub>();
+
+                return;
+            }
+
+            var regionEndpoint = RegionEndpoint.GetBySystemName(Configuration["AWS_S3_BUCKET_REGION"]);
+
+            services.AddTransient<IAmazonS3>(serviceProvider => new AmazonS3Client(regionEndpoint));
+
+            services.AddTransient<ITransferUtility>(serviceProvider => new TransferUtility(
+                s3Client: serviceProvider.GetRequiredService<IAmazonS3>()
+            ));
+
+            services.AddTransient<IPersistenceRepository>(serviceProvider => new AwsS3PersistenceRepository(
+                transferUtility: serviceProvider.GetRequiredService<ITransferUtility>(),
+                bucketName: Configuration["AWS_S3_BUCKET_NAME_CONFIG_MAP"],
+                configMapFileName: Configuration["CONFIG_MAP_FILE_NAME"]
+            ));
+
+            services.AddTransient<S3BucketHealthCheck>(serviceProvider => new S3BucketHealthCheck(
+                amazonS3: serviceProvider.GetRequiredService<IAmazonS3>(),
+                bucketName: Configuration["AWS_S3_BUCKET_NAME_CONFIG_MAP"])
+            );
+        }
+
+        protected virtual void AddEventRegistry(IServiceCollection services)
+        {
+            services.AddSingleton<IDomainEventRegistry, DomainEventRegistry>();
+            services.AddSingleton(provider => {
+                return new DomainEventRegistration
+                {
+                    EventTypeName = "aws_context_account_created",
+                    EventType = typeof(ContextAccountCreatedDomainEvent),
+                    Topic = "build.selfservice.events.capabilities"
+                };
+            });
+            services.AddSingleton(provider => {
+                return new DomainEventRegistration
+                {
+                    EventTypeName = "capability_registered",
+                    EventType = typeof(CapabilityRegisteredDomainEvent),
+                    Topic = "build.selfservice.events.capabilities"
+                };
+            });
+            services.AddSingleton(provider => {
+                return new DomainEventRegistration
+                {
+                    EventTypeName = "k8s_namespace_created_and_aws_arn_connected",
+                    EventType = typeof(K8sNamespaceCreatedAndAwsArnConnectedEvent),
+                    Topic = "build.selfservice.events.capabilities"
+                };
+            });
+        }
+
+        protected virtual void AddEventDispatcher(IServiceCollection services)
+        {
+            services.AddSingleton<IPublishingEventsQueue, PublishingEventsQueue>();
+            services.AddTransient<IEventDispatcher, EventDispatcher>();
+
+            services.AddHostedService<PublishingService>();
+        }
+
+        protected virtual void AddEventHandlers(IServiceCollection services)
+        {
+            services.AddTransient<IEventHandler, ContextAccountCreatedDomainEventHandler>();
+            services.AddTransient<IEventHandler<ContextAccountCreatedDomainEvent>, ContextAccountCreatedDomainEventHandler>();
+            services.AddTransient<IEventHandler, CapabilityRegisteredEventHandler>();
+            services.AddTransient<IEventHandler<CapabilityRegisteredDomainEvent>, CapabilityRegisteredEventHandler>();
+            services.AddTransient<IEventHandler, K8sNamespaceCreatedAndAwsArnConnectedEventHandler>();
+            services.AddTransient<IEventHandler<K8sNamespaceCreatedAndAwsArnConnectedEvent>, K8sNamespaceCreatedAndAwsArnConnectedEventHandler>();
+        }
+
+        protected virtual void AddK8sServices(IServiceCollection services)
+        {
+            if (
+                string.IsNullOrWhiteSpace(Configuration["KUBERNETES_SERVICE_HOST"]) == false &&
+                string.IsNullOrWhiteSpace(Configuration["KUBERNETES_SERVICE_PORT"]) == false
+            )
+            {
+                services.AddTransient<IKubernetesWrapper>(k =>
+                    new KubernetesWrapper(new Kubernetes(KubernetesClientConfiguration.InClusterConfig())));
+            }
+            else if (ExecuteAgainstK8s.Allowed)
+            {
+                services.AddTransient<IKubernetesWrapper>(k =>
+                    new KubernetesWrapper(new Kubernetes(KubernetesClientConfiguration.BuildConfigFromConfigFile())));
+            }
+        }
+
+        protected virtual void AddKafkaServices(IServiceCollection services)
+        {
+            services.AddTransient<KafkaConsumerFactory.KafkaConfiguration>();
+            services.AddTransient<KafkaPublisherFactory>();
+            services.AddTransient<KafkaConsumerFactory>();
+
+            services.AddHostedService<KafkaConsumerHostedService>();
+        }
+                
+        protected virtual void AddMetricServices(IServiceCollection services)
+        {
+            services.AddHostedService<MetricHostedService>();
         }
     }
 

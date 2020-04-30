@@ -7,11 +7,16 @@ namespace K8sJanitor.WebApi.Infrastructure.Messaging
 {
     public interface IDomainEventRegistry
     {
-        DomainEventRegistry Register<TEvent>(string eventTypeName, string topicName, IEventHandler<TEvent> eventHandler);
+        IDomainEventRegistry Register<TEvent>(string eventTypeName, string topicName) where TEvent : IEvent;
+
         string GetTopicFor(string eventType);
+
         IEnumerable<string> GetAllTopics();
-        Type GetInstanceTypeFor(string eventType);
-        string GetTypeNameFor(IEvent domainEvent);
-        List<object> GetEventHandlersFor<TEvent>(TEvent domainEvent);
+        
+        Type GetTypeFor(string eventType);
+
+        string GetTypeNameFor(IEvent @event);
+
+        IEnumerable<IEventHandler> GetEventHandlersFor(IEvent @event);
     }
 }

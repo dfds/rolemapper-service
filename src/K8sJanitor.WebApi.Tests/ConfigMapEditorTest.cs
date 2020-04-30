@@ -83,7 +83,7 @@ namespace K8sJanitor.WebApi.Tests
         {
             // Arrange
             var initialMap =
-                "apiVersion: v1\r\ndata:\r\n  mapRoles: >\r\n    - rolearn: arn:aws:iam::123456789012:role/Awesome\r\n      username: Awesome:{{SessionName}}\r\n      groups:\r\n      - DFDS-ReadOnly\r\nkind: ConfigMap\r\nmetadata:\r\n  name: aws-auth\r\n  namespace: kube-system";
+                "apiVersion: v1" + System.Environment.NewLine + "data:" + System.Environment.NewLine + "  mapRoles: >" + System.Environment.NewLine + "    - rolearn: arn:aws:iam::123456789012:role/Awesome" + System.Environment.NewLine + "      username: Awesome:{{SessionName}}" + System.Environment.NewLine + "      groups:" + System.Environment.NewLine + "      - DFDS-ReadOnly" + System.Environment.NewLine + "kind: ConfigMap" + System.Environment.NewLine + "metadata:" + System.Environment.NewLine + "  name: aws-auth" + System.Environment.NewLine + "  namespace: kube-system";
 
             
             // Act
@@ -93,11 +93,10 @@ namespace K8sJanitor.WebApi.Tests
                 userName: "userName",
                 groups: new[] {"group1", "group2"}
             );
-
-
+            
             // Assert
             var expected =
-                "apiVersion: v1\r\ndata:\r\n  mapRoles: >\r\n    - rolearn: arn:aws:iam::123456789012:role/Awesome\r\n      username: Awesome:{{SessionName}}\r\n      groups:\r\n      - DFDS-ReadOnly\r\nkind: ConfigMap\r\nmetadata:\r\n  name: aws-auth\r\n  namespace: kube-system\r\n- rolearn: roleArn\n  username: userName:{{SessionName}}\n  groups:\n    - group1\n    - group2\n";
+                "apiVersion: v1" + System.Environment.NewLine + "data:" + System.Environment.NewLine + "  mapRoles: >" + System.Environment.NewLine + "    - rolearn: arn:aws:iam::123456789012:role/Awesome" + System.Environment.NewLine + "      username: Awesome:{{SessionName}}" + System.Environment.NewLine + "      groups:" + System.Environment.NewLine + "      - DFDS-ReadOnly" + System.Environment.NewLine + "kind: ConfigMap" + System.Environment.NewLine + "metadata:" + System.Environment.NewLine + "  name: aws-auth" + System.Environment.NewLine + "  namespace: kube-system" + System.Environment.NewLine + "- rolearn: roleArn" + System.Environment.NewLine + "  username: userName:{{SessionName}}" + System.Environment.NewLine + "  groups:" + System.Environment.NewLine + "    - group1" + System.Environment.NewLine + "    - group2" + System.Environment.NewLine + "";
             Assert.Equal(expected,resultMap);
         }
 
@@ -114,7 +113,7 @@ namespace K8sJanitor.WebApi.Tests
 
 
             // Assert
-            var expected = "- rolearn: roleArn\n  username: userName:{{SessionName}}\n  groups:\n    - group1\n    - group2\n";
+            var expected = "- rolearn: roleArn" + System.Environment.NewLine + "  username: userName:{{SessionName}}" + System.Environment.NewLine + "  groups:" + System.Environment.NewLine + "    - group1" + System.Environment.NewLine + "    - group2" + System.Environment.NewLine + "";
             Assert.Equal(expected, result);
         }
     }

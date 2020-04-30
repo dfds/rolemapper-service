@@ -1,8 +1,13 @@
+using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
+using K8sJanitor.WebApi.Domain.Events;
+using K8sJanitor.WebApi.EventHandlers;
 using K8sJanitor.WebApi.Infrastructure.Messaging;
 using K8sJanitor.WebApi.Tests.Builders;
 using K8sJanitor.WebApi.Tests.TestDoubles;
+using Moq.AutoMock;
 using Xunit;
 
 namespace K8sJanitor.WebApi.Tests.Controllers.EventsController
@@ -12,22 +17,24 @@ namespace K8sJanitor.WebApi.Tests.Controllers.EventsController
         [Fact]
         public async Task Will_Handle_CapabilityRegisteredEvent()
         {
-            using (var builder = new HttpClientBuilder())
+            //Arrange
+            using var builder = new HttpClientBuilder();
+
+            var teamCreatedEventHandlerStub = new TeamCreatedEventHandlerStub();
+            var domEventRegistration = new DomainEventRegistration
             {
-                var teamCreatedEventHandlerStub = new TeamCreatedEventHandlerStub();
+                EventTypeName = "capability_registered",
+                EventType = typeof(CapabilityRegisteredDomainEvent),
+                Topic = "foo"
+            };
 
-                var eventRegistry = new DomainEventRegistry();
-                eventRegistry.Register(
-                    eventTypeName: "capability_registered",
-                    topicName: "foo",
-                    eventHandler: teamCreatedEventHandlerStub);
+            using var client = builder
+                .WithService<IEventHandler>(teamCreatedEventHandlerStub)
+                .WithService(domEventRegistration)
+                .Build();
 
-
-                var client = builder
-                    .WithService<IDomainEventRegistry>(eventRegistry)
-                    .Build();
-
-                var input = @"{
+            //Act
+            var input = @"{
                                     ""eventName"": ""capability_registered"",
                                     ""version"": ""1"",
                                     ""payload"": {
@@ -36,13 +43,12 @@ namespace K8sJanitor.WebApi.Tests.Controllers.EventsController
                                     }
                                 }";
 
-                var content = new JsonContent(input);
+            var content = new JsonContent(input);
+            var response = await client.PostAsync("/api/events", content);
 
-                var response = await client.PostAsync("/api/events", content);
-
-                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-                Assert.True(teamCreatedEventHandlerStub.HandleAsyncGotCalled);
-            }
+            //Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.True(teamCreatedEventHandlerStub.HandleAsyncGotCalled);
         }
     }
 }

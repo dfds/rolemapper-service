@@ -27,7 +27,7 @@ namespace K8sJanitor.WebApi
 
             if (configMapYaml.EndsWith("\n") == false)
             {
-                configMapYaml = configMapYaml + "\r\n";
+                configMapYaml = configMapYaml + Environment.NewLine;
             }
             configMapYaml = configMapYaml + roleArnObjectText;
 
