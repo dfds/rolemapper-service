@@ -18,6 +18,7 @@ spec:
         prometheus.io/port: "8080"
         prometheus.io/scrape: "true"
     spec:
+      priorityClassName: selfservice
       serviceAccountName: k8s-janitor-sa
       containers:
         - name: k8s-janitor
