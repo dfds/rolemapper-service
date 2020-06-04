@@ -34,7 +34,8 @@ namespace K8sJanitor.WebApi.Repositories.Kubernetes
                         ApiGroups = new List<string>
                         {
                             "extensions",
-                            "apps"
+                            "apps",
+                            "networking.k8s.io"
                         },
                         Resources = new List<string>
                         {
