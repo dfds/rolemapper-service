@@ -73,3 +73,10 @@ The application requires the following environment variables when running in pro
 | KUBERNETES_SERVICE_KAFKA_GROUP_ID | Id of the consumer group that the application will join. Only a single consumer in a group will read a message.
 | KUBERNETES_SERVICE_KAFKA_SASL_PASSWORD | Kafka Simple Authentication and Security Layer password
 | KUBERNETES_SERVICE_KAFKA_SASL_USERNAME |  Kafka Simple Authentication and Security Layer username
+
+
+## Deployment prerequisites
+
+With the change to scoped Kubernetes service connections during deploment, certain manifests have been moved out of the *k8s* directory and moved to the *k8s_initial* directory.
+
+The manifests within *k8s_initial* will have to be run manually or with a different service connection due to elevated rights.
