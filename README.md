@@ -80,3 +80,7 @@ The application requires the following environment variables when running in pro
 With the change to scoped Kubernetes service connections during deploment, certain manifests have been moved out of the *k8s* directory and moved to the *k8s_initial* directory.
 
 The manifests within *k8s_initial* will have to be run manually or with a different service connection due to elevated rights.
+
+---
+
+If the scoped service account is missing for deployment, see https://wiki.dfds.cloud/en/teams/devex/selfservice/Kubernetes-selfservice-deployment-setup
