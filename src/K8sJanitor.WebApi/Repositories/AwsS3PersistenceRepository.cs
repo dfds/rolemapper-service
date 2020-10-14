@@ -18,13 +18,19 @@ namespace K8sJanitor.WebApi.Repositories
             _configMapFileName = configMapFileName;
         }
 
-        public async Task StoreFile(string content)
+        public async Task StoreFile(string content, string contentType = "application/octet-stream")
         {                    
             using (var memoryStream = GenerateStreamFromString(content))
             {
-                await _transferUtility.UploadAsync(stream: memoryStream,
-                                                   bucketName: _bucketName,
-                                                   key: _configMapFileName);
+                var req = new TransferUtilityUploadRequest
+                {
+                    BucketName = _bucketName,
+                    ContentType = contentType,
+                    InputStream = memoryStream,
+                    Key = _configMapFileName
+                };
+
+                await _transferUtility.UploadAsync(req);
             }
         }
 

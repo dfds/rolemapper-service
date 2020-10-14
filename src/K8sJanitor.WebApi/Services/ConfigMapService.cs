@@ -40,7 +40,7 @@ namespace K8sJanitor.WebApi.Services
             await _awsAuthConfigMapRepository.WriteConfigMap(configMap);
             
             var awsAuthConfigMapYaml = configMap.SerializeToYaml();
-            await _configMapPersistenceService.StoreFile(awsAuthConfigMapYaml);
+            await _configMapPersistenceService.StoreFile(awsAuthConfigMapYaml, "text/plain");
         }
     }
 }
