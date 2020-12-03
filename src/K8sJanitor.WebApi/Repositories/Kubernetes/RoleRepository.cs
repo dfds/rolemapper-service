@@ -143,7 +143,24 @@ namespace K8sJanitor.WebApi.Repositories.Kubernetes
                             "list",
                             "watch"
                         }
-                    }
+                    },
+                    new V1PolicyRule
+                    {
+                        ApiGroups = new List<string>
+                        {
+                            "metrics.k8s.io"
+                        },
+                        Resources = new List<string>
+                        {
+                            "pods"
+                        },
+                        Verbs = new List<string>
+                        {
+                            "get",
+                            "list",
+                            "watch"
+                        }
+                    },
                 }
             };
             try
