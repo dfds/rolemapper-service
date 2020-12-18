@@ -39,3 +39,9 @@ steps:
     inputs:
       PathtoPublish: k8s
       ArtifactName: manifests
+
+  - task: Kubernetes@1
+    inputs:
+      connectionType: 'Kubernetes Service Connection'
+      command: 'rollout'
+      arguments: 'status deployment k8s-janitor --timeout=120s'
