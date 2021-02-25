@@ -34,7 +34,6 @@ namespace K8sJanitor.WebApi.Repositories.Kubernetes
                         ApiGroups = new List<string>
                         {
                             "extensions",
-                            "apps",
                             "networking.k8s.io"
                         },
                         Resources = new List<string>
@@ -44,6 +43,41 @@ namespace K8sJanitor.WebApi.Repositories.Kubernetes
                         Verbs = new List<string>
                         {
                             "*"
+                        }
+                    },
+                    new V1PolicyRule
+                    {
+                        ApiGroups = new List<string>
+                        {
+                            "apps",
+                        },
+                        Resources = new List<string>
+                        {
+                            "controllerrevisions",
+                            "deployments",
+                            "replicasets",
+                            "statefulsets"
+                        },
+                        Verbs = new List<string>
+                        {
+                            "*"
+                        }
+                    },
+                    new V1PolicyRule
+                    {
+                        ApiGroups = new List<string>
+                        {
+                            "apps",
+                        },
+                        Resources = new List<string>
+                        {
+                            "daemonsets"
+                        },
+                        Verbs = new List<string>
+                        {
+                            "get",
+                            "list",
+                            "watch"
                         }
                     },
                     new V1PolicyRule
