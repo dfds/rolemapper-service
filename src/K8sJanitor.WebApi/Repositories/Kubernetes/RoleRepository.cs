@@ -55,8 +55,10 @@ namespace K8sJanitor.WebApi.Repositories.Kubernetes
                         {
                             "controllerrevisions",
                             "deployments",
+                            "deployments/scale",
                             "replicasets",
-                            "statefulsets"
+                            "statefulsets",
+                            "statefulsets/scale",
                         },
                         Verbs = new List<string>
                         {
